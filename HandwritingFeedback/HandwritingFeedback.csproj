@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Util\" />
+    <Folder Include="View\" />
+    <Folder Include="InkCanvases\" />
+    <Folder Include="StylusPlugins\" />
+	<Folder Include="RealtimeFeedback\" />
+    <Folder Include="BatchedFeedback\" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+		<PackageReference Include="NAudio" Version="2.0.0" />
+		<PackageReference Include="OxyPlot.Core" Version="2.0.0" />
+		<PackageReference Include="OxyPlot.Wpf" Version="2.0.0" />
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,37 @@
+﻿<Page x:Class="HandwritingFeedback.View.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:HandwritingFeedback"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="MainPage">
+
+    <Grid Background="White">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*" />
+            <RowDefinition Height="2*" />
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Height = "Auto" Width = "Auto" Margin="10,10,10,10" HorizontalScrollBarVisibility = "Auto" VerticalScrollBarVisibility = "Auto">
+            <Grid>
+                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,75" TextAlignment="Center" Foreground="Black" FontFamily="Consolas" FontSize="70">Handwriting Application</TextBlock>
+                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,75,0,0" TextAlignment="Center" Foreground="Black" FontFamily="Consolas" FontSize="50">Please select a mode below</TextBlock>
+            </Grid>
+        </ScrollViewer>
+
+        <Grid Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#eaeaea">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+            <Button Content="Practice" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Navigate" Tag="\View\PracticeMode.xaml" Height="200" Width="400" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" />
+            <Button Content="Expert"   Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Navigate" Tag="\View\ExpertMode.xaml"   Height="200" Width="400" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" />
+            <Button Content="Customize Feedback"   HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="Navigate" Tag="\View\CustomizeFeedback.xaml"   Height="40" Width="250" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20" />
+        </Grid>
+    </Grid>
+</Page>

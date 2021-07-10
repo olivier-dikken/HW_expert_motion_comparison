@@ -1,0 +1,163 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Windows.Controls;
+using HandwritingFeedback.BatchedFeedback.SynthesisTypes;
+using HandwritingFeedback.BatchedFeedback.SynthesisTypes.Graphs;
+using HandwritingFeedback.Config;
+using OxyPlot;
+using OxyPlot.Annotations;
+using OxyPlot.Axes;
+using OxyPlot.Series;
+
+namespace HandwritingFeedback.BatchedFeedback
+{
+    /// <summary>
+    /// Plotter utility tool generates differing types of visualizations for batched feedback.
+    /// </summary>
+    public class Plotter
+    {
+        public StackPanel UnitDock { get; }
+        public StackPanel GraphDock { get; }
+
+        /// <summary>
+        /// Construct an instance of a plotter utility tool.
+        /// </summary>
+        public Plotter(StackPanel unitDock, StackPanel graphDock)
+        {
+            this.UnitDock = unitDock;
+            this.GraphDock = graphDock;
+        }
+
+        /// <summary>
+        /// Format unitary values to be displaying in unit value docking pane on UI.
+        /// </summary>
+        /// <param name="synthesis">Batched feedback component instance to be visualized as a unit value</param>
+        public void RenderUnitValue(UnitValue synthesis)
+        {
+            // Format text to be added to dock
+            var view = new TextBlock
+            {
+                Text = synthesis.Title + " :    " + synthesis.Value + " " + synthesis.Unit
+            };
+
+            // Add new text to dock
+            UnitDock.Children.Add(view);
+        }
+
+        /// <summary>
+        /// Renders batched feedback components as a line graph.
+        /// </summary>
+        /// <param name="synthesis">Batched feedback component instance to be visualized in a line graph</param>
+        public void RenderLineGraph(LineGraph synthesis)
+        {
+            // Instantiate x-axis
+            var xAxis = new LinearAxis
+            {
+                Position = AxisPosition.Bottom,
+                Title = synthesis.XAxisLabel,
+                MajorGridlineStyle = LineStyle.Solid,
+                MinorGridlineStyle = LineStyle.Solid,
+                MinimumRange = synthesis.MinimumXRange,
+                AbsoluteMinimum = synthesis.AbsoluteMinimumX
+                
+            };
+
+            // Instantiate y-axis
+            var yAxis = new LinearAxis
+            {
+                Position = AxisPosition.Left,
+                Title = synthesis.YAxisLabel,
+                MajorGridlineStyle = LineStyle.Solid,
+                MinorGridlineStyle = LineStyle.Solid,
+                MinimumRange = synthesis.MinimumYRange,
+                AbsoluteMinimum = synthesis.AbsoluteMinimumY
+            };
+
+            // Instantiate plot model
+            var plot = new PlotModel
+            {
+                Title = synthesis.Title,
+                LegendPosition = LegendPosition.TopLeft
+            };
+
+            // Attach axes to plot model
+            plot.Axes.Add(xAxis);
+            plot.Axes.Add(yAxis);
+
+            HighlightErrors(plot, synthesis.ErrorZonesXValues, ApplicationConfig.Instance.MinErrorHighlightingFraction);
+
+            // Iterate through all lists of data points synthesized by component
+            foreach (LineSeries candidate in synthesis.AllSeries)
+            {
+                // Interpolate line graph (to create a smooth curved line) between points
+                if (synthesis.CurvedLine)
+                {
+                    candidate.InterpolationAlgorithm = InterpolationAlgorithms.CanonicalSpline;
+                }
+
+                // Add newly created series to graph
+                plot.Series.Add(candidate);
+            }
+
+            // Attach model to a view and add to the graph docking panel
+            var plotView = new OxyPlot.Wpf.PlotView
+            {
+                Model = plot,
+                Height = 450
+            };
+            GraphDock.Children.Add(plotView);
+        }
+
+        /// <summary>
+        /// Draws transparent rectangles on a plot using the provided x-values and <br />
+        /// displays the total error count in the subtitle of the plot. Used for highlighting <br />
+        /// areas where real-time feedback was provided (which means that an error occured there).
+        /// </summary>
+        /// <param name="plot">The plot to add rectangle annotations to</param>
+        /// <param name="xValues">List of x-values for the rectangles, must have an even number <br />
+        /// of elements (so that every rectangle has a start and end value)</param>
+        /// <param name="minErrorFraction">Minimum fraction of the x-axis that an error must span <br />
+        /// before it is counted and highlighted</param>
+        /// <exception cref="ArgumentException">Thrown when xValues has an odd number of elements</exception>
+        public static void HighlightErrors(PlotModel plot, List<double> xValues, double minErrorFraction)
+        {
+            int xValuesCount = xValues.Count;
+            if (xValuesCount % 2 != 0) throw new ArgumentException(
+                "Not every error zone has an end x-value (xValues should have an even number of elements)!");
+            int totalErrorCount = 0;
+
+            // Draw rectangles over areas where an error occured, using the indices in synthesis.
+            // Looping happens in pairs, where each pair has x values for the start and end of the rectangle
+            for (int i = 0; i < xValuesCount / 2; i++)
+            {
+                double rectangleStart = xValues[i * 2];
+                double rectangleEnd = xValues[i * 2 + 1];
+
+                // Continue if the error is too small to be counted
+                if (rectangleEnd - rectangleStart < minErrorFraction * 100d)
+                    continue;
+
+                RectangleAnnotation annotation = new RectangleAnnotation
+                {
+                    Fill = OxyColor.FromArgb(64, 255, 0, 0), // Transparent red
+                    Layer = AnnotationLayer.AboveSeries, // Overlayed on top of lines
+                    MinimumY = -65536d, // Extends to y=-infinity (-2^16, because graphs might render incorrectly with lower values)
+                    MaximumY = 65536d, // Extends to y=infinity (2^16, because graphs might render incorrectly with higher values)
+                    MinimumX = rectangleStart,
+                    MaximumX = rectangleEnd
+                };
+                
+                plot.Annotations.Add(annotation);
+                totalErrorCount++;
+            }
+
+            // Display total error count if there were any errors
+            if (totalErrorCount > 0)
+            {
+                plot.SubtitleColor = OxyColors.Black;
+                plot.SubtitleFontSize = 20d;
+                plot.Subtitle = totalErrorCount == 1 ? "1 mistake" : totalErrorCount + " mistakes";
+            }
+        }
+    }
+}
