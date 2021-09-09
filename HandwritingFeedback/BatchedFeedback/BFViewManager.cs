@@ -7,6 +7,7 @@ using HandwritingFeedback.BatchedFeedback.Components.CanvasComponents.AccuracyCo
 using HandwritingFeedback.BatchedFeedback.Components.CanvasComponents.PressureComponents;
 using HandwritingFeedback.BatchedFeedback.Components.CanvasComponents.SpeedComponents;
 using HandwritingFeedback.BatchedFeedback.Components.CanvasComponents.TiltComponents;
+using HandwritingFeedback.BatchedFeedback.Components.CanvasComponents.KeypointComponents;
 using HandwritingFeedback.BatchedFeedback.SynthesisTypes;
 using HandwritingFeedback.BatchedFeedback.SynthesisTypes.Graphs;
 using HandwritingFeedback.Util;
@@ -46,7 +47,8 @@ namespace HandwritingFeedback.BatchedFeedback
             // Add any additional canvas components below
             _calculationHelper = new CalculationHelper();
             this.Components.Add(new AccuracyOverProgress(studentTraceUtils, expertTraceUtils, _calculationHelper));
-            this.Components.Add(new PressureOverProgress(studentTraceUtils, expertTraceUtils));
+            //this.Components.Add(new PressureOverProgress(studentTraceUtils, expertTraceUtils));
+            this.Components.Add(new KeypointDetection(studentTraceUtils, expertTraceUtils));
             this.Components.Add(new TiltRange(studentTraceUtils, expertTraceUtils));
             this.Components.Add(new CompletionTime(studentTraceUtils, expertTraceUtils));
             this.Components.Add(new SpeedOverProgress(studentTraceUtils, expertTraceUtils));

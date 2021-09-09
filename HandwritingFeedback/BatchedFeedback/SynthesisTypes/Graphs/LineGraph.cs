@@ -13,11 +13,14 @@ namespace HandwritingFeedback.BatchedFeedback.SynthesisTypes.Graphs
         // Indicates whether lines in graph should be interpolated between points
         public bool CurvedLine { get; set; }
         public new List<LineSeries> AllSeries { get; }
-        
+
         // List of x values indicating the starts and ends of errors.
         // Even indices mark starts, odd indices mark ends.
         // Rectangles will be drawn over the graph using these x values
         public List<double> ErrorZonesXValues { get; }
+
+        // List of x values indicating a keypoint is found for this x value.
+        public List<(double, double)> Keypoints { get; }
 
         /// <summary>
         /// Constructor for synthesis that must be visualized as a line graph.
@@ -27,6 +30,7 @@ namespace HandwritingFeedback.BatchedFeedback.SynthesisTypes.Graphs
             this.CurvedLine = false;
             this.AllSeries = new List<LineSeries>();
             this.ErrorZonesXValues = new List<double>();
+            this.Keypoints = new List<(double, double)> { };
         }
 
         /// <summary>

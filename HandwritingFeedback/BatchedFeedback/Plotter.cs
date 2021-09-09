@@ -86,6 +86,8 @@ namespace HandwritingFeedback.BatchedFeedback
 
             HighlightErrors(plot, synthesis.ErrorZonesXValues, ApplicationConfig.Instance.MinErrorHighlightingFraction);
 
+            MarkKeypoints(plot, synthesis.Keypoints);
+
             // Iterate through all lists of data points synthesized by component
             foreach (LineSeries candidate in synthesis.AllSeries)
             {
@@ -158,6 +160,29 @@ namespace HandwritingFeedback.BatchedFeedback
                 plot.SubtitleFontSize = 20d;
                 plot.Subtitle = totalErrorCount == 1 ? "1 mistake" : totalErrorCount + " mistakes";
             }
+        }
+
+        public static void MarkKeypoints(PlotModel plot, List<(double, double)> kpValues)
+        {
+
+            int ValuesCount = kpValues.Count;
+            Console.WriteLine("keypoints valuescount: {0}", ValuesCount);
+
+            var scatterSeries = new ScatterSeries { MarkerType = MarkerType.Circle };
+
+            // Draw rectangles over areas where an error occured, using the indices in synthesis.
+            // Looping happens in pairs, where each pair has x values for the start and end of the rectangle
+            for (int i = 0; i < ValuesCount; i++)
+            {
+                var x = kpValues[i].Item1;
+                var y = kpValues[i].Item2;
+                var size = 3;
+                var colorValue = 900;
+                scatterSeries.Points.Add(new ScatterPoint(x, y, size, colorValue));
+               
+            }
+
+            plot.Series.Add(scatterSeries);
         }
     }
 }
