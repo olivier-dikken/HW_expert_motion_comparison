@@ -21,6 +21,7 @@ namespace HandwritingFeedback.BatchedFeedback.SynthesisTypes.Graphs
 
         // List of x values indicating a keypoint is found for this x value.
         public List<(double, double)> Keypoints { get; }
+        public List<(double, double)> DebugKeypoints { get; }
 
         /// <summary>
         /// Constructor for synthesis that must be visualized as a line graph.
@@ -31,6 +32,7 @@ namespace HandwritingFeedback.BatchedFeedback.SynthesisTypes.Graphs
             this.AllSeries = new List<LineSeries>();
             this.ErrorZonesXValues = new List<double>();
             this.Keypoints = new List<(double, double)> { };
+            this.DebugKeypoints = new List<(double, double)> { };
         }
 
         /// <summary>

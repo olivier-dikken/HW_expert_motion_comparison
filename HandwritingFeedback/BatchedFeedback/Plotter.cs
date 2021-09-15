@@ -86,7 +86,8 @@ namespace HandwritingFeedback.BatchedFeedback
 
             HighlightErrors(plot, synthesis.ErrorZonesXValues, ApplicationConfig.Instance.MinErrorHighlightingFraction);
 
-            MarkKeypoints(plot, synthesis.Keypoints);
+            MarkKeypoints(plot, synthesis.Keypoints, 3);
+            MarkKeypoints(plot, synthesis.DebugKeypoints, 6);
 
             // Iterate through all lists of data points synthesized by component
             foreach (LineSeries candidate in synthesis.AllSeries)
@@ -162,7 +163,7 @@ namespace HandwritingFeedback.BatchedFeedback
             }
         }
 
-        public static void MarkKeypoints(PlotModel plot, List<(double, double)> kpValues)
+        public static void MarkKeypoints(PlotModel plot, List<(double, double)> kpValues, int colorValue)
         {
 
             int ValuesCount = kpValues.Count;
@@ -176,8 +177,7 @@ namespace HandwritingFeedback.BatchedFeedback
             {
                 var x = kpValues[i].Item1;
                 var y = kpValues[i].Item2;
-                var size = 3;
-                var colorValue = 900;
+                var size = 7;
                 scatterSeries.Points.Add(new ScatterPoint(x, y, size, colorValue));
                
             }
