@@ -20,8 +20,8 @@ namespace HandwritingFeedback.BatchedFeedback.SynthesisTypes.Graphs
         public List<double> ErrorZonesXValues { get; }
 
         // List of x values indicating a keypoint is found for this x value.
-        public List<(double, double)> Keypoints { get; }
-        public List<(double, double)> DebugKeypoints { get; }
+        public List<(double, double)> Keypoints { get; set; }
+        public List<(double, double)> DebugKeypoints { get; set; }
 
         /// <summary>
         /// Constructor for synthesis that must be visualized as a line graph.

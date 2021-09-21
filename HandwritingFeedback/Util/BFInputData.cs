@@ -17,5 +17,7 @@ namespace HandwritingFeedback.Util
         public StackPanel GraphDock;
 
         public StackPanel UnitValueDock;
+
+        public StackPanel ParametersDock;
     }
 }

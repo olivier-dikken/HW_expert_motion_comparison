@@ -11,6 +11,8 @@ using HandwritingFeedback.BatchedFeedback.Components.CanvasComponents.KeypointCo
 using HandwritingFeedback.BatchedFeedback.SynthesisTypes;
 using HandwritingFeedback.BatchedFeedback.SynthesisTypes.Graphs;
 using HandwritingFeedback.Util;
+using System.Windows.Controls;
+using System.Diagnostics;
 
 namespace HandwritingFeedback.BatchedFeedback
 {
@@ -22,6 +24,8 @@ namespace HandwritingFeedback.BatchedFeedback
         public readonly List<BFComponent> Components;
         private readonly Plotter _plotter;
         private CalculationHelper _calculationHelper;
+        public KeypointDetection kpDetection;
+        private StackPanel _parametersDock;
 
         /// <summary>
         /// Constructor for BFManager instantiate new engine and load components.
@@ -31,10 +35,13 @@ namespace HandwritingFeedback.BatchedFeedback
         {
             // Instantiate engine and load all batched feedback components
             this.Components = new List<BFComponent>();
+            kpDetection = new KeypointDetection(input.StudentTraceUtils, input.ExpertTraceUtils);
             this.LoadCanvasComponents(input.StudentTraceUtils, input.ExpertTraceUtils);
 
             // Instantiate plotter
             _plotter = new Plotter(input.UnitValueDock, input.GraphDock);
+
+            _parametersDock = input.ParametersDock;
         }
 
         /// <summary>
@@ -48,7 +55,7 @@ namespace HandwritingFeedback.BatchedFeedback
             _calculationHelper = new CalculationHelper();
             this.Components.Add(new AccuracyOverProgress(studentTraceUtils, expertTraceUtils, _calculationHelper));
             //this.Components.Add(new PressureOverProgress(studentTraceUtils, expertTraceUtils));
-            this.Components.Add(new KeypointDetection(studentTraceUtils, expertTraceUtils));
+            this.Components.Add(kpDetection);
             this.Components.Add(new TiltRange(studentTraceUtils, expertTraceUtils));
             this.Components.Add(new CompletionTime(studentTraceUtils, expertTraceUtils));
             this.Components.Add(new SpeedOverProgress(studentTraceUtils, expertTraceUtils));
@@ -90,6 +97,56 @@ namespace HandwritingFeedback.BatchedFeedback
                                             "of an unknown type!");
                 }
             }
+
+            //populate parameters dock
+            
+
+            List<(string, int)> guiparams = kpDetection.GetGUIParameters();
+
+            foreach((string, int) guiparam in guiparams)
+            {
+                TextBox tb = new TextBox();
+                Label label = new Label();
+                label.Content = guiparam.Item1;
+                tb.Width = 120;
+                tb.Text = guiparam.Item2.ToString();
+                _parametersDock.Children.Add(label);
+                _parametersDock.Children.Add(tb);
+            }
+
+            
+           
+        }
+
+        /// <summary>
+        /// get string,value pairs from parameter dock
+        /// </summary>
+        /// <returns></returns>
+        public List<(string, int)> getParameterDockValues()
+        {
+            List<(string, int)> result = new List<(string, int)>();
+            string lab = "";
+            int val;
+            for(int i = 0; i < _parametersDock.Children.Count; i++)
+            {
+                if(i%2 == 0) //even
+                {
+                    Label labelElement = (Label)_parametersDock.Children[i];
+                    lab = (string)labelElement.Content;                    
+                } else //odd
+                {
+                    TextBox tbElement = (TextBox)_parametersDock.Children[i];
+                    val = Int32.Parse(tbElement.Text);
+                    result.Add((lab, val));
+                }
+            }
+            return result;
+        }
+
+        public void UpdateKeypointParameters(List<(string, int)> newValues)
+        {
+            kpDetection.UpdateParameters(newValues);
+            _plotter.RenderLineGraph((LineGraph)kpDetection.SynthesizeNew("newplot"));
         }
 
     }

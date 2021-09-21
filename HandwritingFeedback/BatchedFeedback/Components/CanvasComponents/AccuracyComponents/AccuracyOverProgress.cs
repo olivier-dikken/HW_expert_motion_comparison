@@ -91,6 +91,9 @@ namespace HandwritingFeedback.BatchedFeedback.Components.CanvasComponents.Accura
                 // Mark the current point if it is the beginning or the end of an error (a ratio of 0 means no error)
                 if (previousRatio == 0d && ratio != 0d || previousRatio != 0d && ratio == 0d)
                     result.ErrorZonesXValues.Add(xValue);
+
+                
+
                 previousRatio = ratio;
                 
                 if (currentSectionLength > studentDistances[i] && i != allStudentPoints.Count - 1) continue;
@@ -109,7 +112,9 @@ namespace HandwritingFeedback.BatchedFeedback.Components.CanvasComponents.Accura
                 // The expert trace is split to improve hit testing performance
                 double yValue = CalculationHelper.CalculateAccuracy(
                     strokeSectionCollection, ExpertTraceUtils.Split(), sections, currentSection);
+
                 
+
                 dataPoints.Add(new DataPoint(xValue, yValue));
 
                 previousPointIndex = i;

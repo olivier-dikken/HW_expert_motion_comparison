@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows.Controls;
 using HandwritingFeedback.BatchedFeedback.SynthesisTypes;
 using HandwritingFeedback.BatchedFeedback.SynthesisTypes.Graphs;
@@ -86,8 +87,8 @@ namespace HandwritingFeedback.BatchedFeedback
 
             HighlightErrors(plot, synthesis.ErrorZonesXValues, ApplicationConfig.Instance.MinErrorHighlightingFraction);
 
-            MarkKeypoints(plot, synthesis.Keypoints, 3);
-            MarkKeypoints(plot, synthesis.DebugKeypoints, 6);
+            //MarkKeypoints(plot, synthesis.Keypoints, 3, "Keypoints Algorithm 1: Neighbor difference > Threshold");
+            MarkKeypoints(plot, synthesis.DebugKeypoints, 6, "Keypoints Algorithm: exponentially weighted MVA");
 
             // Iterate through all lists of data points synthesized by component
             foreach (LineSeries candidate in synthesis.AllSeries)
@@ -97,9 +98,8 @@ namespace HandwritingFeedback.BatchedFeedback
                 {
                     candidate.InterpolationAlgorithm = InterpolationAlgorithms.CanonicalSpline;
                 }
-
-                // Add newly created series to graph
-                plot.Series.Add(candidate);
+                                    
+                plot.Series.Add(candidate);                                
             }
 
             // Attach model to a view and add to the graph docking panel
@@ -163,20 +163,20 @@ namespace HandwritingFeedback.BatchedFeedback
             }
         }
 
-        public static void MarkKeypoints(PlotModel plot, List<(double, double)> kpValues, int colorValue)
+        public static void MarkKeypoints(PlotModel plot, List<(double, double)> kpValues, int colorValue, string label)
         {
 
             int ValuesCount = kpValues.Count;
             Console.WriteLine("keypoints valuescount: {0}", ValuesCount);
 
-            var scatterSeries = new ScatterSeries { MarkerType = MarkerType.Circle };
+            var scatterSeries = new ScatterSeries { MarkerType = MarkerType.Circle, Title =  label};
 
             // Draw rectangles over areas where an error occured, using the indices in synthesis.
             // Looping happens in pairs, where each pair has x values for the start and end of the rectangle
             for (int i = 0; i < ValuesCount; i++)
             {
                 var x = kpValues[i].Item1;
-                var y = kpValues[i].Item2;
+                var y = kpValues[i].Item2 * 100; //*100 to visualize value between [0-1] on scale [0-100]
                 var size = 7;
                 scatterSeries.Points.Add(new ScatterPoint(x, y, size, colorValue));
                

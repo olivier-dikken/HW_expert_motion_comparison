@@ -23,6 +23,7 @@
                 <Button Content="Back to Menu" Click="Navigate" Tag="\View\MainPage.xaml" VerticalAlignment="Top" HorizontalAlignment="Left" Height="40" Width="137" Background="Black" Foreground="White" FontFamily="Consolas" FontSize="18" />
                 <Button Content="Restart" Click="Restart" Tag="\View\PracticeMode.xaml" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="43" Width="123" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="18" Margin="0,0,246,0" />
                 <Button Content="Screenshot" Click="SaveAllBatchedFeedback" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="43" Width="123" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="18"/>
+                <Button Content="Reload Calculations" Click="ReloadCalculations" Tag="\View\PracticeMode.xaml" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="43" Width="123" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="18" Margin="0,0,369,0" />
             </Grid>
         </ScrollViewer>
 
@@ -66,8 +67,13 @@
                 </ScrollViewer>
             </Grid>
 
+            <!-- Scroll viewer for all calculation parameters -->
+            <ScrollViewer Height="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible" Margin="5,0,0,253" Grid.Column="1">
+                <StackPanel  x:Name="parametersDock">
+                </StackPanel>
+            </ScrollViewer>
             <!-- Scroll viewer for all graphs -->
-            <ScrollViewer Height="Auto" Width="Auto" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible">
+            <ScrollViewer Height="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible" Margin="5,133,0,0" Grid.Column="1">
                 <StackPanel  x:Name="graphDock">
                 </StackPanel>
             </ScrollViewer>
