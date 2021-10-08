@@ -343,7 +343,7 @@ namespace HandwritingFeedback.Util
             }
 
             return allPoints;
-        }
+        }        
         
         /// <summary>
         /// Calculates the number of StylusPoints in Trace.

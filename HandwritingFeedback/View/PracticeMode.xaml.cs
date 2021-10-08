@@ -94,6 +94,26 @@ namespace HandwritingFeedback.View
             NavigationService.Navigate(destination);
         }
 
+        private void CompareAlignment(object sender, RoutedEventArgs e)
+        {
+            // The student should not be able to write after clicking submit
+            StudentCanvas.IsEnabled = false;
+
+            StudentTraceUtils = new TraceUtils(StudentCanvas.Strokes.Clone());
+
+            // Add student and expert traces to be sent to batched analytics
+            var inputData = new BFInputData
+            {
+                StudentTraceUtils = StudentTraceUtils,
+                ExpertTraceUtils = ExpertTraceUtils,
+                ExpertOutline = ExpertOutline
+            };
+
+            // Navigate to batched analytics view and transfer traces
+            var destination = new CompareAlignment(inputData);            
+            NavigationService.Navigate(destination);
+        }
+
         /// <summary>
         /// First tries to load the expert's trace, then creates an
         /// outline of the trace that gets placed behind the main
