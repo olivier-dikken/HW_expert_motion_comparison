@@ -4,8 +4,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
+using System.Windows.Media;
 using HandwritingFeedback.Config;
 using HandwritingFeedback.StylusPlugins.Strokes;
 
@@ -408,6 +410,41 @@ namespace HandwritingFeedback.Util
             
             _validTemporalCache = (isCalculated: true, result);
             return result;
+        }
+
+        public static void DrawHelperSquareGrid(InkCanvas canvas)
+        {
+            int intervalSize = 20;
+            int start = 0;
+            int end = 1200;
+            Stroke addLine = null;
+            for (int i = 0; i < (int)Math.Round((double)end / intervalSize); i++)
+            {
+                //add vertical line
+                addLine = MakeLine(i * intervalSize, start, i * intervalSize, end);
+                canvas.Strokes.Add(addLine);
+                //add horizondal line
+                addLine = MakeLine(start, i * intervalSize, end, i * intervalSize);
+                canvas.Strokes.Add(addLine);
+            }
+        }
+
+        public static Stroke MakeLine(double x1, double y1, double x2, double y2)
+        {
+            StylusPoint sp_1 = new StylusPoint(x1, y1);
+            StylusPoint sp_2 = new StylusPoint(x2, y2);
+
+            StylusPointCollection spCol = new StylusPointCollection();
+            spCol.Add(sp_1);
+            spCol.Add(sp_2);
+
+            Stroke stroke = new Stroke(spCol);
+
+            stroke.DrawingAttributes.Color = Colors.Gray;
+            stroke.DrawingAttributes.Width = 0.2;
+            stroke.DrawingAttributes.Height = 0.4;
+
+            return stroke;
         }
     }
 }

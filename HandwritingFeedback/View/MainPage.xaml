@@ -29,9 +29,22 @@
                 <ColumnDefinition Width="1*" />
                 <ColumnDefinition Width="1*" />
             </Grid.ColumnDefinitions>
-            <Button Content="Practice" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Navigate" Tag="\View\PracticeMode.xaml" Height="200" Width="400" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" />
+
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*" />
+                    <RowDefinition Height="2*" />
+                    <RowDefinition Height="2*" />
+                    <RowDefinition Height="1*" />
+                </Grid.RowDefinitions>
+                <Button Content="Imitate" Grid.Row="1" HorizontalAlignment="Center" Click="Navigate" Tag="\View\PracticeMode.xaml" Height="100" Width="400" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" />
+                <!--Button Content="Manipulate" Grid.Row="2" HorizontalAlignment="Center" Click="Navigate" Tag="\View\ManipulateMode.xaml" Height="100" Width="400" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" /-->
+            </Grid>
+
+
             <Button Content="Expert"   Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Click="Navigate" Tag="\View\ExpertMode.xaml"   Height="200" Width="400" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" />
             <Button Content="Customize Feedback"   HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="Navigate" Tag="\View\CustomizeFeedback.xaml"   Height="40" Width="250" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20" />
+            <Button Content="Evaluate Alignment Algorithm" Grid.Column="1"   HorizontalAlignment="Right" VerticalAlignment="Bottom" Click="Navigate" Tag="\View\EvaluateAlignmentAlgorithm.xaml"   Height="40" Width="318" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20" />
         </Grid>
     </Grid>
 </Page>

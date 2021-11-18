@@ -15,6 +15,9 @@ namespace HandwritingFeedback.View
             this.InitializeComponent();
             ExpertCanvas.DefaultStylusPointDescription =
                 ApplicationConfig.Instance.StylusPointDescription;
+
+            //Add background helper lines WIP
+            TraceUtils.DrawHelperSquareGrid(ExpertCanvas);
         }
 
         /// <summary>
@@ -26,6 +29,9 @@ namespace HandwritingFeedback.View
         {
             ExpertCanvas.Reset();
             SaveButton.IsEnabled = false;
+
+            //Add background helper lines WIP
+            TraceUtils.DrawHelperSquareGrid(ExpertCanvas);
         }
 
         /// <summary>

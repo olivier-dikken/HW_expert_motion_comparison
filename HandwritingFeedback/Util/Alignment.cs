@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HandwritingFeedback.Models;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -124,10 +125,6 @@ namespace HandwritingFeedback.Util
             }
             //distances = small_distances;
             List<(int, int)> bestPath = GetBestPath(distances);
-            foreach((int, int) indices in bestPath)
-            {
-                Debug.WriteLine($"BestPathIndices: ({indices.Item1}, {indices.Item2})");
-            }
             return bestPath;
         }
 
@@ -203,16 +200,6 @@ namespace HandwritingFeedback.Util
             int n = distances.GetLength(1);
             float[, ] bestValues = GetBestValues(distances, m, n);
 
-            Debug.WriteLine($"bestValues [0,0]: {bestValues[0, 0]}");
-            for(int i = 0; i < 10; i++)
-            {
-                for(int j = 0; j < 10; j++)
-                {
-                    Debug.Write($"{bestValues[i, j]}");
-                }
-                Debug.Write(Environment.NewLine);
-            }
-
             (int, int) current = (m-1, n-1);
             List<(int, int)> bestPath = new List<(int, int)> { current };
             while (current != (0, 0))
@@ -251,5 +238,10 @@ namespace HandwritingFeedback.Util
         }
 
 
+        public static void SaveTest(StrokeCollection expertStrokes, StrokeCollection studentStrokes, List<(int, int)> alignmentVector, string fileName)
+        {
+            AlignmentTestSample ats = new AlignmentTestSample(expertStrokes, studentStrokes, alignmentVector);
+            ats.SaveToFile(fileName);
+        }
     }
 }

@@ -1,8 +1,6 @@
-using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
-using System.Windows.Input;
 using System.Windows.Media;
 using HandwritingFeedback.Config;
 using HandwritingFeedback.RealtimeFeedback.FeedbackTypes;
@@ -11,33 +9,31 @@ using HandwritingFeedback.Util;
 namespace HandwritingFeedback.View
 {
     /// <summary>
-    /// Interaction logic for PracticeMode.xaml
+    /// Interaction logic for ManipulateMode.xaml
     /// </summary>
-    public partial class PracticeMode : Page
+    public partial class ManipulateMode : Page
     {
+
         public static TraceUtils ExpertTraceUtils { get; set; }
         public static TraceUtils StudentTraceUtils { get; private set; }
         public static StrokeCollection ExpertOutline = new StrokeCollection();
-        
-        /// <summary>
-        /// Constructor for practice mode view in general case.
-        /// </summary>
-        public PracticeMode()
-        {
+
+    /// <summary>
+    /// Constructor for practice mode view in general case.
+    /// </summary>
+    public ManipulateMode()
+    {
             InitializeComponent();
             Load();
-            
+
             StudentCanvas.DefaultStylusPointDescription =
                 ApplicationConfig.Instance.StylusPointDescription;
 
             // After the first stroke is completed, the submit button will be enabled
             StudentCanvas.StrokeCollected += EnableSubmission;
-            
+
             // Clear the canvas of previous ink
             StudentCanvas.Strokes.Clear();
-
-            //Add background helper lines WIP
-            TraceUtils.DrawHelperSquareGrid(ExpertCanvas);
         }
 
         /// <summary>
@@ -54,7 +50,7 @@ namespace HandwritingFeedback.View
         /// Constructor for practice mode view when restarting an exercise and an expert trace is in memory.
         /// </summary>
         /// <param name="input">Data transferred from previous page.</param>
-        public PracticeMode(BFInputData input) : this()
+        public ManipulateMode(BFInputData input) : this()
         {
             // Extract the expert's trace and its background trace from the given data
             ExpertTraceUtils = input.ExpertTraceUtils;
@@ -62,28 +58,15 @@ namespace HandwritingFeedback.View
 
             // First place the outline
             ExpertCanvas.Strokes = ExpertOutline.Clone();
-            
+
             // The expert's trace is placed on top of the outline
-            ExpertCanvas.Strokes.Add(ExpertTraceUtils.Trace.Clone());            
+            ExpertCanvas.Strokes.Add(ExpertTraceUtils.Trace.Clone());
 
             // We are restarting an exercise when this method is called,
             // so the expert's trace is on the canvas and the student may
             // start writing.
             StudentCanvas.IsEnabled = true;
-            
         }
-
-        private void DrawHelperLines()
-        {
-            Stroke helperBaseline = TraceUtils.MakeLine(200, 200, 600, 200);
-            ExpertCanvas.Strokes.Add(helperBaseline);
-
-            Stroke helperLine = TraceUtils.MakeLine(100, 100, 400, 100);
-            ExpertCanvas.Strokes.Add(helperLine);
-            
-        }
-
-        
 
         /// <summary>
         /// Separates the student and expert trace from each other and propagates
@@ -96,7 +79,7 @@ namespace HandwritingFeedback.View
         {
             // The student should not be able to write after clicking submit
             StudentCanvas.IsEnabled = false;
-            
+
             StudentTraceUtils = new TraceUtils(StudentCanvas.Strokes.Clone());
 
             // Add student and expert traces to be sent to batched analytics
@@ -106,7 +89,7 @@ namespace HandwritingFeedback.View
                 ExpertTraceUtils = ExpertTraceUtils,
                 ExpertOutline = ExpertOutline
             };
-            
+
             // Navigate to batched analytics view and transfer traces
             var destination = new BatchedAnalytics(inputData);
             NavigationService.Navigate(destination);
@@ -128,7 +111,7 @@ namespace HandwritingFeedback.View
             };
 
             // Navigate to batched analytics view and transfer traces
-            var destination = new CompareAlignment(inputData);            
+            var destination = new CompareAlignment(inputData);
             NavigationService.Navigate(destination);
         }
 
@@ -155,14 +138,14 @@ namespace HandwritingFeedback.View
                 {
                     stroke.DrawingAttributes.Color = Color.FromRgb(200, 200, 200);
                 }
-                
+
                 // The existing expert's trace on the canvas gets transformed into
                 // a thicker outline here.
                 foreach (var stroke in ExpertCanvas.Strokes)
                 {
                     // Make the background trace uniform by disabling pressure sensitivity
                     stroke.DrawingAttributes.IgnorePressure = true;
-                    
+
                     // Set the stroke size for each stroke based on the configured value
                     stroke.DrawingAttributes.Width =
                         ApplicationConfig.Instance.MaxDeviationRadius * 2d;
@@ -173,16 +156,13 @@ namespace HandwritingFeedback.View
                 // The canvas currently contains the expert's
                 // outline, which gets saved here.
                 ExpertOutline = ExpertCanvas.Strokes.Clone();
-                
+
                 // Add the expert's trace on top of the outline
                 ExpertCanvas.Strokes.Add(ExpertTraceUtils.Trace);
-                
+
                 StudentCanvas.Strokes.Clear();
                 StudentCanvas.IsEnabled = true;
                 SubmitButton.IsEnabled = false;
-
-                //Add background helper lines WIP
-                TraceUtils.DrawHelperSquareGrid(ExpertCanvas);
             }
         }
 
@@ -214,3 +194,4 @@ namespace HandwritingFeedback.View
         }
     }
 }
+

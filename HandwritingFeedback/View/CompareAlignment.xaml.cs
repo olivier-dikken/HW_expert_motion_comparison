@@ -1,4 +1,5 @@
-﻿using HandwritingFeedback.Util;
+﻿using HandwritingFeedback.Models;
+using HandwritingFeedback.Util;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -21,10 +22,11 @@ namespace HandwritingFeedback.View
     /// </summary>
     public partial class CompareAlignment : Page
     {
-        private readonly int Yoffset = 500;
+        private readonly int yOffset = 500;
         private readonly TraceUtils _expertTraceUtils;
         private readonly TraceUtils _studentTraceUtils;
         private readonly StrokeCollection _expertOutline;
+        private readonly List<(int, int)> alignmentVector;
 
 
         public CompareAlignment(BFInputData input)
@@ -39,51 +41,47 @@ namespace HandwritingFeedback.View
             inkCanvas.Strokes = _expertOutline.Clone();
             inkCanvas.Strokes.Add(_expertTraceUtils.Trace.Clone());
 
-         
-            StrokeCollection offsetCollection = new StrokeCollection();
-            
-            for(int i = 0; i < _studentTraceUtils.Trace.Count; i++)
-            {
-                StylusPointDescription spd = _studentTraceUtils.Trace[i].StylusPoints.Description;
-                StylusPointCollection offsetPoints = new StylusPointCollection(spd);
-                for(int j = 0; j < _studentTraceUtils.Trace[i].StylusPoints.Count; j++)
-                {
-                    StylusPoint newPoint = _studentTraceUtils.Trace[i].StylusPoints[j];                                        
 
-                    newPoint.Y += Yoffset;
+            StrokeCollection offsetCollection = OffsetStrokeCollection(_studentTraceUtils.Trace, yOffset);
+            inkCanvas.Strokes.Add(offsetCollection);
+
+
+            alignmentVector = getBestPath(_expertTraceUtils.Trace, _studentTraceUtils.Trace);
+            DrawAlignmentLines(_expertTraceUtils.Trace, offsetCollection, alignmentVector);
+        }
+
+        public void DrawAlignmentLines(StrokeCollection eStrokes, StrokeCollection offsetStrokes, List<(int, int)> aV)
+        {
+            int idx = 0;
+            foreach ((int, int) match in aV)
+            {
+                StylusPoint spRef = GetPointFromTraceAt(eStrokes, match.Item1);
+                StylusPoint spCor = GetPointFromTraceAt(offsetStrokes, match.Item2);
+                Stroke mappingLine = MakeLine(spRef.X, spRef.Y, spCor.X, spCor.Y, (float)idx / (float)aV.Count);
+                inkCanvas.Strokes.Add(mappingLine);
+                idx++;
+            }
+        }
+
+        public StrokeCollection OffsetStrokeCollection(StrokeCollection toOffset, int yOffset)
+        {
+            StrokeCollection offsetCollection = new StrokeCollection();
+
+            for (int i = 0; i < toOffset.Count; i++)
+            {
+                StylusPointDescription spd = toOffset[i].StylusPoints.Description;
+                StylusPointCollection offsetPoints = new StylusPointCollection(spd);
+                for (int j = 0; j < toOffset[i].StylusPoints.Count; j++)
+                {
+                    StylusPoint newPoint = toOffset[i].StylusPoints[j];
+
+                    newPoint.Y += yOffset;
                     offsetPoints.Add(newPoint);
                 }
                 Stroke newStroke = new Stroke(offsetPoints);
                 offsetCollection.Add(newStroke);
             }
-            inkCanvas.Strokes.Add(offsetCollection);
-
-            //int[] alignmentVector = GetAlignmentMapping(_expertTraceUtils.Trace, offsetCollection);
-            //Debug.WriteLine("Alignment vector: " + String.Join(", ", alignmentVector));
-
-            //for(int i = 0; i < alignmentVector.Length; i++)            
-            //{
-            //    int idx = alignmentVector[i];
-            //    StylusPoint spRef = GetPointFromTraceAt(_expertTraceUtils.Trace, i);
-            //    StylusPoint spCor = GetPointFromTraceAt(offsetCollection, idx);
-            //    float progress = (float)i / (float)alignmentVector.Length;
-            //    Stroke mappingLine = MakeLine(spRef.X, spRef.Y, spCor.X, spCor.Y, progress);
-            //    inkCanvas.Strokes.Add(mappingLine);
-
-            //    Debug.WriteLine("progress : " + progress);
-            //}
-
-            //TestDTW(_expertTraceUtils.Trace, _studentTraceUtils.Trace);
-            List<(int, int)> alignmentVector = getBestPath(_expertTraceUtils.Trace, _studentTraceUtils.Trace);
-            int idx = 0;
-            foreach((int, int) match in alignmentVector)
-            {
-                StylusPoint spRef = GetPointFromTraceAt(_expertTraceUtils.Trace, match.Item1);
-                StylusPoint spCor = GetPointFromTraceAt(offsetCollection, match.Item2);
-                Stroke mappingLine = MakeLine(spRef.X, spRef.Y, spCor.X, spCor.Y, (float)idx/(float)alignmentVector.Count);
-                inkCanvas.Strokes.Add(mappingLine);
-                idx++;
-            }
+            return offsetCollection;
         }
 
         public List<(int, int)> getBestPath(StrokeCollection scExpert, StrokeCollection scStudent)
@@ -92,9 +90,10 @@ namespace HandwritingFeedback.View
             List<(float, float)> coordsS = Alignment.TraceToCoords(scStudent);
             float[,] coordDistances = Alignment.GetCoordinateDistanceMatrix(coordsE, coordsS);
 
-            return Alignment.TestBestPath(coordDistances);
-            
+            return Alignment.TestBestPath(coordDistances);            
         }
+
+
 
 
         public void TestDTW(StrokeCollection scExpert, StrokeCollection scStudent)
@@ -110,18 +109,6 @@ namespace HandwritingFeedback.View
 
             List<(int, int)> alignmentVector = Alignment.TestBestPath(coordDistances);
 
-            //Debug.WriteLine($"coordDistances matrix size: {coordDistances.GetLength(0)} {coordDistances.GetLength(1)}");
-            //Debug.WriteLine("Showing rows/cols [20-30]");
-            //for (int i = 20; i < Math.Min(coordDistances.GetLength(0), 30); i++)
-            //{
-            //    for (int j = 20; j < Math.Min(coordDistances.GetLength(1), 30); j++)
-            //    {
-            //        Debug.Write($"{coordDistances[i, j]}");
-            //    }
-            //    Debug.Write(Environment.NewLine);
-            //}
-            //float bestPathDistance = Alignment.BestPathDistance(coordDistances);
-            //Debug.WriteLine($"bestPathDistance: {bestPathDistance}");
         }
 
         StylusPoint GetPointFromTraceAt(StrokeCollection trace, int idx)
@@ -197,6 +184,19 @@ namespace HandwritingFeedback.View
         private void Navigate(object sender, RoutedEventArgs e)
         {
             CommonUtils.Navigate(sender, e, this);
+        }
+
+        private void TrySaveAndLoad(object sender, RoutedEventArgs e)
+        {
+            string fileName = "TEST_SAVE";
+            AlignmentTestSample toSave = new AlignmentTestSample(_expertTraceUtils.Trace, _studentTraceUtils.Trace, alignmentVector);
+            toSave.SaveToFile(fileName);            
+            AlignmentTestSample ats = AlignmentTestSample.LoadFromFile(fileName);
+            if(ats != null)
+            {
+                Debug.WriteLine("TESTING SAVE ALIGNMENT");
+                Debug.WriteLine(ats.alignmentVector.ToString());
+            }
         }
     }
 }

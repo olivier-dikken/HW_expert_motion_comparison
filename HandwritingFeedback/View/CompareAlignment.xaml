@@ -19,6 +19,7 @@
                 <Grid>
                     <TextBlock Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,20,0,0" TextAlignment="Center" Foreground="Black" FontFamily="Consolas" FontSize="70">Test Alignment Mode</TextBlock>
                     <Button Content="Back to Menu" VerticalAlignment="Top" HorizontalAlignment="Left" Height="75" Width="200" Click="Navigate" Tag="\View\MainPage.xaml" Background="Black" Foreground="White" FontFamily="Consolas" FontSize="25" />
+                    <Button Content="TrySaveAndLoad" VerticalAlignment="Top" HorizontalAlignment="Right" Height="75" Width="200" Click="TrySaveAndLoad" Tag="\View\MainPage.xaml" Background="Black" Foreground="White" FontFamily="Consolas" FontSize="25" />
                 </Grid>
             </ScrollViewer>
 
