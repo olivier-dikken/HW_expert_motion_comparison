@@ -1,9 +1,11 @@
 using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Navigation;
 using HandwritingFeedback.Config;
 using HandwritingFeedback.RealtimeFeedback.FeedbackTypes;
 using HandwritingFeedback.Util;
@@ -36,8 +38,8 @@ namespace HandwritingFeedback.View
             // Clear the canvas of previous ink
             StudentCanvas.Strokes.Clear();
 
-            //Add background helper lines WIP
-            TraceUtils.DrawHelperSquareGrid(ExpertCanvas);
+            //draw exercise helper lines
+            TraceUtils.DrawHelperLines(StudentCanvas, GlobalState.exercisesToHelperLineType[GlobalState.SelectedExercise]);
         }
 
         /// <summary>
@@ -45,6 +47,10 @@ namespace HandwritingFeedback.View
         /// </summary>
         private void Load()
         {
+            //get current exercise and set title
+            var TitleTextBlock = (TextBlock)this.FindName("TitleTextBlock");
+            TitleTextBlock.Text = "Exercise: " + GlobalState.exercises[GlobalState.SelectedExercise];            
+
             // Add all singleton classes with expensive constructors here
             VisualFeedback.GetInstance();
             AuditoryFeedback.GetInstance();
@@ -70,16 +76,6 @@ namespace HandwritingFeedback.View
             // so the expert's trace is on the canvas and the student may
             // start writing.
             StudentCanvas.IsEnabled = true;
-            
-        }
-
-        private void DrawHelperLines()
-        {
-            Stroke helperBaseline = TraceUtils.MakeLine(200, 200, 600, 200);
-            ExpertCanvas.Strokes.Add(helperBaseline);
-
-            Stroke helperLine = TraceUtils.MakeLine(100, 100, 400, 100);
-            ExpertCanvas.Strokes.Add(helperLine);
             
         }
 
@@ -181,8 +177,8 @@ namespace HandwritingFeedback.View
                 StudentCanvas.IsEnabled = true;
                 SubmitButton.IsEnabled = false;
 
-                //Add background helper lines WIP
-                TraceUtils.DrawHelperSquareGrid(ExpertCanvas);
+                //draw helper lines
+                TraceUtils.DrawHelperLines(StudentCanvas, GlobalState.exercisesToHelperLineType[GlobalState.SelectedExercise]);
             }
         }
 
@@ -194,7 +190,7 @@ namespace HandwritingFeedback.View
         private void Navigate(object sender, RoutedEventArgs e)
         {
             CommonUtils.Navigate(sender, e, this);
-        }
+        }         
 
         /// <summary>
         /// This method enables the submit button when an expert trace is loaded on the canvas

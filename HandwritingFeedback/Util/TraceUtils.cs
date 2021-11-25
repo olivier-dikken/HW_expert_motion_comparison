@@ -412,21 +412,82 @@ namespace HandwritingFeedback.Util
             return result;
         }
 
-        public static void DrawHelperSquareGrid(InkCanvas canvas)
+        public static void DrawHelperSquareGrid(InkCanvas canvas, int spacing, int startY)
         {
-            int intervalSize = 20;
+            int intervalSize = spacing;
             int start = 0;
-            int end = 1200;
+            int end = 1600;
             Stroke addLine = null;
-            for (int i = 0; i < (int)Math.Round((double)end / intervalSize); i++)
+
+            //add red base line as reference for main line
+            //baseline
+            addLine = MakeLine(start, startY, end, startY);
+            addLine.DrawingAttributes.Color = Colors.Red;
+            canvas.Strokes.Add(addLine);
+
+            for (int i = -50; i < (int)Math.Round((double)end / intervalSize); i++)
             {
                 //add vertical line
                 addLine = MakeLine(i * intervalSize, start, i * intervalSize, end);
                 canvas.Strokes.Add(addLine);
                 //add horizondal line
-                addLine = MakeLine(start, i * intervalSize, end, i * intervalSize);
+                addLine = MakeLine(start, i * intervalSize + startY, end, i * intervalSize + startY);
                 canvas.Strokes.Add(addLine);
             }
+        }
+
+        public static void DrawHelperLines(InkCanvas canvas, int type, int spacing = 20)
+        {
+            if (type == 0)
+                return;
+            // 0 no line
+            // 1 baseline
+            // 2 square lines
+            // 3 staved lines
+
+            int startY = 200;
+            int startX = 100;
+            int pageWidth = 1600;
+
+            Stroke newLine = null;
+            
+            switch (type)
+            {
+                case 0:
+                    break;
+
+                case 1:
+                    //baseline
+                    newLine = MakeLine(startX, startY, pageWidth, startY);
+                    canvas.Strokes.Add(newLine);
+                    break;
+
+                case 2:                    
+                    DrawHelperSquareGrid(canvas, spacing, startY);
+                    break;
+
+                case 3:
+                    //baseline
+                    newLine = MakeLine(startX, startY, pageWidth, startY);
+                    canvas.Strokes.Add(newLine);
+                    //descender line
+                    newLine = MakeLine(startX, startY + spacing, pageWidth, startY + spacing);
+                    canvas.Strokes.Add(newLine);
+                    //ascender line
+                    newLine = MakeLine(startX, startY - 3* spacing, pageWidth, startY - 3* spacing);
+                    canvas.Strokes.Add(newLine);
+                    //mid line
+                    newLine = MakeLine(startX, startY - 2* spacing, pageWidth, startY - 2* spacing);
+                    canvas.Strokes.Add(newLine);
+                    break;               
+
+                default:
+                    break;
+
+            }
+            
+
+
         }
 
         public static Stroke MakeLine(double x1, double y1, double x2, double y2)

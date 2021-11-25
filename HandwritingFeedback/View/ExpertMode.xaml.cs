@@ -10,14 +10,37 @@ namespace HandwritingFeedback.View
     /// </summary>
     public partial class ExpertMode : Page
     {
+
+        int helperLineType = 1;
+        int lineSpacing = 20;
         public ExpertMode()
         {
             this.InitializeComponent();
             ExpertCanvas.DefaultStylusPointDescription =
                 ApplicationConfig.Instance.StylusPointDescription;
 
-            //Add background helper lines WIP
-            TraceUtils.DrawHelperSquareGrid(ExpertCanvas);
+            
+            TraceUtils.DrawHelperLines(ExpertCanvasBG, helperLineType, lineSpacing);
+        }
+
+        private void ButtonSwitchLines(object sender, RoutedEventArgs e)
+        {
+            helperLineType = (helperLineType +  1) % 4;
+            ClearCanvas(sender, e);
+        }
+
+        private void ButtonLineIntervalIncrease(object sender, RoutedEventArgs e)
+        {
+            lineSpacing += 2;
+            ClearCanvas(sender, e);
+        }
+
+        private void ButtonLineIntervalDecrease(object sender, RoutedEventArgs e)
+        {
+            if (lineSpacing < 4)
+                return;
+            lineSpacing -= 2;
+            ClearCanvas(sender, e);
         }
 
         /// <summary>
@@ -27,11 +50,12 @@ namespace HandwritingFeedback.View
         /// <param name="e">Event arguments</param>
         private void ClearCanvas(object sender, RoutedEventArgs e)
         {
+            ExpertCanvasBG.Reset();
             ExpertCanvas.Reset();
             SaveButton.IsEnabled = false;
 
             //Add background helper lines WIP
-            TraceUtils.DrawHelperSquareGrid(ExpertCanvas);
+            TraceUtils.DrawHelperLines(ExpertCanvasBG, helperLineType, lineSpacing);
         }
 
         /// <summary>

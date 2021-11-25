@@ -22,7 +22,7 @@
 
         <ScrollViewer Grid.Row="0" Height = "Auto" Width = "Auto" HorizontalScrollBarVisibility = "Auto" VerticalScrollBarVisibility = "Auto">
             <Grid>
-                <TextBlock Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,60,0,0" TextAlignment="Center" Foreground="Black" FontFamily="Consolas" FontSize="70">Imitate Mode</TextBlock>
+                <TextBlock x:Name="TitleTextBlock" Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,60,0,0" TextAlignment="Center" Foreground="Black" FontFamily="Consolas" FontSize="70">Imitate Mode</TextBlock>
                 <TextBlock Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,140,0,0" TextAlignment="Center" Foreground="Black" FontFamily="Consolas" FontSize="50">Load an exercise to begin.<LineBreak /> Click 'Submit' when you are done.</TextBlock>
                 <Button Content="Back to Menu" VerticalAlignment="Top" HorizontalAlignment="Left" Height="75" Width="200" Click="Navigate" Tag="\View\MainPage.xaml" Background="Black" Foreground="White" FontFamily="Consolas" FontSize="25" />
             </Grid>
