@@ -8,6 +8,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using HandwritingFeedback.Config;
+using HandwritingFeedback.Models;
 using HandwritingFeedback.Util;
 
 namespace HandwritingFeedback.View
@@ -37,6 +38,8 @@ namespace HandwritingFeedback.View
 
         bool showingAlignment = false;
 
+        ExpertDistributionModel edm;        
+
         public CreateContentRecordPerformanceMode()
         {
             InitializeComponent();
@@ -55,10 +58,21 @@ namespace HandwritingFeedback.View
             startingPoint = Int32.Parse(lines[lines.Length - 1]);
         }
 
+        private void InitEDM()
+        {
+            TargetTrace = FileHandler.LoadStrokeCollection(GlobalState.CreateContentsPreviousFolder + "\\TargetTrace.isf");
+            TraceUtils tu = new TraceUtils(TargetTrace);
+            int length = tu.GetNumberOfStylusPoints();
+            edm = new ExpertDistributionModel(length);            
+        }
+
         private void Load()
         {
             //read config from text file
             ReadConfigFile();
+
+            //init expert distribution model object
+            InitEDM();
 
             //load exercise config
             iteration = 1; //start at iteration 1 instead of 0
@@ -170,11 +184,17 @@ namespace HandwritingFeedback.View
             showingAlignment = true;            
         }
 
-        private void TransformStrokeDataToTarget(StrokeCollection target, StrokeCollection toTransform)
+        /// <summary>
+        /// So the toTransform ends up with the same amount of datapoints as the target, with indexes corresponding to aligned points between the target and toTransform
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="toTransform"></param>
+        private double[] TransformStrokeDataToTarget(StrokeCollection target, StrokeCollection toTransform, string featureName)
         {
             List<(int, int)> alignmentVector = getBestPath(target, toTransform);
-            int targetLength = alignmentVector[0].Item1;
-            double[] transformed_x = new double[targetLength];
+            TraceUtils tu = new TraceUtils(TargetTrace);
+            int targetLength = tu.GetNumberOfStylusPoints();
+            double[] transformed = new double[targetLength];
 
             double nextVals;
             double amount;
@@ -186,13 +206,35 @@ namespace HandwritingFeedback.View
                 {
                     if(alignmentVector[j].Item1 == i)
                     {
-                        nextVals += GetPointFromTraceAt(toTransform, alignmentVector[j].Item2).X;
+                        StylusPoint currentPoint = GetPointFromTraceAt(toTransform, alignmentVector[j].Item2);
+                        double toAdd = 0;
+                        switch (featureName)
+                        {
+                            case "X":
+                                toAdd = currentPoint.X;
+                                break;
+
+                            case "Y":
+                                toAdd = currentPoint.Y;
+                                break;
+
+                            case "speed":                                
+                                break;
+
+                            default:
+                                Debug.WriteLine($"unrecognized feature name: {featureName} in TransformStrokeDataToTarget");
+                                return null;
+
+                        }
+
+                        nextVals += toAdd;
                         amount += 1;
                     }
                 }                
-                transformed_x[i] = nextVals / amount;
+                transformed[i] = nextVals / amount;
             }
-        }
+            return transformed;
+        }        
 
         public void DrawAlignmentLines(StrokeCollection eStrokes, StrokeCollection offsetStrokes, List<(int, int)> aV)
         {
@@ -313,23 +355,52 @@ namespace HandwritingFeedback.View
         private void NextIteration()
         {
             //store expertPerformance of previous iteration
-            TransformStrokeDataToTarget(TargetTrace, expertPerformance);
+            foreach(string featureName in GlobalState.FeatureNames)
+            {
+                AddToEDM(featureName);
+            }                        
             expertPerformances[iteration - 1] = expertPerformance;
             
             iteration++;
 
             LoadIteration();            
+        }  
+        
+        private void AddToEDM(string featureName)
+        {
+            double[] transformed = TransformStrokeDataToTarget(TargetTrace, expertPerformance, featureName);
+            edm.AddTransformed(transformed, featureName);
         }
 
         private void SaveExercise()
         {
+            //store expertPerformance of previous iteration
+            foreach (string featureName in GlobalState.FeatureNames)
+            {
+                AddToEDM(featureName);
+            }
+            expertPerformances[iteration - 1] = expertPerformance;
+
             //TargetTrace and config already saved, need to save EDM and add RDY to config file
             //convert arrays per dimension to avg + std per dimension
-            
+            Debug.WriteLine(edm.ToString());
+            EDMData edmData = edm.GetDistributionModel();
+            string fileName = "testfile";
+            ExpertDistributionModel.SaveToFile(GlobalState.CreateContentsPreviousFolder + "\\" + fileName, edmData);
+
+            EDMData loadedData = ExpertDistributionModel.LoadFromFile(GlobalState.CreateContentsPreviousFolder + "\\" + fileName);
+            Debug.WriteLine($"number of loaded datapoints: {loadedData.dataPoints.Length}");
 
             //save to file, format: dimension=[0,4,2,1,...] e.g. distance_avg=[0.18,1.1,0.87,...]; distance_std=[0.11, 0.12, 0.03,...]
 
+
             //return to menu
+        }
+
+        private double[] ExtractFeatureArrayFromStrokeCollection()
+        {
+
+            return null;
         }
 
         /// <summary>

@@ -60,5 +60,7 @@ namespace HandwritingFeedback.Util
                 { 8, WritingScale.M},
                 { 9, WritingScale.M}
             };
+
+        public static string[] FeatureNames = new string[2] { "X", "Y" };
     }
 }
