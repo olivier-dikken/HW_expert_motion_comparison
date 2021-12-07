@@ -7,6 +7,7 @@ namespace HandwritingFeedback.Util
     static class GlobalState
     {
         public static int SelectedExercise = 0;
+        public static string CreateContentsPreviousFolder = "";
         public static Dictionary<int, string> exercises =
             new Dictionary<int, string>()
             {

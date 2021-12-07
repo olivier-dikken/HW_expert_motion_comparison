@@ -45,6 +45,21 @@ namespace HandwritingFeedback.Util
 
             return false;
         }
+
+        public static bool SaveTargetTrace(StrokeCollection strokesToSave, string path)
+        {
+            //save as TargetTrace.isf in the path folder
+            try
+            {
+                FileStream fs = new FileStream(path + "\\TargetTrace.isf", FileMode.Create);
+                strokesToSave.Save(fs);
+                fs.Close();
+                return true;
+            }
+            catch { }
+
+            return false;
+        }
         
         public static void ButtonSaveAsImageClick(object sender, RoutedEventArgs e, Grid fullPage)
         {
@@ -108,6 +123,59 @@ namespace HandwritingFeedback.Util
 
             fs.Close();
             return true;
+        }
+
+        public static StrokeCollection LoadStrokeCollection(string pathToFile)
+        {
+            var fs = new FileStream(pathToFile,
+                 FileMode.Open);
+
+            StrokeCollection fetchedStrokes;
+
+            // If selected file is wrong .ISF type or invalid, do nothing
+            try
+            {
+                // Fetch all strokes from selected file-stream
+                fetchedStrokes = new StrokeCollection(fs);
+            }
+            catch (ArgumentException)
+            {
+                return null;
+            }
+
+            // Parse fetched stroke to extract saved properties per stroke
+            ParseStrokeCollection(fetchedStrokes);
+
+            fs.Close();
+
+            return fetchedStrokes;
+        }
+
+        public static void LoadTrace(string pathToTrace, InkCanvas inkCanvas)
+        {
+            var fs = new FileStream(pathToTrace,
+                 FileMode.Open);
+
+            StrokeCollection fetchedStrokes;
+
+            // If selected file is wrong .ISF type or invalid, do nothing
+            try
+            {
+                // Fetch all strokes from selected file-stream
+                fetchedStrokes = new StrokeCollection(fs);
+            }
+            catch (ArgumentException)
+            {
+                return;
+            }
+
+            // Parse fetched stroke to extract saved properties per stroke
+            ParseStrokeCollection(fetchedStrokes);
+
+            // Add the strokes to the ink canvas
+            inkCanvas.Strokes.Add(fetchedStrokes);
+
+            fs.Close();
         }
 
         /// <summary>

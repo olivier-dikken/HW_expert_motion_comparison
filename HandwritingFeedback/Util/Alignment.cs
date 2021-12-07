@@ -111,18 +111,18 @@ namespace HandwritingFeedback.Util
             int mL = distances.GetLength(0);
             int nL = distances.GetLength(1);
 
-            int offset = 5;
+            //int offset = 5;
 
             int limit = Math.Min(mL, nL);
 
-            float[,] small_distances = new float[limit - offset, limit - offset];
-            for (int i = offset; i < limit; i++)
-            {
-                for (int j = offset; j < limit; j++)
-                {
-                    small_distances[i - offset, j - offset] = distances[i, j];
-                }
-            }
+            //float[,] small_distances = new float[limit - offset, limit - offset];
+            //for (int i = offset; i < limit; i++)
+            //{
+            //    for (int j = offset; j < limit; j++)
+            //    {
+            //        small_distances[i - offset, j - offset] = distances[i, j];
+            //    }
+            //}
             //distances = small_distances;
             List<(int, int)> bestPath = GetBestPath(distances);
             return bestPath;
