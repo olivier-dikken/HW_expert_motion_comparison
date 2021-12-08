@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
@@ -20,6 +21,10 @@ namespace HandwritingFeedback.View
         public static TraceUtils ExpertTraceUtils { get; set; }
         public static TraceUtils StudentTraceUtils { get; private set; }
         public static StrokeCollection ExpertOutline = new StrokeCollection();
+
+        int helperLineType;
+
+        public static StrokeCollection TargetTrace;
         
         /// <summary>
         /// Constructor for practice mode view in general case.
@@ -38,6 +43,10 @@ namespace HandwritingFeedback.View
             // Clear the canvas of previous ink
             StudentCanvas.Strokes.Clear();
 
+            //TODO clean code...
+            ExpertCanvas.Strokes.Add(TargetTrace.Clone());
+            StudentCanvas.IsEnabled = true;
+
             //draw exercise helper lines
             TraceUtils.DrawHelperLines(StudentCanvas, GlobalState.exercisesToHelperLineType[GlobalState.SelectedExercise]);
         }
@@ -49,11 +58,27 @@ namespace HandwritingFeedback.View
         {
             //get current exercise and set title
             var TitleTextBlock = (TextBlock)this.FindName("TitleTextBlock");
-            TitleTextBlock.Text = "Exercise: " + GlobalState.exercises[GlobalState.SelectedExercise];            
+            TitleTextBlock.Text = "Exercise: " + Path.GetFileName(GlobalState.SelectedExercisePath);            
 
             // Add all singleton classes with expensive constructors here
             VisualFeedback.GetInstance();
             AuditoryFeedback.GetInstance();
+
+            ReadConfigFile();
+        }
+        
+        /// <summary>
+        /// read exercise config and load exercise
+        /// </summary>
+        private void ReadConfigFile()
+        {
+            string[] lines = System.IO.File.ReadAllLines(GlobalState.SelectedExercisePath + "\\exerciseConfig.txt");
+
+            string description = lines[0];
+            helperLineType = Int32.Parse(lines[lines.Length - 2]);
+
+            TargetTrace = FileHandler.LoadStrokeCollection(GlobalState.SelectedExercisePath + "\\TargetTrace.isf");
+            ExpertTraceUtils = new TraceUtils(TargetTrace);
         }
 
         /// <summary>
@@ -68,9 +93,9 @@ namespace HandwritingFeedback.View
 
             // First place the outline
             ExpertCanvas.Strokes = ExpertOutline.Clone();
-            
+
             // The expert's trace is placed on top of the outline
-            ExpertCanvas.Strokes.Add(ExpertTraceUtils.Trace.Clone());            
+            ExpertCanvas.Strokes.Add(ExpertTraceUtils.Trace.Clone());                        
 
             // We are restarting an exercise when this method is called,
             // so the expert's trace is on the canvas and the student may

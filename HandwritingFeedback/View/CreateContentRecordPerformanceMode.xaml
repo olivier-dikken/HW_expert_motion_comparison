@@ -54,6 +54,11 @@
                     <ColumnDefinition Width="1*" />
                 </Grid.ColumnDefinitions>
             </Grid>
+            <!-- Scroll viewer for all graphs -->
+            <ScrollViewer Height="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible" Margin="5,133,0,0" Grid.Column="1">
+                <StackPanel  x:Name="graphDock">
+                </StackPanel>
+            </ScrollViewer>
         </Grid>
     </Grid>
 </Page>

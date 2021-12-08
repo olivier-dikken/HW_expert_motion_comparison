@@ -146,13 +146,13 @@ namespace HandwritingFeedback.Models
     [Serializable()]
     public class EDMDataPoint
     {
-        int index;
-        double X;
-        double X_std;
-        double Y;
-        double Y_std;
-        double pressure;
-        double speed;
+        public int index;
+        public double X;
+        public double X_std;
+        public double Y;
+        public double Y_std;
+        public double pressure;
+        public double speed;
 
         public EDMDataPoint(int i)
         {

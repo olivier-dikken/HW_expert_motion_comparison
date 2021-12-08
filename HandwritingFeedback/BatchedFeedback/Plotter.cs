@@ -101,6 +101,7 @@ namespace HandwritingFeedback.BatchedFeedback
                                     
                 plot.Series.Add(candidate);                                
             }
+            
 
             // Attach model to a view and add to the graph docking panel
             var plotView = new OxyPlot.Wpf.PlotView
@@ -108,6 +109,7 @@ namespace HandwritingFeedback.BatchedFeedback
                 Model = plot,
                 Height = 450
             };
+            
             GraphDock.Children.Add(plotView);
         }
 

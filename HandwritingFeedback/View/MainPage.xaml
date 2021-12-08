@@ -28,10 +28,12 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" />
                 <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0">
-                <Grid.ColumnDefinitions>
+                <ListView Name="ListExercises"></ListView>
+                <!--Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
                     <ColumnDefinition Width="1*" />
                     <ColumnDefinition Width="1*" />
@@ -41,8 +43,8 @@
                     <RowDefinition Height="1*" />
                     <RowDefinition Height="1*" />
                     <RowDefinition Height="1*" />
-                </Grid.RowDefinitions>
-                <Button Content="Trace 1" Grid.Row="0" HorizontalAlignment="Stretch" Click="StartExercise" Tag="0" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" />
+                </Grid.RowDefinitions-->
+                <!--Button Content="Trace 1" Grid.Row="0" HorizontalAlignment="Stretch" Click="StartExercise" Tag="0" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" />
                 <Button Content="Trace 2" Grid.Row="1" HorizontalAlignment="Stretch" Click="StartExercise" Tag="1" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" />
                 <Button Content="Trace 3" Grid.Row="2" HorizontalAlignment="Stretch" Click="StartExercise" Tag="2" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" />
                 <Button Content="Trace 4" Grid.Row="3" HorizontalAlignment="Stretch" Click="StartExercise" Tag="3" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" />
@@ -53,15 +55,19 @@
                 <Button Content="Copy 4" Grid.Column="1" Grid.Row="3" HorizontalAlignment="Stretch" Click="StartExercise" Tag="7" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" />
 
                 <Button Content="Copy 5" Grid.Column="2" Grid.Row="0" HorizontalAlignment="Stretch" Click="StartExercise" Tag="8" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" />
-                <Button Content="Copy 6" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch" Click="StartExercise" Tag="9" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" />
+                <Button Content="Copy 6" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Stretch" Click="StartExercise" Tag="9" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" /-->
                 <!--Button Content="Manipulate" Grid.Row="2" HorizontalAlignment="Center" Click="Navigate" Tag="\View\ManipulateMode.xaml" Height="100" Width="400" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" /-->
+            </Grid>
+
+            <Grid Grid.Column="1">
+                <Button Content="StartExercise"   Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Top" Click="StartSelectedExercise" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20" />
             </Grid>
 
 
             <!--Button Content="Expert"   Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="Navigate" Tag="\View\ExpertMode.xaml" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" /-->
-            <Button Content="Create Content"   Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="Navigate" Tag="\View\CreateContentMode.xaml" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" />
+            <Button Content="Create Content"   Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="Navigate" Tag="\View\CreateContentMode.xaml" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" />
             <Button Content="Settings"   HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="Navigate" Tag="\View\CustomizeFeedback.xaml"   Height="40" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20" />
-            <Button Content="Test Alignment Algorithm" Grid.Column="1"   HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Click="Navigate" Tag="\View\EvaluateAlignmentAlgorithm.xaml"   Height="40"  Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20" />
+            <Button Content="Test Alignment Algorithm" Grid.Column="2"   HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Click="Navigate" Tag="\View\EvaluateAlignmentAlgorithm.xaml"   Height="40"  Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20" />
         </Grid>
     </Grid>
 </Page>

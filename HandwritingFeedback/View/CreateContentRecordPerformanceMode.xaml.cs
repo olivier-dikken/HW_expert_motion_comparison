@@ -7,9 +7,13 @@ using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using HandwritingFeedback.BatchedFeedback;
+using HandwritingFeedback.BatchedFeedback.SynthesisTypes;
+using HandwritingFeedback.BatchedFeedback.SynthesisTypes.Graphs;
 using HandwritingFeedback.Config;
 using HandwritingFeedback.Models;
 using HandwritingFeedback.Util;
+using OxyPlot;
 
 namespace HandwritingFeedback.View
 {
@@ -38,7 +42,9 @@ namespace HandwritingFeedback.View
 
         bool showingAlignment = false;
 
-        ExpertDistributionModel edm;        
+        ExpertDistributionModel edm;
+
+        Synthesis Synthesis;
 
         public CreateContentRecordPerformanceMode()
         {
@@ -391,10 +397,102 @@ namespace HandwritingFeedback.View
             EDMData loadedData = ExpertDistributionModel.LoadFromFile(GlobalState.CreateContentsPreviousFolder + "\\" + fileName);
             Debug.WriteLine($"number of loaded datapoints: {loadedData.dataPoints.Length}");
 
-            //save to file, format: dimension=[0,4,2,1,...] e.g. distance_avg=[0.18,1.1,0.87,...]; distance_std=[0.11, 0.12, 0.03,...]
+            Plotter _plotter = new Plotter(null, graphDock);
 
+            ShowEDMGraph(loadedData, "X", _plotter);
+            ShowEDMGraph(loadedData, "Y", _plotter);
 
             //return to menu
+        }
+
+        private void ShowEDMGraph(EDMData data, string feature, Plotter _plotter)
+        {
+            Debug.WriteLine("In ShowEDMGraph");
+
+            LineGraph Synthesis = new LineGraph
+            {
+                Title = "EDM graph",
+                XAxisLabel = $"{feature} AVG and STD",
+                YAxisLabel = "Datapoint index",                
+                CurvedLine = false,
+                MinimumYRange = 100,
+                AbsoluteMinimumY = 100
+            };            
+            
+
+
+            List<DataPoint> dataPoints = new List<DataPoint>();
+            dataPoints.Add(new DataPoint(0, 0));
+            for(int i = 0; i < data.dataPoints.Length; i++)
+            {
+                switch (feature)
+                {
+                    case "X":
+                        dataPoints.Add(new DataPoint(i, data.dataPoints[i].X));
+                        break;
+
+                    case "Y":
+                        dataPoints.Add(new DataPoint(i, data.dataPoints[i].Y));
+                        break;
+
+                    default:
+                        Debug.WriteLine($"Wrong feature name: {feature}");
+                        break;
+                }
+                
+            }
+            var avgSeries = LineGraph.CreateSeries(dataPoints, OxyColors.Blue, "Student Trace");
+            Synthesis.AddSeries(avgSeries);
+
+            List<DataPoint> dataPoints_bound_upper = new List<DataPoint>();
+            dataPoints_bound_upper.Add(new DataPoint(0, 0));
+            for (int i = 0; i < data.dataPoints.Length; i++)
+            {
+                switch (feature)
+                {
+                    case "X":
+                        dataPoints_bound_upper.Add(new DataPoint(i, data.dataPoints[i].X + 5*data.dataPoints[i].X_std));
+                        break;
+
+                    case "Y":
+                        dataPoints_bound_upper.Add(new DataPoint(i, data.dataPoints[i].Y + 5*data.dataPoints[i].Y_std));
+                        break;
+
+                    default:
+                        Debug.WriteLine($"Wrong feature name: {feature}");
+                        break;
+                }
+
+            }
+            var bound_upper_Series = LineGraph.CreateSeries(dataPoints_bound_upper, OxyColors.Orange, "UpperBound");
+            Synthesis.AddSeries(bound_upper_Series);
+
+            List<DataPoint> dataPoints_bound_lower = new List<DataPoint>();
+            dataPoints_bound_lower.Add(new DataPoint(0, 0));
+            for (int i = 0; i < data.dataPoints.Length; i++)
+            {
+                switch (feature)
+                {
+                    case "X":
+                        dataPoints_bound_lower.Add(new DataPoint(i, data.dataPoints[i].X - data.dataPoints[i].X_std));
+                        break;
+
+                    case "Y":
+                        dataPoints_bound_lower.Add(new DataPoint(i, data.dataPoints[i].Y - data.dataPoints[i].Y_std));
+                        break;
+
+                    default:
+                        Debug.WriteLine($"Wrong feature name: {feature}");
+                        break;
+                }
+
+            }
+            var bound_lower_Series = LineGraph.CreateSeries(dataPoints_bound_lower, OxyColors.Orange, "LowerBound");            
+            Synthesis.AddSeries(bound_lower_Series);
+
+
+
+            _plotter.RenderLineGraph((LineGraph)Synthesis);
         }
 
         private double[] ExtractFeatureArrayFromStrokeCollection()
