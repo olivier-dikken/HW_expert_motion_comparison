@@ -67,7 +67,8 @@
             <!--Button Content="Expert"   Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="Navigate" Tag="\View\ExpertMode.xaml" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" /-->
             <Button Content="Create Content"   Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="Navigate" Tag="\View\CreateContentMode.xaml" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="40" />
             <Button Content="Settings"   HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="Navigate" Tag="\View\CustomizeFeedback.xaml"   Height="40" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20" />
-            <Button Content="Test Alignment Algorithm" Grid.Column="2"   HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Click="Navigate" Tag="\View\EvaluateAlignmentAlgorithm.xaml"   Height="40"  Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20" />
+            <!--Button Content="Test Alignment Algorithm" Grid.Column="2"   HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Click="Navigate" Tag="\View\EvaluateAlignmentAlgorithm.xaml"   Height="40"  Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20" /-->
+            <Button Content="Compare Alignment Algorithms" Grid.Column="2"   HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Click="Navigate" Tag="\View\CompareAlignmentAlgorithms.xaml"   Height="40"  Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20" />
         </Grid>
     </Grid>
 </Page>

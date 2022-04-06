@@ -15,6 +15,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using HandwritingFeedback.Config;
+using System.IO;
 
 namespace HandwritingFeedback.View
 {
@@ -23,14 +25,160 @@ namespace HandwritingFeedback.View
     /// </summary>
     public partial class EvaluateAlignmentAlgorithm : Page
     {
+        public static TraceUtils ExpertTraceUtils { get; set; }
+        public static TraceUtils StudentTraceUtils { get; private set; }
+        public static StrokeCollection ExpertOutline = new StrokeCollection();
+        StrokeCollection TargetTrace;
+        StrokeCollection CandidateTrace;
+
+        bool eSubmitted = false;
+
         public EvaluateAlignmentAlgorithm()
         {
             InitializeComponent();
+
+            ExpertCanvas.DefaultStylusPointDescription =
+                ApplicationConfig.Instance.StylusPointDescription;
+        }
+
+
+        private void InitStudentCanvas()
+        {
+            NextButton.Content = "Submit";
+
+            LoadOutlineTrace();                   
         }
 
         private void Navigate(object sender, RoutedEventArgs e)
         {
             CommonUtils.Navigate(sender, e, this);
+        }
+
+        private void CreateTestSample(object sender, RoutedEventArgs e)
+        {
+            //set canvas to draw E stroke and submit
+
+            //then allow drawing of S trance and submit
+
+            //comput mapping_GT on submission
+        }
+
+        /// <summary>
+        /// clone to expertCanvasBG
+        /// </summary>
+        private void LoadOutlineTrace()
+        {
+            FileHandler.LoadTrace(GlobalState.CreateContentsPreviousFolder + "\\TargetTrace.isf", ExpertCanvasBG);
+            // The .ISF was loaded, so the canvas currently contains the expert's
+            // trace, which gets saved here.
+            ExpertTraceUtils = new TraceUtils(ExpertCanvasBG.Strokes.Clone());
+
+            // Modify the color of the expert's trace
+            // This will allow the expert's trace to be darker than
+            // the outline.
+            foreach (var stroke in ExpertTraceUtils.Trace)
+            {
+                stroke.DrawingAttributes.Color = Color.FromRgb(200, 200, 200);
+            }
+
+            // The existing expert's trace on the canvas gets transformed into
+            // a thicker outline here.
+            foreach (var stroke in ExpertCanvasBG.Strokes)
+            {
+                // Make the background trace uniform by disabling pressure sensitivity
+                stroke.DrawingAttributes.IgnorePressure = true;
+
+                // Set the stroke size for each stroke based on the configured value
+                stroke.DrawingAttributes.Width =
+                    ApplicationConfig.Instance.MaxDeviationRadius * 2d;
+                stroke.DrawingAttributes.Height =
+                    ApplicationConfig.Instance.MaxDeviationRadius * 2d;
+            }
+
+            // The canvas currently contains the expert's
+            // outline, which gets saved here.
+            ExpertOutline = ExpertCanvasBG.Strokes.Clone();
+
+            // Add the expert's trace on top of the outline
+            ExpertCanvasBG.Strokes.Add(ExpertTraceUtils.Trace);
+        }
+
+        private void ButtonNext(object sender, RoutedEventArgs e)
+        {
+            if (!eSubmitted)
+            {
+
+
+                //create folder with filename
+                string workingDirectory = Environment.CurrentDirectory;
+                string path = Directory.GetParent(workingDirectory).Parent.FullName + "\\SavedData\\TestAlignment\\" + Guid.NewGuid().ToString();
+                Debug.WriteLine("working directory: " + workingDirectory);
+                Debug.WriteLine("path to create folder at: " + path);
+
+                if (!Directory.Exists(path))
+                {
+                    GlobalState.CreateContentsPreviousFolder = path;
+                    Directory.CreateDirectory(path);
+                    //save trace to folder as TargetTrace.isf
+                    FileHandler.SaveTargetTrace(ExpertCanvas.Strokes, path);
+                    TargetTrace = ExpertCanvas.Strokes;
+                    eSubmitted = true;                    
+                    ClearCanvas(sender, e);
+                    InitStudentCanvas();
+                }
+                else
+                {
+                    Debug.WriteLine("Error, folder name already exists");
+                }
+            } else
+            {
+                //save student trace
+                Debug.WriteLine("Saving student stroke");
+                FileHandler.SaveCandidateTrace(ExpertCanvas.Strokes, GlobalState.CreateContentsPreviousFolder);
+                CandidateTrace = ExpertCanvas.Strokes;
+                //get alignment
+                List<(int, int)> alignmentVector = getBestPath(TargetTrace, CandidateTrace);
+                File.WriteAllTextAsync(GlobalState.CreateContentsPreviousFolder + "\\aV.txt", String.Join(", ", alignmentVector));
+                ClearCanvas(sender, e);
+                eSubmitted = false;
+                NextButton.Content = "Next";
+            }
+        }
+
+        public List<(int, int)> getBestPath(StrokeCollection scExpert, StrokeCollection scStudent)
+        {
+            List<(float, float)> coordsE = Alignment.TraceToCoords(scExpert);
+            List<(float, float)> coordsS = Alignment.TraceToCoords(scStudent);
+            float[,] coordDistances = Alignment.GetCoordinateDistanceMatrix(coordsE, coordsS);
+
+            return Alignment.TestBestPath(coordDistances);
+        }
+
+        /// <summary>
+        /// Removes all strokes from the canvas.
+        /// </summary>
+        /// <param name="sender">The Button which invoked the method</param>
+        /// <param name="e">Event arguments</param>
+        private void ClearCanvas(object sender, RoutedEventArgs e)
+        {
+            ExpertCanvasBG.Reset();
+            ExpertCanvas.Reset();
+            NextButton.IsEnabled = false;
+        }
+
+        /// <summary>
+        /// This method enables the save button when 
+        /// at least one stroke is present on the canvas.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The event data.</param>
+        void EnableNext(object sender, InkCanvasStrokeCollectedEventArgs e)
+        {
+            // Canvas must contain at least 1 stroke.
+            if (!NextButton.IsEnabled && ExpertCanvas.Strokes.Count != 0)
+            {
+                NextButton.IsEnabled = true;
+            }
         }
 
         private void LoadTestSample(object sender, RoutedEventArgs e)
@@ -41,9 +189,9 @@ namespace HandwritingFeedback.View
             
 
             //show traces 
-            inkCanvas.Strokes = ats.eStrokes.Clone();
+            ExpertCanvas.Strokes = ats.eStrokes.Clone();
             StrokeCollection offsetCollection = OffsetStrokeCollection(ats.sStrokes, 500);
-            inkCanvas.Strokes.Add(offsetCollection);
+            ExpertCanvas.Strokes.Add(offsetCollection);
 
             //run alignment algorithm
             List<(int, int)> aV = ats.alignmentVector;
@@ -115,7 +263,7 @@ namespace HandwritingFeedback.View
                 StylusPoint spRef = GetPointFromTraceAt(eStrokes, match.Item1);
                 StylusPoint spCor = GetPointFromTraceAt(offsetStrokes, match.Item2);
                 Stroke mappingLine = MakeLine(spRef.X, spRef.Y, spCor.X, spCor.Y, (float)idx / (float)aV.Count);
-                inkCanvas.Strokes.Add(mappingLine);
+                ExpertCanvas.Strokes.Add(mappingLine);
                 idx++;
             }
         }
@@ -176,5 +324,5 @@ namespace HandwritingFeedback.View
             }
             return offsetCollection;
         }
-    }
+    }    
 }

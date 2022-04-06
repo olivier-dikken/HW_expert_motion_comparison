@@ -394,6 +394,9 @@ namespace HandwritingFeedback.View
             string fileName = "testfile";
             ExpertDistributionModel.SaveToFile(GlobalState.CreateContentsPreviousFolder + "\\" + fileName, edmData);
 
+            ExpertCanvasBG.Reset();
+            ExpertCanvas.Reset();            
+
             EDMData loadedData = ExpertDistributionModel.LoadFromFile(GlobalState.CreateContentsPreviousFolder + "\\" + fileName);
             Debug.WriteLine($"number of loaded datapoints: {loadedData.dataPoints.Length}");
 
@@ -402,7 +405,58 @@ namespace HandwritingFeedback.View
             ShowEDMGraph(loadedData, "X", _plotter);
             ShowEDMGraph(loadedData, "Y", _plotter);
 
-            //return to menu
+            //show tolerance thresholds in plot!
+            ShowXYThresholds(loadedData);
+
+            //show exercise target trace, in black
+            TargetTrace = FileHandler.LoadStrokeCollection(GlobalState.CreateContentsPreviousFolder + "\\TargetTrace.isf");
+            DrawingAttributes da = new DrawingAttributes();
+            da.Color = Colors.Black;
+            for(int i = 0; i < TargetTrace.Count; i++)
+            {
+                ExpertCanvas.Strokes.Add(new Stroke(TargetTrace[i].StylusPoints, da));
+            }            
+
+            //return to menu & show success message
+        }
+
+        /// <summary>
+        /// TODO WIP plot thresholds of X,Y of EDM
+        /// </summary>
+        /// <param name="data"></param>
+        private void ShowXYThresholds(EDMData data)
+        {
+            int steps = 10;
+            int length = data.dataPoints.Length;
+            double[] avg_X = new double[length];
+            double[] avg_Y = new double[length];
+            double[] std_X = new double[length];
+            double[] std_Y = new double[length];
+            StylusPoint[] ellipse_points = new StylusPoint[steps];
+            float t = 0;
+            double new_x;
+            double new_y;
+            DrawingAttributes da = new DrawingAttributes();
+            da.Color = Colors.Green;
+            for (int i = 0; i < length; i++)
+            {
+                avg_X[i] = data.dataPoints[i].X;
+                avg_Y[i] = data.dataPoints[i].Y;
+                std_X[i] = data.dataPoints[i].X_std;
+                std_Y[i] = data.dataPoints[i].Y_std;
+                for(int j = 0; j < steps; j ++)
+                {
+                    t = j * (2 * MathF.PI) / 10;
+                    new_x = data.dataPoints[i].X + data.dataPoints[i].X_std * MathF.Cos(t);
+                    new_y = data.dataPoints[i].Y + data.dataPoints[i].Y_std * MathF.Sin(t);
+
+                    ellipse_points[j] = new StylusPoint(new_x, new_y);
+                }
+                StylusPointCollection spc = new StylusPointCollection(ellipse_points);
+                Stroke newStroke = new Stroke(spc, da);
+                ExpertCanvasBG.Strokes.Add(newStroke);
+            }
+
         }
 
         private void ShowEDMGraph(EDMData data, string feature, Plotter _plotter)
@@ -474,11 +528,11 @@ namespace HandwritingFeedback.View
                 switch (feature)
                 {
                     case "X":
-                        dataPoints_bound_lower.Add(new DataPoint(i, data.dataPoints[i].X - data.dataPoints[i].X_std));
+                        dataPoints_bound_lower.Add(new DataPoint(i, data.dataPoints[i].X - 5*data.dataPoints[i].X_std));
                         break;
 
                     case "Y":
-                        dataPoints_bound_lower.Add(new DataPoint(i, data.dataPoints[i].Y - data.dataPoints[i].Y_std));
+                        dataPoints_bound_lower.Add(new DataPoint(i, data.dataPoints[i].Y - 5*data.dataPoints[i].Y_std));
                         break;
 
                     default:

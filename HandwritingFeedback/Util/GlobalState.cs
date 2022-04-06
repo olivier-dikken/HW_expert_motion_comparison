@@ -9,6 +9,7 @@ namespace HandwritingFeedback.Util
         public static int SelectedExercise = 0;
         public static string SelectedExercisePath = "";
         public static string CreateContentsPreviousFolder = "";
+        public static string TestAlignmentPath = "C:\\Users\\olivi\\HW_expert_motion_comparison\\HandwritingFeedback\\bin\\SavedData\\TestAlignment\\";
         public static Dictionary<int, string> exercises =
             new Dictionary<int, string>()
             {

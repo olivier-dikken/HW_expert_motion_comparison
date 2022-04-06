@@ -11,6 +11,7 @@ namespace HandwritingFeedback
     /// </summary>
     public partial class MainWindow : Window
     {
+        //public static CompareAlignmentAlgorithms Page;
         public static MainPage Page;
 
         public MainWindow()
@@ -30,7 +31,9 @@ namespace HandwritingFeedback
                 FeedbackType.AccuracyColor | FeedbackType.PressureAudio;
 
             // Navigate to main page
+            //Page ??= new CompareAlignmentAlgorithms();
             Page ??= new MainPage();
+
             navFrame.NavigationService.Navigate(Page);
 
             // Disable navigation gestures

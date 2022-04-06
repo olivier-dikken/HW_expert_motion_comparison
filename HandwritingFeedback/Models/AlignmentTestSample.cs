@@ -26,7 +26,9 @@ namespace HandwritingFeedback.Models
         public static AlignmentTestSample LoadFromFile(string fileName)
         {
             //save relative to cwd
-            fileName = "\\HWtests\\" + fileName; 
+            string workingDirectory = Environment.CurrentDirectory;
+            string path = Directory.GetParent(workingDirectory).Parent.FullName + "\\SavedData\\TestAlignment";
+            fileName = path + fileName; 
             AlignmentTestSample ats = null;
             StrokeCollection eStrokes = null;
             StrokeCollection sStrokes = null;

@@ -60,7 +60,22 @@ namespace HandwritingFeedback.Util
 
             return false;
         }
-        
+
+        public static bool SaveCandidateTrace(StrokeCollection strokesToSave, string path)
+        {
+            //save as TargetTrace.isf in the path folder
+            try
+            {
+                FileStream fs = new FileStream(path + "\\CandidateTrace.isf", FileMode.Create);
+                strokesToSave.Save(fs);
+                fs.Close();
+                return true;
+            }
+            catch { }
+
+            return false;
+        }
+
         public static void ButtonSaveAsImageClick(object sender, RoutedEventArgs e, Grid fullPage)
         {
             SaveFileDialog saveFileDialog1 = new SaveFileDialog

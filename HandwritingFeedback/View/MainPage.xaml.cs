@@ -15,7 +15,7 @@ namespace HandwritingFeedback.View
         public MainPage()
         {
             this.InitializeComponent();
-
+            
             LoadExercises();
         }
 

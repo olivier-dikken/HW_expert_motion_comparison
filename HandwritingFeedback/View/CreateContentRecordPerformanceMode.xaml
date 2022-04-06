@@ -34,7 +34,7 @@
 
         <Grid x:Name="drawingCanvas" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="3*" />
                 <ColumnDefinition Width="1*" />
             </Grid.ColumnDefinitions>
             <global:ExpertInkCanvas x:Name="ExpertCanvasBG" Grid.Column="0" Grid.ColumnSpan="2" Background="White" />
