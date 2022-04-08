@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Navigation;
 using HandwritingFeedback.Config;
+using HandwritingFeedback.Models;
 using HandwritingFeedback.RealtimeFeedback.FeedbackTypes;
 using HandwritingFeedback.Util;
 
@@ -23,6 +24,8 @@ namespace HandwritingFeedback.View
         public static StrokeCollection ExpertOutline = new StrokeCollection();
 
         int helperLineType;
+
+        EDMData loadedEDMData;
 
         public static StrokeCollection TargetTrace;
         
@@ -71,7 +74,7 @@ namespace HandwritingFeedback.View
         /// read exercise config and load exercise
         /// </summary>
         private void ReadConfigFile()
-        {
+        {            
             string[] lines = System.IO.File.ReadAllLines(GlobalState.SelectedExercisePath + "\\exerciseConfig.txt");
 
             string description = lines[0];
@@ -79,6 +82,9 @@ namespace HandwritingFeedback.View
 
             TargetTrace = FileHandler.LoadStrokeCollection(GlobalState.SelectedExercisePath + "\\TargetTrace.isf");
             ExpertTraceUtils = new TraceUtils(TargetTrace);
+
+            loadedEDMData = ExpertDistributionModel.LoadFromFile(GlobalState.SelectedExercisePath + "\\EDMData");
+            Debug.WriteLine($"number of loaded datapoints: {loadedEDMData.dataPoints.Length}");
         }
 
         /// <summary>
@@ -125,11 +131,15 @@ namespace HandwritingFeedback.View
             {
                 StudentTraceUtils = StudentTraceUtils,
                 ExpertTraceUtils = ExpertTraceUtils,
-                ExpertOutline = ExpertOutline
+                ExpertOutline = ExpertTraceUtils.Trace//ExpertOutline
             };
-            
+
+            Debug.WriteLine("studentTraceUtils.Trace.Count: " + inputData.StudentTraceUtils.Trace.Count);
+            Debug.WriteLine("expertTraceUtils.Trace.Count: " + inputData.ExpertTraceUtils.Trace.Count);
+            Debug.WriteLine("expertOutline.Count: " + inputData.ExpertOutline.Count);
+
             // Navigate to batched analytics view and transfer traces
-            var destination = new BatchedAnalytics(inputData);
+            var destination = new BatchedAnalytics_EDM(inputData, loadedEDMData);
             NavigationService.Navigate(destination);
         }
 

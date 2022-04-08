@@ -46,7 +46,7 @@ namespace HandwritingFeedback.View
             manager = new BFViewManager(input);
             manager.PopulateDocks();
 
-            AddDots(manager.kpDetection.getKeypointsCanvasLocation());
+            //AddDots(manager.kpDetection.getKeypointsCanvasLocation());
             
                         
         }

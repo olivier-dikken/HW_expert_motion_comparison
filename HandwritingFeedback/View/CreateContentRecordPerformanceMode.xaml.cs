@@ -391,7 +391,7 @@ namespace HandwritingFeedback.View
             //convert arrays per dimension to avg + std per dimension
             Debug.WriteLine(edm.ToString());
             EDMData edmData = edm.GetDistributionModel();
-            string fileName = "testfile";
+            string fileName = "EDMData";
             ExpertDistributionModel.SaveToFile(GlobalState.CreateContentsPreviousFolder + "\\" + fileName, edmData);
 
             ExpertCanvasBG.Reset();
