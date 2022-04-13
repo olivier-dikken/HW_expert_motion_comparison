@@ -89,7 +89,7 @@ namespace HandwritingFeedback.BatchedFeedback.Components.CanvasComponents.Keypoi
 
             var expertDataPoints = new List<DataPoint>();
 
-            //derivte datapoints extra feature
+            //derive datapoints extra feature
             List<(double, double)> xyValues = new List<(double, double)>();
             List<(double, double)> pressureValues = new List<(double, double)>();
             var derivativeDataPoints = new List<DataPoint>();

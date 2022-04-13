@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
@@ -23,7 +25,7 @@ namespace HandwritingFeedback.View
     public partial class CreateContentRecordPerformanceMode : Page
     {
         int iteration = 0;
-        int numberOfSamples = 5;
+        int numberOfSamples = 15;
 
         int type = 0;
         int helperLineType = 0;
@@ -44,14 +46,12 @@ namespace HandwritingFeedback.View
 
         ExpertDistributionModel edm;
 
-        Synthesis Synthesis;
-
         public CreateContentRecordPerformanceMode()
         {
-            InitializeComponent();
-            Load();
-
             expertPerformances = new StrokeCollection[numberOfSamples];
+
+            InitializeComponent();
+            Load();           
         }
 
         private void ReadConfigFile()
@@ -169,6 +169,11 @@ namespace HandwritingFeedback.View
             }            
         }
 
+        private void ButtonFinish(object sender, RoutedEventArgs e)
+        {       
+           FinishExercise();
+        }
+
         private void ShowAlignment()
         {
             //clear canvas
@@ -222,6 +227,19 @@ namespace HandwritingFeedback.View
 
                             case "Y":
                                 toAdd = currentPoint.Y;
+                                break;
+
+                            case "Curvature":
+                                if(alignmentVector[j].Item2 == 0)
+                                {
+                                    toAdd = 0;
+                                } else
+                                {
+                                    StylusPoint previousPoint = GetPointFromTraceAt(toTransform, (alignmentVector[j].Item2 - 1));
+                                    float x_diff = (float)(currentPoint.X - previousPoint.X);
+                                    float y_diff = (float)(currentPoint.Y - previousPoint.Y);
+                                    toAdd = MathF.Atan2(y_diff, x_diff);
+                                }                                                                
                                 break;
 
                             case "speed":                                
@@ -355,6 +373,12 @@ namespace HandwritingFeedback.View
                 SubmitButton.Content = "Submit " + iteration + "/" + numberOfSamples;
             }
 
+            if (iteration > 1)
+            {
+                FinishButton.Content = "Finish Submission with " + (iteration-1).ToString() + " samples.";
+                FinishButton.IsEnabled = true;
+            }
+
             showingAlignment = false;
         }
 
@@ -378,14 +402,19 @@ namespace HandwritingFeedback.View
             edm.AddTransformed(transformed, featureName);
         }
 
-        private void SaveExercise()
+        private void FinishExercise()
         {
-            //store expertPerformance of previous iteration
-            foreach (string featureName in GlobalState.FeatureNames)
+            if (expertPerformance != null)
             {
-                AddToEDM(featureName);
+                //store expertPerformance of previous iteration
+                foreach (string featureName in GlobalState.FeatureNames)
+                {
+                    AddToEDM(featureName);
+                }
+
+                expertPerformances[iteration - 1] = expertPerformance;
             }
-            expertPerformances[iteration - 1] = expertPerformance;
+               
 
             //TargetTrace and config already saved, need to save EDM and add RDY to config file
             //convert arrays per dimension to avg + std per dimension
@@ -393,6 +422,70 @@ namespace HandwritingFeedback.View
             EDMData edmData = edm.GetDistributionModel();
             string fileName = "EDMData";
             ExpertDistributionModel.SaveToFile(GlobalState.CreateContentsPreviousFolder + "\\" + fileName, edmData);
+
+            //save strokecollection to file
+            Directory.CreateDirectory(GlobalState.CreateContentsPreviousFolder + "\\ExpertRecordings\\");
+            for (int i = 0; i < iteration-1; i++)
+            {
+                FileStream fs = new FileStream(GlobalState.CreateContentsPreviousFolder + "\\ExpertRecordings\\recording_" + i, FileMode.Create);
+                expertPerformances[i].Save(fs);
+                fs.Close();
+            }
+
+
+            ExpertCanvasBG.Reset();
+            ExpertCanvas.Reset();
+
+            EDMData loadedData = ExpertDistributionModel.LoadFromFile(GlobalState.CreateContentsPreviousFolder + "\\" + fileName);
+            Debug.WriteLine($"number of loaded datapoints: {loadedData.dataPoints.Length}");
+
+            Plotter _plotter = new Plotter(null, graphDock);
+
+            ShowEDMGraph(loadedData, "X", _plotter);
+            ShowEDMGraph(loadedData, "Y", _plotter);
+
+            //show tolerance thresholds in plot!
+            ShowXYThresholds(loadedData);
+
+            //show exercise target trace, in black
+            TargetTrace = FileHandler.LoadStrokeCollection(GlobalState.CreateContentsPreviousFolder + "\\TargetTrace.isf");
+            DrawingAttributes da = new DrawingAttributes();
+            da.Color = Colors.Black;
+            for (int i = 0; i < TargetTrace.Count; i++)
+            {
+                ExpertCanvas.Strokes.Add(new Stroke(TargetTrace[i].StylusPoints, da));
+            }
+
+            //return to menu & show success message
+        }
+
+        private void SaveExercise()
+        {
+            //store expertPerformance of previous iteration
+            foreach (string featureName in GlobalState.FeatureNames)
+            {
+                AddToEDM(featureName);
+            }
+            if(expertPerformance != null)
+                expertPerformances[iteration - 1] = expertPerformance;
+
+            //TargetTrace and config already saved, need to save EDM and add RDY to config file
+            //convert arrays per dimension to avg + std per dimension
+            Debug.WriteLine(edm.ToString());
+            EDMData edmData = edm.GetDistributionModel();
+            string fileName = "EDMData";
+            ExpertDistributionModel.SaveToFile(GlobalState.CreateContentsPreviousFolder + "\\" + fileName, edmData);
+
+            //save strokecollection to file
+            Directory.CreateDirectory(GlobalState.CreateContentsPreviousFolder + "\\ExpertRecordings\\");
+            for(int i = 0; i < expertPerformances.Length; i++)
+            {
+                Stream SaveFileStream = File.Create(GlobalState.CreateContentsPreviousFolder + "\\ExpertRecordings\\recording_" + i);
+                BinaryFormatter serializer = new BinaryFormatter();
+                serializer.Serialize(SaveFileStream, expertPerformances[i]);
+                SaveFileStream.Close();
+            }
+            
 
             ExpertCanvasBG.Reset();
             ExpertCanvas.Reset();            

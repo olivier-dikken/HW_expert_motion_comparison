@@ -42,6 +42,7 @@
             <Button Content="Clear" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Top" Click="ClearCanvas" Height="75" Width="200" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="25" />
 
             <Button Content="Submit" x:Name="SubmitButton" IsEnabled="False" Click="ButtonSubmit" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Height="75" Width="200" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="0,0,-1,0" />
+            <Button Content="Finish" x:Name="FinishButton" IsEnabled="False" Click="ButtonFinish" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Top" Height="75" Width="200" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="0,75,0,0" />
             <Grid x:Name="lineControls" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Stretch">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="1*" />

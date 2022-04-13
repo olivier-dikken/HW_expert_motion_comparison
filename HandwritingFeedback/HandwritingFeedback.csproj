@@ -10,7 +10,6 @@
     <Folder Include="InkCanvases\" />
     <Folder Include="StylusPlugins\" />
 	<Folder Include="RealtimeFeedback\" />
-    <Folder Include="BatchedFeedback\" />
   </ItemGroup>
 
 	<ItemGroup>

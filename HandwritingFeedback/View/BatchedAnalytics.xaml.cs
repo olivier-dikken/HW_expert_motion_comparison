@@ -95,11 +95,11 @@ namespace HandwritingFeedback.View
         /// <summary>
         /// reload the keypoint calculations
         /// </summary>
-        private void ReloadCalculations(object sender, RoutedEventArgs e)
-        {
-            List<(string, int)> parameterValues = manager.getParameterDockValues();
-            manager.UpdateKeypointParameters(parameterValues);
-        }
+        //private void ReloadCalculations(object sender, RoutedEventArgs e)
+        //{
+        //    List<(string, int)> parameterValues = manager.getParameterDockValues();
+        //    manager.UpdateKeypointParameters(parameterValues);
+        //}
 
         /// <summary>
         /// Restarts exercise by loading the previous expert model in practice mode,

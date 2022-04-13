@@ -35,7 +35,7 @@ namespace HandwritingFeedback.BatchedFeedback
         {
             // Instantiate engine and load all batched feedback components
             this.Components = new List<BFComponent>();
-            kpDetection = new KeypointDetection(input.StudentTraceUtils, input.ExpertTraceUtils);
+            //kpDetection = new KeypointDetection(input.StudentTraceUtils, input.ExpertTraceUtils);
             this.LoadCanvasComponents(input.StudentTraceUtils, input.ExpertTraceUtils);
 
             // Instantiate plotter
@@ -55,14 +55,14 @@ namespace HandwritingFeedback.BatchedFeedback
             _calculationHelper = new CalculationHelper();
             this.Components.Add(new AccuracyOverProgress(studentTraceUtils, expertTraceUtils, _calculationHelper));
             //this.Components.Add(new PressureOverProgress(studentTraceUtils, expertTraceUtils));
-            this.Components.Add(kpDetection);
-            this.Components.Add(new TiltRange(studentTraceUtils, expertTraceUtils));
-            this.Components.Add(new CompletionTime(studentTraceUtils, expertTraceUtils));
+            //this.Components.Add(kpDetection);
+            //this.Components.Add(new TiltRange(studentTraceUtils, expertTraceUtils));
+            //this.Components.Add(new CompletionTime(studentTraceUtils, expertTraceUtils));
             this.Components.Add(new SpeedOverProgress(studentTraceUtils, expertTraceUtils));
-            this.Components.Add(new AccuracyDistance(studentTraceUtils, expertTraceUtils));
+            //this.Components.Add(new AccuracyDistance(studentTraceUtils, expertTraceUtils));
             // The overall accuracy component should be synthesized last,
             // such that it can use the computed final accuracy from AccuracyOverProgress.
-            this.Components.Add(new OverallAccuracy(studentTraceUtils, expertTraceUtils, _calculationHelper));
+            //this.Components.Add(new OverallAccuracy(studentTraceUtils, expertTraceUtils, _calculationHelper));
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace HandwritingFeedback.BatchedFeedback
             });
             
             // Synthesize OverallAccuracy last so it uses the computed accuracy from AccuracyOverProgress.
-            syntheses.Add(Components.Last().Synthesize());
+            //syntheses.Add(Components.Last().Synthesize());
             
             // Render every synthesis on the batched analytics view depending on their types
             foreach (Synthesis s in syntheses)
@@ -101,18 +101,18 @@ namespace HandwritingFeedback.BatchedFeedback
             //populate parameters dock
             
 
-            List<(string, int)> guiparams = kpDetection.GetGUIParameters();
+            //List<(string, int)> guiparams = kpDetection.GetGUIParameters();
 
-            foreach((string, int) guiparam in guiparams)
-            {
-                TextBox tb = new TextBox();
-                Label label = new Label();
-                label.Content = guiparam.Item1;
-                tb.Width = 120;
-                tb.Text = guiparam.Item2.ToString();
-                _parametersDock.Children.Add(label);
-                _parametersDock.Children.Add(tb);
-            }
+            //foreach((string, int) guiparam in guiparams)
+            //{
+            //    TextBox tb = new TextBox();
+            //    Label label = new Label();
+            //    label.Content = guiparam.Item1;
+            //    tb.Width = 120;
+            //    tb.Text = guiparam.Item2.ToString();
+            //    _parametersDock.Children.Add(label);
+            //    _parametersDock.Children.Add(tb);
+            //}
 
             
            
@@ -122,32 +122,32 @@ namespace HandwritingFeedback.BatchedFeedback
         /// get string,value pairs from parameter dock
         /// </summary>
         /// <returns></returns>
-        public List<(string, int)> getParameterDockValues()
-        {
-            List<(string, int)> result = new List<(string, int)>();
-            string lab = "";
-            int val;
-            for(int i = 0; i < _parametersDock.Children.Count; i++)
-            {
-                if(i%2 == 0) //even
-                {
-                    Label labelElement = (Label)_parametersDock.Children[i];
-                    lab = (string)labelElement.Content;                    
-                } else //odd
-                {
-                    TextBox tbElement = (TextBox)_parametersDock.Children[i];
-                    val = Int32.Parse(tbElement.Text);
-                    result.Add((lab, val));
-                }
-            }
-            return result;
-        }
+        //public List<(string, int)> getParameterDockValues()
+        //{
+        //    List<(string, int)> result = new List<(string, int)>();
+        //    string lab = "";
+        //    int val;
+        //    for(int i = 0; i < _parametersDock.Children.Count; i++)
+        //    {
+        //        if(i%2 == 0) //even
+        //        {
+        //            Label labelElement = (Label)_parametersDock.Children[i];
+        //            lab = (string)labelElement.Content;                    
+        //        } else //odd
+        //        {
+        //            TextBox tbElement = (TextBox)_parametersDock.Children[i];
+        //            val = Int32.Parse(tbElement.Text);
+        //            result.Add((lab, val));
+        //        }
+        //    }
+        //    return result;
+        //}
 
-        public void UpdateKeypointParameters(List<(string, int)> newValues)
-        {
-            kpDetection.UpdateParameters(newValues);
-            _plotter.RenderLineGraph((LineGraph)kpDetection.SynthesizeNew("newplot"));
-        }
+        //public void UpdateKeypointParameters(List<(string, int)> newValues)
+        //{
+        //    kpDetection.UpdateParameters(newValues);
+        //    _plotter.RenderLineGraph((LineGraph)kpDetection.SynthesizeNew("newplot"));
+        //}
 
     }
 }

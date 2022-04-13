@@ -12,6 +12,28 @@ using HandwritingFeedback.Util;
 
 namespace HandwritingFeedback.View
 {
+    public struct EDMComparisonResult
+    {
+        public EDMComparisonResult(List<float> val_student, List<float> val_scores, List<float> val_avg, List<float> val_std, string theTitle, string theYlabel)
+        {
+            Value_student = val_student;
+            Value_scores = val_scores;
+            Value_avg = val_avg;
+            Value_std = val_std;
+            title= theTitle;
+            ylabel = theYlabel;
+        }
+
+        public List<float> Value_student { get; set; }
+        public List<float> Value_scores{ get; set; }
+        public List<float> Value_avg { get; set; }
+        public List<float> Value_std { get; set; }
+
+        public string title { get; }
+        public string ylabel { get; }
+
+    }
+
     /// <summary>
     /// Interaction logic for BatchedAnalytics.xaml
     /// </summary>
@@ -20,7 +42,7 @@ namespace HandwritingFeedback.View
         private readonly TraceUtils _expertTraceUtils;
         private readonly TraceUtils _studentTraceUtils;
         private readonly StrokeCollection _expertOutline;
-        BFViewManager manager;
+        BFViewManager_EDM manager;
 
         /// <summary>
         /// Constructor for batched analytics view.
@@ -40,41 +62,54 @@ namespace HandwritingFeedback.View
             inkCanvas.Strokes.Add(_studentTraceUtils.Trace);
 
             //1- align student points with target trace (to know which EDM points to use)
-            List<(int, int)> alignmentVector = getBestPath(_expertTraceUtils.Trace, _studentTraceUtils.Trace);
+            List<(int, int)> alignmentVector = getBestPath(_studentTraceUtils.Trace, _expertTraceUtils.Trace);
             //1.2 - show alignment (visually)
             StrokeCollection offsetTargetTrace = OffsetStrokeCollection(_expertTraceUtils.Trace, 200);
-            DrawAlignmentLines(offsetTargetTrace, _studentTraceUtils.Trace, alignmentVector);
+            DrawAlignmentLines(_studentTraceUtils.Trace, offsetTargetTrace, alignmentVector);
             inkCanvas.Strokes.Add(offsetTargetTrace);
 
             //1.3 compute error per datapoint per feature
-            ComputeErrorBasedOnEDM(_studentTraceUtils.Trace, alignmentVector, edmData);
+            List<EDMComparisonResult> comparisonResults = ComputeErrorBasedOnEDM(_studentTraceUtils.Trace, alignmentVector, edmData);
 
-            //2- populate graphs with single feature EDM_avg + bounds and student trace
-
-
-
-            //3- evaluate features X,Y (visual color code)
-
-
-
+            
             // Populate unit and graphing docks
-            //input.UnitValueDock = unitValueDock;
-            //input.GraphDock = graphDock;
+            input.UnitValueDock = unitValueDock;
+            input.GraphDock = graphDock;
             //input.ParametersDock = parametersDock;
 
-            //manager = new BFViewManager(input);
-            //manager.PopulateDocks();                                    
+            manager = new BFViewManager_EDM(input, comparisonResults);
+            manager.PopulateDocks();
+
+            //TODO - evaluate features (visual color code, not in graphs)
         }
 
-        private void ComputeErrorBasedOnEDM(StrokeCollection trace, List<(int, int)> aV, EDMData edmData)
+        private List<EDMComparisonResult> ComputeErrorBasedOnEDM(StrokeCollection trace, List<(int, int)> aV, EDMData edmData)
         {
+            List<EDMComparisonResult> result = new List<EDMComparisonResult> ();
+            List<float> x_student = new List<float>();
+            List<float> x_scores = new List<float>();
+            List<float> x_avg = new List<float>();
+            List<float> x_std = new List<float>();
+
+            List<float> y_student = new List<float>();
+            List<float> y_scores = new List<float>();
+            List<float> y_avg = new List<float>();
+            List<float> y_std = new List<float>();
+
+            int totalPoints = 0;
+            for(int i = 0; i < trace.Count; i++)
+            {
+               totalPoints += trace[i].StylusPoints.Count;
+            }
+
             //use alignmentVector to find corresponding edmDataPoints
             List<EDMDataPoint> relevantEDMPoints = new List<EDMDataPoint>();
             int previousStudentMatchIndex = -1;
-            EDMDataPoint[] correspondingDataPoints = new EDMDataPoint[trace.Count];
+            EDMDataPoint[] correspondingDataPoints = new EDMDataPoint[totalPoints];
             for(int i = 0; i < aV.Count; i++)
             {
-                if(aV[i].Item1 == previousStudentMatchIndex) // student point aligned to several expert points
+                if(aV[i].Item1 == previousStudentMatchIndex || previousStudentMatchIndex == -1) // student point aligned to several expert points
+                    
                 {                    
                 } else //student index increased by 1
                 {
@@ -85,32 +120,55 @@ namespace HandwritingFeedback.View
                     {
                         correspondingDataPoints[previousStudentMatchIndex] = edmDataPointAvg(relevantEDMPoints, previousStudentMatchIndex);
                     }
-                    relevantEDMPoints.Clear();                    
+                    relevantEDMPoints.Clear();
+
+                    //compare edmDataPoint values with corresponding student datapoint
+                    StylusPoint studentPoint = GetPointFromTraceAt(trace, previousStudentMatchIndex);
+                    float score_x = GetEDMScore(studentPoint, correspondingDataPoints[previousStudentMatchIndex], "X", 1);
+                    float score_y = GetEDMScore(studentPoint, correspondingDataPoints[previousStudentMatchIndex], "Y", 1);
+
+                    x_student.Add((float)studentPoint.X);
+                    x_scores.Add(score_x);
+                    x_avg.Add((float)correspondingDataPoints[previousStudentMatchIndex].X);
+                    x_std.Add((float)correspondingDataPoints[previousStudentMatchIndex].X_std);
+
+                    y_student.Add((float)studentPoint.Y);
+                    y_scores.Add(score_y);
+                    y_avg.Add((float)correspondingDataPoints[previousStudentMatchIndex].Y);
+                    y_std.Add((float)correspondingDataPoints[previousStudentMatchIndex].Y_std);
+
+                    //print in console
+                    Debug.WriteLine("Student point " + previousStudentMatchIndex + " comparison with EDM point. X diff: " + score_x + " Y diff: " + score_y);
                 }
-                relevantEDMPoints.Add(edmData.dataPoints[aV[i].Item2]);
-
-
-                //student[aV[i].Item1] matched to target[aV[i].Item2]
-
-                //get relevant EDM values:
-                // - if studentDP has 1 match then use data directly
-                // - if studentDP has >1 match, then take avg of match values and use
-
-
-
-                //compare edmDataPoint values with corresponding student datapoint
-
-
-                //print in console
-
+                relevantEDMPoints.Add(edmData.dataPoints[aV[i].Item2]);                
 
                 previousStudentMatchIndex = aV[i].Item1;
             }
+            EDMComparisonResult x_comparison = new EDMComparisonResult(x_student, x_scores, x_avg, x_std, "X of student vs EDM", "X position");
+            result.Add(x_comparison);
+            EDMComparisonResult y_comparison = new EDMComparisonResult(y_student, y_scores, y_avg, y_std, "Y of student vs EDM", "Y position");
+            result.Add(y_comparison);
+            return result;
+        }
 
+        private float GetEDMScore(StylusPoint studentPoint, EDMDataPoint edmPoint, String feature, float scale)
+        {
+            switch (feature)
+            {
+                case "X":
+                    return (float)((studentPoint.X - edmPoint.X) / (edmPoint.X_std * scale));
+                    break;
 
+                case "Y":
+                    return (float)((studentPoint.Y - edmPoint.Y) / (edmPoint.Y_std * scale));
+                    break;
 
+                default:
+                    Debug.WriteLine("Feature not found: " + feature);
+                    break;
+            }
 
-            throw new NotImplementedException();
+            return 0;
         }
 
         private EDMDataPoint edmDataPointAvg(List<EDMDataPoint> relevantEDMPoints, int idx)
