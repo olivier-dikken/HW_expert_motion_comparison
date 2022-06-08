@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Ink;
+using System.Windows.Input;
 using HandwritingFeedback.Config;
 using HandwritingFeedback.Util;
 
@@ -93,6 +95,7 @@ namespace HandwritingFeedback.View
                 GlobalState.CreateContentsPreviousFolder = path;
                 Directory.CreateDirectory(path);
                 //save trace to folder as TargetTrace.isf
+                //FileHandler.SaveTargetTrace(RemoveOffsetFromStrokeCollection(ExpertCanvas.Strokes), path);
                 FileHandler.SaveTargetTrace(ExpertCanvas.Strokes, path);
                 //navigate to the exercise config screen
                 this.NavigationService.Navigate(new Uri("\\View\\CreateContentConfigMode.xaml", UriKind.Relative));                
@@ -101,6 +104,52 @@ namespace HandwritingFeedback.View
             {
                 Debug.WriteLine("Error, folder name already exists");
             }                        
+        }
+
+        public StrokeCollection RemoveOffsetFromStrokeCollection(StrokeCollection withOffset)
+        {
+            StrokeCollection offsetCollection = new StrokeCollection();
+
+            double minX = 1000;
+            double minY = 1000;
+
+            for (int i = 0; i < withOffset.Count; i++)
+            {
+                StylusPointDescription spd = withOffset[i].StylusPoints.Description;
+                StylusPointCollection offsetPoints = new StylusPointCollection(spd);
+                for (int j = 0; j < withOffset[i].StylusPoints.Count; j++)
+                {
+                    if(minX > withOffset[i].StylusPoints[j].X)
+                    {
+                        minX = withOffset[i].StylusPoints[j].X;
+                    }
+
+                    if(minY > withOffset[i].StylusPoints[j].Y)
+                    {
+                        minY = withOffset[i].StylusPoints[j].Y;
+                    }
+                }
+            }
+
+            //remove minX and minY from all points
+            for (int i = 0; i < withOffset.Count; i++)
+            {
+                StylusPointDescription spd = withOffset[i].StylusPoints.Description;
+                StylusPointCollection offsetPoints = new StylusPointCollection(spd);
+                for (int j = 0; j < withOffset[i].StylusPoints.Count; j++)
+                {
+                    StylusPoint newPoint = withOffset[i].StylusPoints[j];
+
+                    newPoint.Y -= minY;
+                    newPoint.X -= minX;
+
+                    offsetPoints.Add(newPoint);
+                }
+                Stroke newStroke = new Stroke(offsetPoints);
+                offsetCollection.Add(newStroke);
+            }
+
+            return offsetCollection;
         }
 
         /// <summary>

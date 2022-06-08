@@ -25,7 +25,7 @@ namespace HandwritingFeedback.View
     public partial class CreateContentRecordPerformanceMode : Page
     {
         int iteration = 0;
-        int numberOfSamples = 15;
+        int numberOfSamples = 25;
 
         int type = 0;
         int helperLineType = 0;
@@ -218,6 +218,7 @@ namespace HandwritingFeedback.View
                     if(alignmentVector[j].Item1 == i)
                     {
                         StylusPoint currentPoint = GetPointFromTraceAt(toTransform, alignmentVector[j].Item2);
+                        StylusPoint previousPoint;
                         double toAdd = 0;
                         switch (featureName)
                         {
@@ -235,14 +236,21 @@ namespace HandwritingFeedback.View
                                     toAdd = 0;
                                 } else
                                 {
-                                    StylusPoint previousPoint = GetPointFromTraceAt(toTransform, (alignmentVector[j].Item2 - 1));
+                                    previousPoint = GetPointFromTraceAt(toTransform, (alignmentVector[j].Item2 - 1));
                                     float x_diff = (float)(currentPoint.X - previousPoint.X);
                                     float y_diff = (float)(currentPoint.Y - previousPoint.Y);
                                     toAdd = MathF.Atan2(y_diff, x_diff);
                                 }                                                                
                                 break;
 
-                            case "speed":                                
+                            case "Pressure":                                
+                                toAdd = currentPoint.PressureFactor;
+                                break;
+
+                            case "Speed":
+                                previousPoint = GetPointFromTraceAt(toTransform, (alignmentVector[j].Item2 - 1));
+                                float diagonalLength = MathF.Sqrt(MathF.Pow((float)(currentPoint.X - previousPoint.X), 2) + MathF.Pow((float)(currentPoint.Y - previousPoint.Y), 2));
+                                toAdd = diagonalLength; //TODO divide by time passed!                                
                                 break;
 
                             default:

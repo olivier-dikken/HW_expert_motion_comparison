@@ -27,22 +27,22 @@ namespace HandwritingFeedback.BatchedFeedback
         private readonly Plotter _plotter;
         private CalculationHelper _calculationHelper;
         public KeypointDetection kpDetection;
-        private StackPanel _parametersDock;
+        private StackPanel _parametersDock;        
 
         /// <summary>
         /// Constructor for BFManager instantiate new engine and load components.
         /// </summary>
         /// <param name="input">Input data transferred from sensors</param>
-        public BFViewManager_EDM(BFInputData input, List<EDMComparisonResult> comparisonResults)
+        public BFViewManager_EDM(BFInputData input, List<EDMComparisonResult> comparisonResults, Canvas overlayCanvas, BatchedAnalytics_EDM BA_EDM)
         {
             // Instantiate engine and load all batched feedback components
             this.Components = new List<BFComponent>();            
-            this.LoadCanvasComponents(input.StudentTraceUtils, input.ExpertTraceUtils, comparisonResults);
+            this.LoadCanvasComponents(input.StudentTraceUtils, input.ExpertTraceUtils, comparisonResults, overlayCanvas, BA_EDM);
 
             // Instantiate plotter
             _plotter = new Plotter(input.UnitValueDock, input.GraphDock);
 
-            _parametersDock = input.ParametersDock;
+            _parametersDock = input.ParametersDock;            
         }
 
         /// <summary>
@@ -50,14 +50,14 @@ namespace HandwritingFeedback.BatchedFeedback
         /// </summary>
         /// <param name="studentTraceUtils">TraceUtils of trace of student's attempt at an exercise</param>
         /// <param name="expertTraceUtils">TraceUtils of trace upon which the student practiced</param>
-        public void LoadCanvasComponents(TraceUtils studentTraceUtils, TraceUtils expertTraceUtils, List<EDMComparisonResult> comparisonResults)
+        public void LoadCanvasComponents(TraceUtils studentTraceUtils, TraceUtils expertTraceUtils, List<EDMComparisonResult> comparisonResults, Canvas overlayCanvas, BatchedAnalytics_EDM BA_EDM)
         {
             // Add any additional canvas components below
             _calculationHelper = new CalculationHelper();
 
             foreach(EDMComparisonResult comparisonResult in comparisonResults)
             {
-                this.Components.Add(new FeatureOverProgress_EDM(studentTraceUtils, expertTraceUtils, comparisonResult, comparisonResult.title, comparisonResult.ylabel));
+                this.Components.Add(new FeatureOverProgress_EDM(studentTraceUtils, expertTraceUtils, comparisonResult, comparisonResult.title, comparisonResult.ylabel, overlayCanvas, BA_EDM));
             }
             
         }

@@ -5,39 +5,38 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:HandwritingFeedback.View" 
       xmlns:global="clr-namespace:HandwritingFeedback.InkCanvases"
-      mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      mc:Ignorable="d"
+      d:DesignHeight="600" d:DesignWidth="800"
       Title="PracticeMode">
 
-    <Grid Background="White">
+    <Grid Background="Beige">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="1*" />
-            <RowDefinition Height="2*" />
+            <RowDefinition Height="143*" />
+            <RowDefinition Height="463*" />
         </Grid.RowDefinitions>
 
         <Grid Background="Black" Grid.Row="1" VerticalAlignment="Top" Panel.ZIndex="1" Height="1" />
 
-        <ScrollViewer Grid.Row="0" Height = "Auto" Width = "Auto" HorizontalScrollBarVisibility = "Auto" VerticalScrollBarVisibility = "Auto">
-            <Grid>
-                <TextBlock x:Name="TitleTextBlock" Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,60,0,0" TextAlignment="Center" Foreground="Black" FontFamily="Consolas" FontSize="70">Imitate Mode</TextBlock>
-                <TextBlock Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,140,0,0" TextAlignment="Center" Foreground="Black" FontFamily="Consolas" FontSize="50">Load an exercise to begin.<LineBreak /> Click 'Submit' when you are done.</TextBlock>
-                <Button Content="Back to Menu" VerticalAlignment="Top" HorizontalAlignment="Left" Height="75" Width="200" Click="Navigate" Tag="\View\MainPage.xaml" Background="Black" Foreground="White" FontFamily="Consolas" FontSize="25" />
-            </Grid>
-        </ScrollViewer>
-
-        <Grid x:Name="DrawingCanvas" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid>
+            <TextBlock x:Name="TitleTextBlock" Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,65,0,0" TextAlignment="Center" Foreground="Black" FontFamily="Consolas" FontSize="60" Width="566">Practice Exercise</TextBlock>
+            <TextBlock Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,140,0,0" TextAlignment="Center" Foreground="Black" FontFamily="Consolas" FontSize="50">Load an exercise to begin.<LineBreak /> Click 'Submit' when you are done.</TextBlock>
+            <Button Content="Back to Menu" VerticalAlignment="Top" HorizontalAlignment="Left" Height="49" Width="200" Click="Navigate" Tag="\View\MainPage.xaml" Background="Black" Foreground="White" FontFamily="Consolas" FontSize="25" />
+        </Grid>
+        <Grid x:Name="DrawingCanvas" Grid.Row="1" Grid.Column="0" Margin="0,72,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="1*" />
             </Grid.ColumnDefinitions>
-            <global:ExpertInkCanvas x:Name="ExpertCanvas" IsEnabled="False" Grid.Column="0" Grid.ColumnSpan="2" Background="White" />
-            <global:StudentInkCanvas x:Name="StudentCanvas" IsEnabled="False" StrokeCollected="EnableSubmission" Grid.Column="0" Grid.ColumnSpan="2" Background="Transparent" />
-            <Button Content="Load" Click="ButtonLoad_ClickAsync" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="75" Width="200" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="0,0,-1,0" />
-            <Button Content="Submit" x:Name="SubmitButton" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Click="SubmitTrace" Tag="\View\BatchedAnalytics.xaml" IsEnabled="False" Height="75" Width="200" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="-1,0,0,0" />
-            <Button Content="TestAlignment" x:Name="TestAlignment" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Click="CompareAlignment" Tag="\View\BatchedAnalytics.xaml" IsEnabled="True" Height="75" Width="200" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="0,0,190,0" />
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            <global:ExpertInkCanvas x:Name="ExpertCanvas" IsEnabled="False"  Background="White" Grid.Column="0" Grid.Row="0"/>
+            <global:StudentInkCanvas x:Name="StudentCanvas" IsEnabled="False" StrokeCollected="EnableSubmission"  Background="Transparent" Grid.Column="0" Grid.Row="0"/>
         </Grid>
+        <Button Content="Change&#xD;&#xA;Exercise" Click="ButtonLoad_ClickAsync" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="62" Width="208" Background="RosyBrown" Foreground="Black" FontFamily="Consolas" FontSize="25" Grid.Row="1" BorderThickness="0" Margin="5,5,0,0"/>
+        <Button Content="Submit" x:Name="SubmitButton" HorizontalAlignment="Right" VerticalAlignment="Top" Click="SubmitTrace" Tag="\View\BatchedAnalytics.xaml" IsEnabled="True" Height="62" Width="195" Background="LightGreen" Foreground="Black" FontFamily="Consolas" FontSize="25" Grid.Row="1" BorderThickness="0" Margin="0,5,5,0"/>
+        <Button Content="Retry" Click="ButtonLoad_ClickAsync" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="62" Width="195" Background="Coral" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="218,5,0,0" Grid.Row="1" BorderThickness="0"/>
     </Grid>
 </Page>

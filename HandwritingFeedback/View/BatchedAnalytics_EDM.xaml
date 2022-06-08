@@ -37,8 +37,8 @@
 
             <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="4*"/>
-                    <RowDefinition Height="3*"/>
+                    <RowDefinition Height="10*"/>
+                    <RowDefinition Height="0*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
@@ -47,11 +47,23 @@
                 <!-- Ink canvas to display visual real-time feedback -->
                 <Border Grid.Column="0" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="4" Background="Black">
                     <ScrollViewer x:Name="canvasDock" Height="Auto" Width="Auto" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                        <InkCanvas x:Name="inkCanvas" Background="White" IsEnabled="False">
-                            <!--<InkCanvas.LayoutTransform>
-                                <ScaleTransform ScaleX="0.55" ScaleY="0.55" />
-                            </InkCanvas.LayoutTransform>-->
-                        </InkCanvas>
+                    
+                        <Grid x:Name="ResultsCanvas" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="1*" />
+                            </Grid.ColumnDefinitions>
+                            <InkCanvas x:Name="inkCanvas" Background="White" IsEnabled="False"  Grid.Column="0" Grid.ColumnSpan="2">
+                            <InkCanvas.LayoutTransform>
+                                    <ScaleTransform ScaleX="2" ScaleY="2" />
+                                </InkCanvas.LayoutTransform>
+                            </InkCanvas>
+                            <Canvas x:Name="overlayCanvas" Background="Transparent" Grid.Column="0" Grid.ColumnSpan="2">
+                                <Canvas.LayoutTransform>
+                                    <ScaleTransform ScaleX="2" ScaleY="2" />
+                                </Canvas.LayoutTransform>
+                            </Canvas>
+                        </Grid>
                     </ScrollViewer>
                 </Border>
 

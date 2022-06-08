@@ -9,13 +9,13 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="CreateContentRecordPerformanceMode">
 
-    <Grid Background="White">
+    <Grid Background="Beige">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="1*" />
-            <RowDefinition Height="2*" />
+            <RowDefinition Height="17*" />
+            <RowDefinition Height="28*" />
         </Grid.RowDefinitions>
 
         <ScrollViewer Height = "Auto" Width = "Auto" HorizontalScrollBarVisibility = "Auto" VerticalScrollBarVisibility = "Auto">
@@ -34,16 +34,18 @@
 
         <Grid x:Name="drawingCanvas" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*" />
+                <!--<ColumnDefinition Width="3*" />-->
                 <ColumnDefinition Width="1*" />
             </Grid.ColumnDefinitions>
-            <global:ExpertInkCanvas x:Name="ExpertCanvasBG" Grid.Column="0" Grid.ColumnSpan="2" Background="White" />
-            <global:ExpertInkCanvas x:Name="ExpertCanvas" StrokeCollected="EnableSubmit" Grid.Column="0" Grid.ColumnSpan="2" Background="Transparent"/>
-            <Button Content="Clear" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Top" Click="ClearCanvas" Height="75" Width="200" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="25" />
+            <!--<global:ExpertInkCanvas x:Name="ExpertCanvasBG" Grid.Column="0" Grid.ColumnSpan="2" Background="White" />
+            <global:ExpertInkCanvas x:Name="ExpertCanvas" StrokeCollected="EnableSubmit" Grid.Column="0" Grid.ColumnSpan="2" Background="Transparent"/>-->
+            <global:ExpertInkCanvas x:Name="ExpertCanvasBG" Grid.Column="0" Background="White" Margin="177,0,173,0" />
+            <global:ExpertInkCanvas x:Name="ExpertCanvas" StrokeCollected="EnableSubmit" Grid.Column="0" Background="Transparent" Margin="177,0,173,0"/>
+            <Button Content="Clear" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Top" Click="ClearCanvas" Height="56" Width="172" Background="Coral" Foreground="Black" FontFamily="Consolas" FontSize="25" />
 
-            <Button Content="Submit" x:Name="SubmitButton" IsEnabled="False" Click="ButtonSubmit" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Height="75" Width="200" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="0,0,-1,0" />
-            <Button Content="Finish" x:Name="FinishButton" IsEnabled="False" Click="ButtonFinish" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Top" Height="75" Width="200" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="0,75,0,0" />
-            <Grid x:Name="lineControls" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Stretch">
+            <Button Content="Submit" x:Name="SubmitButton" IsEnabled="False" Click="ButtonSubmit" HorizontalAlignment="Right" VerticalAlignment="Top" Height="38" Width="146" Background="GreenYellow" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="0,0,-1,0" />
+            <Button Content="Finish" x:Name="FinishButton" IsEnabled="False" Click="ButtonFinish" HorizontalAlignment="Right" VerticalAlignment="Top" Height="37" Width="145" Background="LightGreen" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="0,38,0,0" />
+            <!--<Grid x:Name="lineControls" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Stretch">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="1*" />
                     <RowDefinition Height="1*" />
@@ -54,9 +56,9 @@
                     <ColumnDefinition Width="1*" />
                     <ColumnDefinition Width="1*" />
                 </Grid.ColumnDefinitions>
-            </Grid>
+            </Grid>-->
             <!-- Scroll viewer for all graphs -->
-            <ScrollViewer Height="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible" Margin="5,133,0,0" Grid.Column="1">
+            <ScrollViewer Height="Auto" Width="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible" Margin="0,80,0,0" HorizontalAlignment="Right">
                 <StackPanel  x:Name="graphDock">
                 </StackPanel>
             </ScrollViewer>

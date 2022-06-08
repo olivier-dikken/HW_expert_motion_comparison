@@ -151,8 +151,12 @@ namespace HandwritingFeedback.Models
         public double X_std;
         public double Y;
         public double Y_std;
-        public double pressure;
-        public double speed;
+        public double Pressure;
+        public double Pressure_std;
+        public double Speed;
+        public double Speed_std;
+        public double Curvature;
+        public double Curvature_std;
 
         public EDMDataPoint(int i)
         {
@@ -179,20 +183,28 @@ namespace HandwritingFeedback.Models
                     this.Y_std = val;
                     break;
 
-                case "pressure":
-                    Debug.WriteLine($"feature not yet implemented in EDM.SetValue() : {name}");
+                case "Curvature":
+                    this.Curvature = val;
                     break;
 
-                case "pressure_std":
-                    Debug.WriteLine($"feature not yet implemented in EDM.SetValue() : {name}");
+                case "Curvature_std":
+                    this.Curvature_std = val;
                     break;
 
-                case "speed":
-                    Debug.WriteLine($"feature not yet implemented in EDM.SetValue() : {name}");
+                case "Pressure":
+                    this.Pressure = val;                    
                     break;
 
-                case "speed_std":
-                    Debug.WriteLine($"feature not yet implemented in EDM.SetValue() : {name}");
+                case "Pressure_std":
+                    this.Pressure_std = val;
+                    break;
+
+                case "Speed":
+                    this.Speed = val;
+                    break;
+
+                case "Speed_std":
+                    this.Speed_std = val;
                     break;
 
                 default:

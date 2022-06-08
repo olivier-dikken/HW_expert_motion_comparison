@@ -78,7 +78,7 @@ namespace HandwritingFeedback.BatchedFeedback
             var plot = new PlotModel
             {
                 Title = synthesis.Title,
-                LegendPosition = LegendPosition.TopLeft
+                LegendPosition = LegendPosition.TopLeft                
             };
 
             // Attach axes to plot model
@@ -88,7 +88,7 @@ namespace HandwritingFeedback.BatchedFeedback
             HighlightErrors(plot, synthesis.ErrorZonesXValues, ApplicationConfig.Instance.MinErrorHighlightingFraction);
 
             //MarkKeypoints(plot, synthesis.Keypoints, 3, "Keypoints Algorithm 1: Neighbor difference > Threshold");
-            MarkKeypoints(plot, synthesis.DebugKeypoints, 6, "Keypoints Algorithm: exponentially weighted MVA");
+            //MarkKeypoints(plot, synthesis.DebugKeypoints, 6, "Keypoints Algorithm: exponentially weighted MVA");
 
             // Iterate through all lists of data points synthesized by component
             foreach (LineSeries candidate in synthesis.AllSeries)
@@ -107,7 +107,7 @@ namespace HandwritingFeedback.BatchedFeedback
             var plotView = new OxyPlot.Wpf.PlotView
             {
                 Model = plot,
-                Height = 450
+                Height = 450                
             };
             
             GraphDock.Children.Add(plotView);

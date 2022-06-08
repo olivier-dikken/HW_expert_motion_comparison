@@ -9,13 +9,13 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="CreateContentMode">
 
-    <Grid Background="White">
+    <Grid Background="Beige">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="1*" />
-            <RowDefinition Height="2*" />
+            <RowDefinition Height="17*" />
+            <RowDefinition Height="28*" />
         </Grid.RowDefinitions>
 
         <ScrollViewer Height = "Auto" Width = "Auto" HorizontalScrollBarVisibility = "Auto" VerticalScrollBarVisibility = "Auto">
@@ -32,19 +32,19 @@
 
         <Grid Background="Black" Grid.Row="1" VerticalAlignment="Top" Panel.ZIndex="1" Height="1" />
 
-        <Grid x:Name="drawingCanvas" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid x:Name="drawingCanvas" Grid.Row="1" Grid.Column="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="1*" />
+                <!--<ColumnDefinition Width="1*" />-->
             </Grid.ColumnDefinitions>
-            <global:ExpertInkCanvas x:Name="ExpertCanvasBG" Grid.Column="0" Grid.ColumnSpan="2" Background="White" />
-            <global:ExpertInkCanvas x:Name="ExpertCanvas" StrokeCollected="EnableNext" Grid.Column="0" Grid.ColumnSpan="2" Background="Transparent"/>
-            <Button Content="Clear" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Top" Click="ClearCanvas" Height="75" Width="200" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="25" />
+            <global:ExpertInkCanvas x:Name="ExpertCanvasBG" Grid.Column="0" Background="White" Margin="177,0,173,0" />
+            <global:ExpertInkCanvas x:Name="ExpertCanvas" StrokeCollected="EnableNext" Grid.Column="0" Background="Transparent" Margin="177,0,173,0"/>
+            <Button Content="Clear" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Top" Click="ClearCanvas" Height="38" Width="113" Background="Coral" Foreground="Black" FontFamily="Consolas" FontSize="25" />
             <!--Button Content="Save" x:Name="SaveButton" IsEnabled="False" Click="ButtonSave_ClickAsync" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Height="75" Width="200" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="0,0,-1,0" /-->
-            <TextBox x:Name="TextBoxFilename" ToolTip="Please enter the exercise title. Will be used as filename to save file." Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Top" Height="30" Width="200" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20">
+            <TextBox x:Name="TextBoxFilename" ToolTip="Please enter the exercise title. Will be used as filename to save file." HorizontalAlignment="Left" VerticalAlignment="Top" Height="30" Width="200" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20" Grid.ColumnSpan="2" Margin="300,-30,0,0">
                 ExerciseTitle
             </TextBox>
-            <Button Content="Next" x:Name="NextButton" IsEnabled="False" Click="ButtonNext" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Height="75" Width="200" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="0,0,-1,0" />
+            <Button Content="Next" x:Name="NextButton" IsEnabled="False" Click="ButtonNext" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Height="38" Width="111" Background="LightGreen" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="0,0,-1,0" />
             <Grid x:Name="lineControls" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Stretch">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="1*" />
@@ -56,12 +56,12 @@
                     <ColumnDefinition Width="1*" />
                     <ColumnDefinition Width="1*" />
                 </Grid.ColumnDefinitions>
-                <Button Content="Switch Lines" x:Name="SwitchLines" Click="ButtonSwitchLines" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="0,0,-1,0" />
-                <Button Content="-" x:Name="LineIntervalDecreaseButton" Click="ButtonLineIntervalDecrease" Grid.Row="3" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Top" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="0,0,-1,0" />
-                <Button Content="Line Size" x:Name="LineLabel" IsEnabled="False" Grid.Row="3" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Top" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="0,0,-1,0" />
-                <Button Content="+" x:Name="LineIntervalIncreaseButton" Click="ButtonLineIntervalIncrease" Grid.Row="3" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="0,0,-1,0" />
+                <Button Content="Switch Lines" x:Name="SwitchLines" Click="ButtonSwitchLines" Grid.Row="3" Grid.Column="1" VerticalAlignment="Top" Background="RosyBrown" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="0,0,-1,0" />
+                <Button Content="-" x:Name="LineIntervalDecreaseButton" Click="ButtonLineIntervalDecrease" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Top" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="0,37,0,0" />
+                <Button Content="Line Size" x:Name="LineLabel" IsEnabled="False" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Top" Background="RosyBrown" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="0,37,0,0" />
+                <Button Content="+" x:Name="LineIntervalIncreaseButton" Click="ButtonLineIntervalIncrease" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="0,37,-1,0" />
             </Grid>
         </Grid>
-        
+
     </Grid>
 </Page>
