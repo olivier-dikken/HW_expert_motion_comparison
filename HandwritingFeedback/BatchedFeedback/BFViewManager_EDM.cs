@@ -15,6 +15,7 @@ using System.Windows.Controls;
 using System.Diagnostics;
 using HandwritingFeedback.Models;
 using HandwritingFeedback.View;
+using OxyPlot;
 
 namespace HandwritingFeedback.BatchedFeedback
 {
@@ -27,7 +28,9 @@ namespace HandwritingFeedback.BatchedFeedback
         private readonly Plotter _plotter;
         private CalculationHelper _calculationHelper;
         public KeypointDetection kpDetection;
-        private StackPanel _parametersDock;        
+        private StackPanel _parametersDock;
+
+        private StackPanel _graphDock;
 
         /// <summary>
         /// Constructor for BFManager instantiate new engine and load components.
@@ -41,6 +44,7 @@ namespace HandwritingFeedback.BatchedFeedback
 
             // Instantiate plotter
             _plotter = new Plotter(input.UnitValueDock, input.GraphDock);
+            _graphDock = input.GraphDock;
 
             _parametersDock = input.ParametersDock;            
         }
@@ -62,18 +66,43 @@ namespace HandwritingFeedback.BatchedFeedback
             
         }
 
+
+        public void UpdateSelectedPoint(int newSelectedPointIndex)
+        {
+            foreach(BFComponent component in this.Components)
+            {
+                FeatureOverProgress_EDM ft_comp = (FeatureOverProgress_EDM)component;
+                ft_comp.setSelectedPoint(newSelectedPointIndex);
+            }
+            //redraw
+            PopulateDocks();
+        }
+
         /// <summary>
         /// Populates all docks on batched analytics view in parallel.
         /// </summary>
         public void PopulateDocks()
         {
+            //start by clearing the dock (useful for redrawing)
+            _graphDock.Children.RemoveRange(0, _graphDock.Children.Count);
+
             var syntheses = new List<Synthesis>();
 
             // Synthesize every other batched feedback component in parallel
             Parallel.ForEach(Components.Take(Components.Count), component =>
             {
-                syntheses.Add(component.Synthesize());
-            });            
+                Synthesis newSynth = component.Synthesize();
+                lock (syntheses)
+                {
+                    syntheses.Add(newSynth);
+                }                
+            });
+
+
+            //keep consistent order
+            syntheses = syntheses.OrderBy(o => o.Title).ToList();
+            
+            
             
             // Render every synthesis on the batched analytics view depending on their types
             foreach (Synthesis s in syntheses)
@@ -91,6 +120,7 @@ namespace HandwritingFeedback.BatchedFeedback
                                             "of an unknown type!");
                 }
             }                     
-        }       
+        }
+        
     }
 }

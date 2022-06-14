@@ -39,11 +39,18 @@ namespace HandwritingFeedback.BatchedFeedback.Components.CanvasComponents.Accura
                 Title = title,
                 XAxisLabel = "Student point index",
                 YAxisLabel = ylabel,
-                CurvedLine = false
+                CurvedLine = false                
             };
             _comparisonResult = comparisonResult;
             _overlayCanvas = overlayCanvas;
             _batchedAnalyticsEDM = BA_EDM;
+        }
+
+        public void setSelectedPoint(int dpIndex)
+        {
+            LineGraph result = (LineGraph)this.Synthesis;
+            result.selectedPointIndex = dpIndex;
+            this.Synthesis = result;
         }
 
         /// <summary>
@@ -63,6 +70,7 @@ namespace HandwritingFeedback.BatchedFeedback.Components.CanvasComponents.Accura
             dataPoints_edm_std_lower.Add(new DataPoint(0, 0));
 
             LineGraph result = (LineGraph)this.Synthesis;
+            result.AllSeries.Clear();
 
 
             for (int i = 0; i < _comparisonResult.Value_student.Count; i++)
@@ -83,12 +91,25 @@ namespace HandwritingFeedback.BatchedFeedback.Components.CanvasComponents.Accura
             result.AddSeries(studentSeries);
 
             var expertSeries = LineGraph.CreateSeries(dataPoints_edm_avg, OxyColors.Red, "Expert Trace");
+
+            AddMouseEventsOffsetSeries(expertSeries);
             result.AddSeries(expertSeries);
 
             var expertSeries_std_upper = LineGraph.CreateSeries(dataPoints_edm_std_upper, OxyColors.Orange, "Expert Trace std upper");
             result.AddSeries(expertSeries_std_upper);
             var expertSeries_std_lower = LineGraph.CreateSeries(dataPoints_edm_std_lower, OxyColors.Orange, "Expert Trace std lower");
             result.AddSeries(expertSeries_std_lower);
+
+            //add error zones
+            double errorThreshold = 1;
+            result.ErrorZonesXValues.Clear();
+            for (int i = 0; i < _comparisonResult.Value_student.Count; i++)
+            {
+                if(Math.Abs(_comparisonResult.Value_scores[i]) > errorThreshold)
+                {
+                    result.ErrorZonesXValues.Add(i);
+                }
+            }
 
             return result;
         }
@@ -121,9 +142,36 @@ namespace HandwritingFeedback.BatchedFeedback.Components.CanvasComponents.Accura
                     //e.Handled = true;
                 }
             };
-
-            
-
         }
+
+        void AddMouseEventsOffsetSeries(LineSeries series)
+        {
+            series.MouseDown += (s, e) =>
+            {
+                // only handle the left mouse button (right button can still be used to pan)
+                if (e.ChangedButton == OxyMouseButton.Left)
+                {
+                    int indexOfNearestPoint = (int)Math.Round(e.HitTestResult.Index);
+
+                    List<DataPoint> dps = (List<DataPoint>)series.ItemsSource;
+                    var nearestPoint = series.Transform(dps[indexOfNearestPoint]);
+
+                    // Check if we are near a point
+                    if ((nearestPoint - e.Position).Length < 10)
+                    {
+                        _overlayCanvas.Children.RemoveRange(0, _overlayCanvas.Children.Count);
+
+                        _batchedAnalyticsEDM.OverlaySelectDatapointOffsetTrace(indexOfNearestPoint);
+
+                    }
+                    // Remember to refresh/invalidate of the plot
+                    //model.RefreshPlot(false);
+
+                    // Set the event arguments to handled - no other handlers will be called.
+                    //e.Handled = true;
+                }
+            };
+        }
+
     }
 }

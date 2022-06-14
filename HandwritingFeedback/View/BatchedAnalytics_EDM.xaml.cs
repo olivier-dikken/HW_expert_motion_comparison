@@ -64,7 +64,7 @@ namespace HandwritingFeedback.View
 
             inkCanvas.Strokes = _expertOutline.Clone();
             inkCanvas.Strokes.Add(_expertTraceUtils.Trace.Clone());
-            inkCanvas.Strokes.Add(_studentTraceUtils.Trace);
+            inkCanvas.Strokes.Add(_studentTraceUtils.Trace);            
 
             _edmData = edmData;
             //1- align student points with target trace (to know which EDM points to use)
@@ -86,13 +86,14 @@ namespace HandwritingFeedback.View
             manager = new BFViewManager_EDM(input, comparisonResults, overlayCanvas, this);
             manager.PopulateDocks();
 
-            //WIP draw on overlayCanvas
-            OverlaySelectDatapoint(10);
-            
+             
+            CenterScrollViewOnTrace(inkCanvas.Strokes);
         }
 
         public void OverlaySelectDatapoint(int studentIndex)
         {
+            //clear current selection
+            overlayCanvas.Children.RemoveRange(0, overlayCanvas.Children.Count);
 
             StylusPoint sp = GetPointFromTraceAt(_studentTraceUtils.Trace, studentIndex);           
 
@@ -101,7 +102,83 @@ namespace HandwritingFeedback.View
 
             //draw ellipse on student dp
             OverlayDrawDatapoint(sp.X, sp.Y);
+
+            manager.UpdateSelectedPoint(studentIndex);
         }
+
+        public void OverlaySelectDatapointOffsetTrace(int otIndex)
+        {
+            //clear current selection
+            overlayCanvas.Children.RemoveRange(0, overlayCanvas.Children.Count);
+
+            StylusPoint sp = GetPointFromTraceAt(_offsetTargetTrace, otIndex);
+
+            //draw alignment lign to corresponding expert dp
+            DrawNearAlignmentLinesForDatapoint( _offsetTargetTrace, _studentTraceUtils.Trace, _alignmentVector, otIndex);
+
+            //draw ellipse on student dp
+            OverlayDrawDatapoint(sp.X, sp.Y);
+
+            manager.UpdateSelectedPoint(otIndex);
+        }
+
+        /// <summary>
+        /// onclick --> find nearest point of student trace or offsetTargetTrace (and select point)
+        /// </summary>
+        private void OnMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            int mouseInteractionDistance = 50;
+            Point pnt = e.GetPosition(overlayCanvas);
+            double mouse_x = pnt.X;
+            double mouse_y = pnt.Y;
+
+            //find nearest point of traces
+            TraceUtils _offsetTargetTraceUtils = new TraceUtils(_offsetTargetTrace);
+            (StylusPoint closestPoint_offsetTrace, double dist_offsetTrace, int ot_traceIndex, int ot_pointIndex) = _offsetTargetTraceUtils.GetClosestPointIndex(pnt);
+            (StylusPoint closestPoint_studentTrace, double dist_studentTrace, int stud_traceIndex, int stud_pointIndex) = _studentTraceUtils.GetClosestPointIndex(pnt);
+
+            int pointIndexCalc = 0;
+            if (dist_offsetTrace < dist_studentTrace) //offsetTrace has closest point
+            {
+                if(dist_offsetTrace < mouseInteractionDistance)
+                {
+                    //find index and select the point in the graphs
+                    
+                    for(int i = 0; i < ot_traceIndex; i++)
+                    {
+                        pointIndexCalc += _offsetTargetTraceUtils.Trace[i].StylusPoints.Count;
+                    }
+                    pointIndexCalc += ot_pointIndex;
+
+                    //highlight pointIndex in canvas
+                    OverlaySelectDatapointOffsetTrace(pointIndexCalc);
+                    //highlight pointIndex also in graphs
+
+                }
+            }
+            else //studentTrace has closest point
+            {
+                if(dist_studentTrace < mouseInteractionDistance)
+                {
+                    //find index and select the point in the graphs
+                    for (int i = 0; i < stud_traceIndex; i++)
+                    {
+                        pointIndexCalc += _studentTraceUtils.Trace[i].StylusPoints.Count;
+                    }
+                    pointIndexCalc += stud_pointIndex;
+
+                    //highlight pointIndex in canvas
+                    OverlaySelectDatapoint(pointIndexCalc);
+                    //highlight pointIndex also in graphs
+
+                }
+            }
+
+            
+            
+        }
+
+        
 
         void OverlayDrawDatapoint(double X, double Y)
         {
@@ -119,6 +196,41 @@ namespace HandwritingFeedback.View
 
             overlayCanvas.Children.Add(ellipse);
         }
+
+        void CenterScrollViewOnTrace(StrokeCollection traceToCenter)
+        {
+            TraceUtils traceUtilsTraceToCenter = new TraceUtils(traceToCenter);
+            int[] traceBounds = traceUtilsTraceToCenter.GetBounds();
+
+            inkCanvas.Width = traceBounds[2] + 100;
+            inkCanvas.Height = traceBounds[3] + 100;
+
+            Debug.WriteLine("inkcanvas width: " + inkCanvas.Width);
+            Debug.WriteLine("canvasDock.ScrollableHeight: " + canvasDock.ScrollableHeight);
+
+
+
+            Debug.WriteLine("trace bounds: " + traceBounds[0] + ", " + traceBounds[1] + ", " + traceBounds[2] + ", "+traceBounds[3] + ".");
+            int scrollToX = (int)inkCanvasScaleTransform.ScaleX * (traceBounds[0]) ;
+            int scrollToY = (int)inkCanvasScaleTransform.ScaleY * (traceBounds[1]) ;
+            ScrollToCanvasLocation(scrollToX, scrollToY);
+
+            //TODO Zoom to fit content
+        }
+
+        void ScrollToCanvasLocation(int x, int y)
+        {
+            if(canvasDock.ScrollableHeight< y && canvasDock.ScrollableWidth < x)
+            {
+                canvasDock.ScrollToHorizontalOffset(x);
+                canvasDock.ScrollToVerticalOffset(y);
+            } else
+            {
+                Debug.WriteLine("ScrollToCanvasLocation error: coordinates out of bound. Width: " + canvasDock.ScrollableWidth + ". Height: " + canvasDock.ScrollableHeight + " input was x: " + x + " y: " + y);   
+            }
+           
+        }
+
 
         private List<EDMComparisonResult> ComputeErrorBasedOnEDM(StrokeCollection trace, List<(int, int)> aV, EDMData edmData)
         {

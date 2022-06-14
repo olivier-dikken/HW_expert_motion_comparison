@@ -23,6 +23,8 @@ namespace HandwritingFeedback.BatchedFeedback.SynthesisTypes.Graphs
         public List<(double, double)> Keypoints { get; set; }
         public List<(double, double)> DebugKeypoints { get; set; }
 
+        public int selectedPointIndex { get; set; }
+
         /// <summary>
         /// Constructor for synthesis that must be visualized as a line graph.
         /// </summary>
@@ -33,6 +35,7 @@ namespace HandwritingFeedback.BatchedFeedback.SynthesisTypes.Graphs
             this.ErrorZonesXValues = new List<double>();
             this.Keypoints = new List<(double, double)> { };
             this.DebugKeypoints = new List<(double, double)> { };
+            this.selectedPointIndex = -1;
         }
 
         /// <summary>

@@ -38,6 +38,12 @@ namespace HandwritingFeedback.Util
             = new Dictionary<Point, (StylusPoint, double)>();
 
         /// <summary>
+        /// for also getting the index, used to link to batched feedback graphs
+        /// </summary>
+        private readonly IDictionary<Point, (StylusPoint, double, int, int)> _closestPointsIndexCache
+            = new Dictionary<Point, (StylusPoint, double, int, int)>();
+
+        /// <summary>
         /// Dictionary that maps (strokeIndex, pointIndex) for all points in splitTrace to <br />
         /// (strokeIndex, pointIndex) for all points in trace. <br />
         /// This allows us to find the corresponding indices for a point in trace <br />
@@ -233,6 +239,96 @@ namespace HandwritingFeedback.Util
             return result; 
         }
 
+        public (StylusPoint stylusPoint, double distance, int strokeIndex, int pointIndex) GetClosestPointIndex(Point point)
+        {
+            // This thread needs exclusive access for using the cache
+            Monitor.Enter(_closestPointsIndexCache);
+
+            // We round the X and Y coordinates, because when using a stylus
+            // these coordinates are very precise, and therefore almost never repeat.
+            // Without rounding, a cache hit would be extremely rare
+            Point roundedPoint = new Point((int)point.X, (int)point.Y);
+
+            // The scan diameter is at least 100 (good value found during functional testing)
+            // and can be greater if the MaxDeviationRadius requires it.
+            // 2d * MaxDeviationRadius makes the dashed line start exactly where the trace changes its
+            // color to red. Multiplying the diameter by 2 adds some space between the red and the
+            // dashed line.
+            double scanDiameter = Math.Max(ApplicationConfig.Instance.ClosestPointScanDiameter,
+                4d * ApplicationConfig.Instance.MaxDeviationRadius);
+
+            // If this point was calculated earlier, return the result
+            if (_closestPointsIndexCache.ContainsKey(roundedPoint))
+            {
+                var cached = _closestPointsIndexCache[roundedPoint];
+                Monitor.Exit(_closestPointsIndexCache);
+                return cached;
+            }
+
+            double minDistance = double.PositiveInfinity;
+            // Indices of the closest point in the split trace
+            (int strokeIndex, int pointIndex) closestPointIndices = (-1, -1);
+
+            for (int i = 0; i < Split().Count; i++)
+            {
+                Stroke strokeSegment = Split()[i];
+
+                // Only consider the points in the stroke segment if it is within the scan diameter
+                if (!strokeSegment.HitTest(point, scanDiameter)) continue;
+
+                // Find the closest point in the stroke segment
+                for (int j = 0; j < strokeSegment.StylusPoints.Count; j++)
+                {
+                    StylusPoint candidate = strokeSegment.StylusPoints[j];
+                    Vector v = Point.Subtract(point, candidate.ToPoint());
+                    double distance = v.Length;
+                    if (distance < minDistance)
+                    {
+                        closestPointIndices = (i, j);
+                        minDistance = distance;
+                    }
+                }
+            }
+
+            // If no closest point was found return
+            if (double.IsInfinity(minDistance))
+            {
+                Monitor.Exit(_closestPointsIndexCache);
+                return (new StylusPoint(double.NegativeInfinity, double.NegativeInfinity), minDistance, -1, -1);
+            }
+
+            // Get indices of closest point in the original trace
+            (int originalStrokeIndex, int originalPointIndex) = _splitTraceIndices[closestPointIndices];
+
+            StylusPoint closestPoint = Trace[originalStrokeIndex].StylusPoints[originalPointIndex];
+
+            // Get point before closest if it exists, else use closestPoint
+            StylusPoint leftNeighbor = originalPointIndex - 1 >= 0
+                ? Trace[originalStrokeIndex].StylusPoints[originalPointIndex - 1]
+                : closestPoint;
+
+            // Get point after closest if it exists, else use closestPoint
+            StylusPoint rightNeighbor = originalPointIndex + 1 < Trace[originalStrokeIndex].StylusPoints.Count
+                ? Trace[originalStrokeIndex].StylusPoints[originalPointIndex + 1]
+                : closestPoint;
+
+            // Get projections of point on the line segments, and corresponding distances
+            var leftResult = ProjectOnLineSegment(point, closestPoint, leftNeighbor);
+            var rightResult = ProjectOnLineSegment(point, closestPoint, rightNeighbor);
+
+            var result = leftResult.distance < rightResult.distance ? leftResult : rightResult;
+
+            // Cache the result for future requests
+            _closestPointsIndexCache.Add(roundedPoint, (result.stylusPoint, result.distance, originalStrokeIndex, originalPointIndex));
+
+            Monitor.Exit(_closestPointsIndexCache);
+
+            // Return the closestPoint together with the minDistance
+            // The minDistance is returned, such that it won't have to
+            // be recalculated by the calling method.
+            return (result.stylusPoint, result.distance, originalStrokeIndex, originalPointIndex);
+        }
+
         /// <summary>
         /// Projects point onto the line segment between lineFrom and lineTo.
         /// </summary>
@@ -410,6 +506,39 @@ namespace HandwritingFeedback.Util
             
             _validTemporalCache = (isCalculated: true, result);
             return result;
+        }
+
+        /// <summary>
+        /// get min x,y and max x,y of StrokeCollection Trace
+        /// </summary>
+        /// <returns></returns>
+        public int[] GetBounds()
+        {
+            int[] bounds = new int[4];
+            
+            //min x
+            bounds[0] = int.MaxValue;
+            //min y
+            bounds[1] = int.MaxValue;
+            //max x
+            bounds[2] = int.MinValue;
+            //max y
+            bounds[3] = int.MinValue;
+
+            StylusPoint pt;
+            for (int i = 0; i < Trace.Count; i++)
+            {
+                for(int j = 0; j < Trace[i].StylusPoints.Count; j++)
+                {
+                    pt = Trace[i].StylusPoints[j];
+                    if (pt.X < bounds[0]) bounds[0] = (int)pt.X;
+                    if (pt.Y < bounds[1]) bounds[1] = (int)pt.Y;
+                    if (pt.X > bounds[2]) bounds[2] = (int)pt.X;                    
+                    if (pt.Y > bounds[3]) bounds[3] = (int)pt.Y;
+                }
+            }
+
+            return bounds;
         }
 
         public static void DrawHelperSquareGrid(InkCanvas canvas, int spacing, int startY)

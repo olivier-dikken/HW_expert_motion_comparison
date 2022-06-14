@@ -55,12 +55,12 @@
                             </Grid.ColumnDefinitions>
                             <InkCanvas x:Name="inkCanvas" Background="White" IsEnabled="False"  Grid.Column="0" Grid.ColumnSpan="2">
                             <InkCanvas.LayoutTransform>
-                                    <ScaleTransform ScaleX="2" ScaleY="2" />
+                                    <ScaleTransform x:Name="inkCanvasScaleTransform" ScaleX="2" ScaleY="2" />
                                 </InkCanvas.LayoutTransform>
                             </InkCanvas>
-                            <Canvas x:Name="overlayCanvas" Background="Transparent" Grid.Column="0" Grid.ColumnSpan="2">
+                            <Canvas x:Name="overlayCanvas" MouseDown="OnMouseDown" Background="Transparent" Grid.Column="0" Grid.ColumnSpan="2">
                                 <Canvas.LayoutTransform>
-                                    <ScaleTransform ScaleX="2" ScaleY="2" />
+                                    <ScaleTransform x:Name="overlayCanvasScaleTransform" ScaleX="2" ScaleY="2" />
                                 </Canvas.LayoutTransform>
                             </Canvas>
                         </Grid>
