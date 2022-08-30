@@ -49,13 +49,16 @@ namespace HandwritingFeedback.View
         private List<(int, int)> _alignmentVector;
         private EDMData _edmData;
 
+        private double currentZoom;
+        private readonly double originalZoom;
+
         /// <summary>
         /// Constructor for batched analytics view.
         /// </summary>
         /// <param name="input">Data transferred from previous page</param>
         public BatchedAnalytics_EDM(BFInputData input, EDMData edmData)
         {
-            InitializeComponent();
+            InitializeComponent();            
 
             // Extract student and expert trace from input
             _expertTraceUtils = input.ExpertTraceUtils;
@@ -72,7 +75,15 @@ namespace HandwritingFeedback.View
             //1.2 - show alignment (visually)
             _offsetTargetTrace = OffsetStrokeCollection(_expertTraceUtils.Trace, 200);
             //DrawAlignmentLines(_studentTraceUtils.Trace, offsetTargetTrace, alignmentVector);
-            inkCanvas.Strokes.Add(_offsetTargetTrace);
+            offsetInkCanvas.Strokes.Add(_offsetTargetTrace);
+
+            //MoveTrace(100, 50, inkCanvas);
+            //MoveTrace(100, 300, offsetInkCanvas);
+
+            StrokeCollection allStrokes = new StrokeCollection();
+            allStrokes.Add(_studentTraceUtils.Trace);
+            allStrokes.Add(_offsetTargetTrace);
+            
 
             //1.3 compute error per datapoint per feature
             List<EDMComparisonResult> comparisonResults = ComputeErrorBasedOnEDM(_studentTraceUtils.Trace, _alignmentVector, _edmData);
@@ -86,7 +97,20 @@ namespace HandwritingFeedback.View
             manager = new BFViewManager_EDM(input, comparisonResults, overlayCanvas, this);
             manager.PopulateDocks();
 
-             
+
+
+            currentZoom = inkCanvasScaleTransform.ScaleX;
+            originalZoom = inkCanvasScaleTransform.ScaleX;
+            ApplyZoom();
+
+            InkCanvasRefreshSize(allStrokes);
+
+            
+            
+        }   
+        
+        void OnCanvasLoaded(object sender, RoutedEventArgs e)
+        {
             CenterScrollViewOnTrace(inkCanvas.Strokes);
         }
 
@@ -129,8 +153,8 @@ namespace HandwritingFeedback.View
         {
             int mouseInteractionDistance = 50;
             Point pnt = e.GetPosition(overlayCanvas);
-            double mouse_x = pnt.X;
-            double mouse_y = pnt.Y;
+            pnt.X = pnt.X * (originalZoom / currentZoom);
+            pnt.Y = pnt.Y * (originalZoom / currentZoom);            
 
             //find nearest point of traces
             TraceUtils _offsetTargetTraceUtils = new TraceUtils(_offsetTargetTrace);
@@ -153,7 +177,8 @@ namespace HandwritingFeedback.View
                     //highlight pointIndex in canvas
                     OverlaySelectDatapointOffsetTrace(pointIndexCalc);
                     //highlight pointIndex also in graphs
-
+                    //double pointX = _offsetTargetTraceUtils.Trace[ot_traceIndex].StylusPoints[ot_pointIndex].X;
+                    //double pointY = _offsetTargetTraceUtils.Trace[ot_traceIndex].StylusPoints[ot_pointIndex].Y;
                 }
             }
             else //studentTrace has closest point
@@ -182,6 +207,11 @@ namespace HandwritingFeedback.View
 
         void OverlayDrawDatapoint(double X, double Y)
         {
+
+            X = X * (currentZoom / originalZoom);
+            Y = Y * (currentZoom / originalZoom);
+           
+
             int ellipseDiameter = 8;
 
             Ellipse ellipse = new Ellipse();
@@ -197,38 +227,107 @@ namespace HandwritingFeedback.View
             overlayCanvas.Children.Add(ellipse);
         }
 
+        void InkCanvasRefreshSize(StrokeCollection traces)
+        {
+            TraceUtils traceUtilsTraces = new TraceUtils(traces);
+            int[] traceBounds = traceUtilsTraces.GetBounds();                        
+            
+            inkCanvas.Width = traceBounds[2] + 1000;
+            inkCanvas.Height = traceBounds[3] + 1000;
+            offsetInkCanvas.Width = traceBounds[2] + 1000;
+            offsetInkCanvas.Height = traceBounds[3] + 1000;
+
+            Debug.WriteLine("inkcanvas width: " + inkCanvas.Width);
+            Debug.WriteLine("canvasDock.ScrollableHeight: " + canvasDock.ScrollableHeight);
+        }
+
         void CenterScrollViewOnTrace(StrokeCollection traceToCenter)
         {
             TraceUtils traceUtilsTraceToCenter = new TraceUtils(traceToCenter);
             int[] traceBounds = traceUtilsTraceToCenter.GetBounds();
-
-            inkCanvas.Width = traceBounds[2] + 100;
-            inkCanvas.Height = traceBounds[3] + 100;
-
-            Debug.WriteLine("inkcanvas width: " + inkCanvas.Width);
-            Debug.WriteLine("canvasDock.ScrollableHeight: " + canvasDock.ScrollableHeight);
-
-
-
+                                       
             Debug.WriteLine("trace bounds: " + traceBounds[0] + ", " + traceBounds[1] + ", " + traceBounds[2] + ", "+traceBounds[3] + ".");
-            int scrollToX = (int)inkCanvasScaleTransform.ScaleX * (traceBounds[0]) ;
-            int scrollToY = (int)inkCanvasScaleTransform.ScaleY * (traceBounds[1]) ;
-            ScrollToCanvasLocation(scrollToX, scrollToY);
-
-            //TODO Zoom to fit content
+            ScrollToCanvasLocation(traceBounds[0], traceBounds[1]);
         }
 
         void ScrollToCanvasLocation(int x, int y)
         {
-            if(canvasDock.ScrollableHeight< y && canvasDock.ScrollableWidth < x)
+            if (y < canvasDock.ScrollableHeight && x < canvasDock.ScrollableWidth)
             {
-                canvasDock.ScrollToHorizontalOffset(x);
-                canvasDock.ScrollToVerticalOffset(y);
+                Debug.WriteLine("Scrolling to: x= " + ((int)inkCanvasScaleTransform.ScaleX * x) + "  y= " + (int)inkCanvasScaleTransform.ScaleY * y);
+                canvasDock.ScrollToHorizontalOffset((int)inkCanvasScaleTransform.ScaleX * x);
+                canvasDock.ScrollToVerticalOffset((int)inkCanvasScaleTransform.ScaleY * y);
             } else
             {
                 Debug.WriteLine("ScrollToCanvasLocation error: coordinates out of bound. Width: " + canvasDock.ScrollableWidth + ". Height: " + canvasDock.ScrollableHeight + " input was x: " + x + " y: " + y);   
+            }            
+        }
+
+        void MoveTrace(int newOffsetX, int newOffsetY, InkCanvas theCanvas)
+        {
+            //get all strokes from canvas
+            StrokeCollection allCanvasStrokes = theCanvas.Strokes;
+            //theCanvas.Strokes.Clear();
+            TraceUtils traceUtilsTraces = new TraceUtils(allCanvasStrokes);
+            int[] traceBounds = traceUtilsTraces.GetBounds();
+
+            int offsetX = newOffsetX - traceBounds[0];
+            int offsetY = newOffsetY - traceBounds[1];
+
+            StrokeCollection offsetCollection = new StrokeCollection();
+
+            for (int i = 0; i < allCanvasStrokes.Count; i++)
+            {
+                StylusPointDescription spd = allCanvasStrokes[i].StylusPoints.Description;
+                StylusPointCollection offsetPoints = new StylusPointCollection(spd);
+                for (int j = 0; j < allCanvasStrokes[i].StylusPoints.Count; j++)
+                {
+                    StylusPoint newPoint = allCanvasStrokes[i].StylusPoints[j];                    
+
+                    newPoint.Y += offsetY;
+                    newPoint.X += offsetX;
+                    offsetPoints.Add(newPoint);
+                }
+                Stroke newStroke = new Stroke(offsetPoints);
+                offsetCollection.Add(newStroke);
             }
-           
+            theCanvas.Strokes = offsetCollection.Clone();
+        }
+
+        public void ToggleZoom(object sender, RoutedEventArgs e)
+        {
+            if(currentZoom < 3)
+            {
+                currentZoom = 5;
+                ApplyZoom();
+                CenterScrollViewOnTrace(inkCanvas.Strokes);
+            } else
+            {
+                currentZoom = 2;
+                ApplyZoom();
+                CenterScrollViewOnTrace(inkCanvas.Strokes);
+            }
+        }
+
+        private void ApplyZoom()
+        {
+            inkCanvasScaleTransform.ScaleX = currentZoom;
+            inkCanvasScaleTransform.ScaleY = currentZoom;
+            offsetInkCanvasScaleTransform.ScaleX = currentZoom;
+            offsetInkCanvasScaleTransform.ScaleY = currentZoom;            
+        }
+
+        public void ZoomViewSelectedDatapoint()
+        {
+            //split canvas in 2 vertically
+
+            //get selected DP and corresponding DP
+
+            //center student DP in canvas top half 
+
+            //center expert DP in canvas bottom half
+
+            //transparent DP in other half (student DP transparent in bottom half, expert DP transparent in top half)
         }
 
 
@@ -469,11 +568,12 @@ namespace HandwritingFeedback.View
         public void DrawAlignmentLines(StrokeCollection eStrokes, StrokeCollection offsetStrokes, List<(int, int)> aV)
         {
             int idx = 0;
+            double rescale = (currentZoom / originalZoom);
             foreach ((int, int) match in aV)
             {
                 StylusPoint spRef = GetPointFromTraceAt(eStrokes, match.Item1);
                 StylusPoint spCor = GetPointFromTraceAt(offsetStrokes, match.Item2);
-                Stroke mappingLine = MakeLine(spRef.X, spRef.Y, spCor.X, spCor.Y, (float)idx / (float)aV.Count);
+                Stroke mappingLine = MakeLine(spRef.X * rescale, spRef.Y * rescale, spCor.X * rescale, spCor.Y * rescale, (float)idx / (float)aV.Count);
                 inkCanvas.Strokes.Add(mappingLine);
                 idx++;
             }
@@ -492,6 +592,7 @@ namespace HandwritingFeedback.View
             int idx = 0;
             int minIndex = studentIndex - bounds;
             int maxIndex = studentIndex + bounds;
+            double rescale = (currentZoom / originalZoom);
             foreach ((int, int) match in aV)
             {
                 if(match.Item1 > minIndex && match.Item1 < maxIndex)
@@ -504,10 +605,10 @@ namespace HandwritingFeedback.View
                     Debug.WriteLine("progress: " + progress);
 
                     Line line = new Line();
-                    line.X1 = spRef.X;
-                    line.Y1 = spRef.Y;
-                    line.X2 = spCor.X;
-                    line.Y2 = spCor.Y;
+                    line.X1 = spRef.X * rescale;
+                    line.Y1 = spRef.Y * rescale;
+                    line.X2 = spCor.X * rescale;
+                    line.Y2 = spCor.Y * rescale;
                     
                     int red = (int) (progress * 254);
                     int green = 255 - red;

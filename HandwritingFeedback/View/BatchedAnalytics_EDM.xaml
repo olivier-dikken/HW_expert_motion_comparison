@@ -20,6 +20,7 @@
             <Grid>
                 <TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Foreground="Black" FontFamily="Consolas" FontSize="40"><Run Language="en-as" Text="Batched Analytics"/></TextBlock>
                 <Button Content="Back to Menu" Click="Navigate" Tag="\View\MainPage.xaml" VerticalAlignment="Top" HorizontalAlignment="Left" Height="40" Width="137" Background="Black" Foreground="White" FontFamily="Consolas" FontSize="18" />
+                <Button Content="Zoom" Click="ToggleZoom" Grid.Column="0" HorizontalAlignment= "Right" VerticalAlignment="Top" Height="40" Width="100" Background="Coral" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="218,5,0,0" Grid.Row="1" BorderThickness="0"/>
             </Grid>
         </ScrollViewer>
 
@@ -46,7 +47,7 @@
 
                 <!-- Ink canvas to display visual real-time feedback -->
                 <Border Grid.Column="0" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="4" Background="Black">
-                    <ScrollViewer x:Name="canvasDock" Height="Auto" Width="Auto" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    <ScrollViewer x:Name="canvasDock" Loaded="OnCanvasLoaded" Height="Auto" Width="Auto" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                     
                         <Grid x:Name="ResultsCanvas" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                             <Grid.ColumnDefinitions>
@@ -56,6 +57,11 @@
                             <InkCanvas x:Name="inkCanvas" Background="White" IsEnabled="False"  Grid.Column="0" Grid.ColumnSpan="2">
                             <InkCanvas.LayoutTransform>
                                     <ScaleTransform x:Name="inkCanvasScaleTransform" ScaleX="2" ScaleY="2" />
+                                </InkCanvas.LayoutTransform>
+                            </InkCanvas>
+                            <InkCanvas x:Name="offsetInkCanvas" Background="Transparent" IsEnabled="False"  Grid.Column="0" Grid.ColumnSpan="2">
+                                <InkCanvas.LayoutTransform>
+                                    <ScaleTransform x:Name="offsetInkCanvasScaleTransform" ScaleX="2" ScaleY="2" />
                                 </InkCanvas.LayoutTransform>
                             </InkCanvas>
                             <Canvas x:Name="overlayCanvas" MouseDown="OnMouseDown" Background="Transparent" Grid.Column="0" Grid.ColumnSpan="2">
