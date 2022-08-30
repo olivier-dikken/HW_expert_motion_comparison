@@ -12,6 +12,7 @@ namespace HandwritingFeedback.View
         public MainPage()
         {
             this.InitializeComponent();
+            //bibeg leaving comment to initialise the branch.
         }
 
         private void Navigate(object sender, RoutedEventArgs e)
