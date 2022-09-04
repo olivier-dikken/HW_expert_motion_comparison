@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -8,11 +8,13 @@
 
   <ItemGroup>
     <Folder Include="InkCanvases\" />
+    <Folder Include="Assets\" />
     <Folder Include="StylusPlugins\" />
 	<Folder Include="RealtimeFeedback\" />
   </ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="MaterialDesignThemes" Version="4.5.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="NAudio" Version="2.0.0" />
 		<PackageReference Include="OxyPlot.Core" Version="2.0.0" />

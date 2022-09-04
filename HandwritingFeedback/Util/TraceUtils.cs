@@ -636,5 +636,27 @@ namespace HandwritingFeedback.Util
 
             return stroke;
         }
+
+        public static StrokeCollection OffsetStrokeCollection(StrokeCollection toOffset, int xOffset, int yOffset)
+        {
+            StrokeCollection offsetCollection = new StrokeCollection();
+
+            for (int i = 0; i < toOffset.Count; i++)
+            {
+                StylusPointDescription spd = toOffset[i].StylusPoints.Description;
+                StylusPointCollection offsetPoints = new StylusPointCollection(spd);
+                for (int j = 0; j < toOffset[i].StylusPoints.Count; j++)
+                {
+                    StylusPoint newPoint = toOffset[i].StylusPoints[j];
+
+                    newPoint.Y += yOffset;
+                    newPoint.X += xOffset;
+                    offsetPoints.Add(newPoint);
+                }
+                Stroke newStroke = new Stroke(offsetPoints);
+                offsetCollection.Add(newStroke);
+            }
+            return offsetCollection;
+        }
     }
 }

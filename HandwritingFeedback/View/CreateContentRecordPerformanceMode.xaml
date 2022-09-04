@@ -26,7 +26,7 @@
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Center"  TextAlignment="Center" Foreground="Black" FontFamily="Consolas" FontSize="50">Create Content</TextBlock>
                 <TextBlock Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Center"  TextAlignment="Center" Foreground="Black" FontFamily="Consolas" FontSize="20">Save target performance.<LineBreak /> Click 'Next' after an acceptable attempt.</TextBlock>
-                <Button Content="Back to Menu" VerticalAlignment="Top" HorizontalAlignment="Left" Height="75" Width="200" Click="Navigate" Tag="\View\MainPage.xaml" Background="Black" Foreground="White" FontFamily="Consolas" FontSize="25" />
+                <Button Content="Back to Menu" VerticalAlignment="Top" HorizontalAlignment="Left" Height="75" Width="200" Click="Navigate" Tag="\View\UpdatedUI\TeacherView.xaml" Background="Black" Foreground="White" FontFamily="Consolas" FontSize="25" />
             </Grid>
         </ScrollViewer>
 

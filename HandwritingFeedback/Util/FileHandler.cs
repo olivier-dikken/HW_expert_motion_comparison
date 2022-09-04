@@ -1,4 +1,6 @@
 using System;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
@@ -8,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using HandwritingFeedback.Config;
+using HandwritingFeedback.Models;
 using HandwritingFeedback.StylusPlugins.Strokes;
 using Microsoft.Win32;
 using Newtonsoft.Json;
@@ -30,7 +33,7 @@ namespace HandwritingFeedback.Util
         {
             SaveFileDialog saveFileDialog1 = new SaveFileDialog
             {
-                Filter = "ISF File (*.isf)|*.isf", 
+                Filter = "ISF File (*.isf)|*.isf",
                 FileName = "InkSample"
             };
 
@@ -91,7 +94,7 @@ namespace HandwritingFeedback.Util
                 // Render whole page to bitmap
                 RenderTargetBitmap renderBitmap =
                     new RenderTargetBitmap((int)fullPage.ActualWidth, (int)fullPage.ActualHeight, 96d, 96d, PixelFormats.Default);
-                renderBitmap.Render(fullPage); 
+                renderBitmap.Render(fullPage);
                 // Save to a memory stream
                 BitmapEncoder encoder = new BmpBitmapEncoder();
                 encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
@@ -99,6 +102,71 @@ namespace HandwritingFeedback.Util
                 fs.Close();
             }
         }
+
+
+        public static void SaveCanvasAsImage(InkCanvas theCanvas, string exerciseFolder, string fileName)
+        {
+            //theCanvas.Background = new SolidColorBrush(Colors.White);
+            //RenderTargetBitmap rtb = new RenderTargetBitmap((int)theCanvas.ActualWidth, (int)theCanvas.ActualHeight, 96d, 96d, PixelFormats.Default);
+            //rtb.Render(theCanvas);
+
+            //FileStream fs = File.Open(saveFile, FileMode.Create);//save bitmap to file
+            //BitmapEncoder encoder = new BmpBitmapEncoder();
+            //encoder.Frames.Add(BitmapFrame.Create(rtb));
+            //encoder.Save(fs);
+            //fs.Close();
+
+            string saveFile = exerciseFolder + "/" + fileName + ".png";
+
+            Rect strokeBounds = theCanvas.Strokes.GetBounds();
+
+
+            //create new grid
+            //create new canvas, add to grid
+            Grid canvasGrid = new Grid();            
+            canvasGrid.Width = strokeBounds.Width;
+            canvasGrid.Height = strokeBounds.Height;
+            RowDefinition rd = new RowDefinition();
+            ColumnDefinition cd = new ColumnDefinition();
+            rd.Height = GridLength.Auto;
+            cd.Width = GridLength.Auto;
+            canvasGrid.RowDefinitions.Add(rd);
+            canvasGrid.ColumnDefinitions.Add(cd);
+            canvasGrid.Background = new SolidColorBrush(Colors.White);
+
+            InkCanvas croppedCanvas = new InkCanvas();
+            croppedCanvas.Background = new SolidColorBrush(Colors.White);
+
+            //offset the strokecollection
+            StrokeCollection strokesAdjustedToOrigin = TraceUtils.OffsetStrokeCollection(theCanvas.Strokes, -(int)strokeBounds.X, -(int)strokeBounds.Y);
+
+
+            croppedCanvas.Strokes.Add(strokesAdjustedToOrigin);
+            croppedCanvas.Width = strokeBounds.Width;
+            croppedCanvas.Height = strokeBounds.Height;
+            Grid.SetRow(croppedCanvas, 0);
+            Grid.SetColumn(croppedCanvas, 0);
+
+            canvasGrid.Children.Add(croppedCanvas);
+
+
+            RenderTargetBitmap rtb = new RenderTargetBitmap((int)strokeBounds.Width, (int)strokeBounds.Height, 96d, 96d, PixelFormats.Default);
+            rtb.Render(canvasGrid);            
+
+
+
+            FileStream fs = File.Open(saveFile, FileMode.Create);//save bitmap to file
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(rtb));
+            encoder.Save(fs);
+            fs.Close();
+            
+
+            
+            //draw all strokes on canvas
+            //save grid...
+        }
+        
 
         /// <summary>
         /// Provided by the Microsoft Ink API. Loads a .ISF file into a provided canvas.
@@ -110,10 +178,10 @@ namespace HandwritingFeedback.Util
         {
             var openFileDialog1 = new OpenFileDialog();
             openFileDialog1.Filter = "ISF File (*.isf)|*.isf";
-            
+
             // Return false if user cancels loading of file
             if (openFileDialog1.ShowDialog() == false) return false;
-            
+
             var fs = new FileStream(openFileDialog1.FileName,
                                                FileMode.Open);
 
@@ -218,7 +286,7 @@ namespace HandwritingFeedback.Util
                 {
                     // De-serialize the json representation of the temporal cache
                     var currTemporalCache = JsonConvert.DeserializeObject<(StylusPointCollection
-                        , long)[]>((string) currStroke.GetPropertyData(StrokePropertyIds.TemporalCache));
+                        , long)[]>((string)currStroke.GetPropertyData(StrokePropertyIds.TemporalCache));
 
                     // Set the new strokes temporal cache snapshot to the retrieved cache snapshot
                     newStroke.TemporalCacheSnapshot = currTemporalCache;
@@ -235,5 +303,30 @@ namespace HandwritingFeedback.Util
                 fetchedStrokes[i] = newStroke;
             });
         }
+
+        public static ObservableCollection<ExerciseItem> GetExerciseItems(){
+            string workingDirectory = Environment.CurrentDirectory;
+            string exerciseFolderPath = Directory.GetParent(workingDirectory).Parent.FullName + "\\SavedData\\Exercises\\";
+            ObservableCollection<ExerciseItem> exerciseItems = new ObservableCollection<ExerciseItem>();
+            try
+            {
+
+                string[] dirs = Directory.GetDirectories(exerciseFolderPath, "*", SearchOption.TopDirectoryOnly);
+                Debug.WriteLine("The number of directories starting with p is {0}.", dirs.Length);
+                foreach (string dir in dirs)
+                {
+                    string fileName = System.IO.Path.GetFileName(dir);
+                    Debug.WriteLine(fileName);
+                    Debug.WriteLine(dir);                                        
+                    exerciseItems.Add(ExerciseItem.FromExerciseConfigFile(dir));
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("The process failed: {0}", e.ToString());
+            }
+            return exerciseItems;
+        }
+
     }
 }
