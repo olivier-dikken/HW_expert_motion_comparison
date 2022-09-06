@@ -7,8 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\analytics_thumbnail.png" />
+    <None Remove="Assets\cat_logo.png" />
+    <None Remove="Assets\manageContent_thumbnail.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\cat_logo.png" />
+    <Resource Include="Assets\manageContent_thumbnail.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="InkCanvases\" />
-    <Folder Include="Assets\" />
     <Folder Include="StylusPlugins\" />
 	<Folder Include="RealtimeFeedback\" />
   </ItemGroup>
@@ -19,6 +29,10 @@
 		<PackageReference Include="NAudio" Version="2.0.0" />
 		<PackageReference Include="OxyPlot.Core" Version="2.0.0" />
 		<PackageReference Include="OxyPlot.Wpf" Version="2.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Include="Assets\analytics_thumbnail.png" />
 	</ItemGroup>
 
 	<ItemGroup>

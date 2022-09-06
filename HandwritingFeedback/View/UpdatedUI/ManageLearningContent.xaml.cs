@@ -43,6 +43,18 @@ namespace HandwritingFeedback.View.UpdatedUI
             InitializeComponent();
         }
 
+        public void ListDeleteButton(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine("Task Delete Button pressed:");
+            Debug.WriteLine(((Button)sender).Tag.ToString());
+        }
+
+        public void ListEditButton(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine("Task Edit Button pressed:");
+            Debug.WriteLine(((Button)sender).Tag.ToString());
+        }
+
         private void Navigate(object sender, RoutedEventArgs e)
         {
             CommonUtils.Navigate(sender, e, this);

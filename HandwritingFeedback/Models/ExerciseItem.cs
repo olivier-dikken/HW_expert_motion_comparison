@@ -53,6 +53,11 @@ namespace HandwritingFeedback.Models
             get => bestScore;
         }
 
+        public string Path
+        {
+            get => path;
+        }
+
         public static ExerciseItem FromExerciseConfigFile(string exerciseFolderPath)
         {
             //0=title
@@ -65,7 +70,7 @@ namespace HandwritingFeedback.Models
             try
             {
                 string[] lines = System.IO.File.ReadAllLines(exerciseFolderPath + "/exerciseConfig.txt");
-                string title = Path.GetFileName(exerciseFolderPath);
+                string title = System.IO.Path.GetFileName(exerciseFolderPath);                
                 string description = lines[1];
                 DateTime creationDate = DateTime.Parse(lines[2]);
                 int attempts = int.Parse(lines[3]);

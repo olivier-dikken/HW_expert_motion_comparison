@@ -94,13 +94,101 @@
 
 
                 <Grid Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#eaeaea">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="1*" />
-                            <RowDefinition Height="1*" />
-                            <RowDefinition Height="1*" />
-                        </Grid.RowDefinitions>
-                        <Button Content="Student Performance Reports"   Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="Navigate" Tag="\View\PracticeMode.xaml" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20" />
-                    <Button Content="Manage Learning Content"   Grid.Column="0" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="Navigate" Tag="\View\UpdatedUI\ManageLearningContent.xaml" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20" />
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="32"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="32"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <materialDesign:Card Grid.Column="1" Grid.Row="1"
+  Width="300"
+  Style="{DynamicResource MaterialDesignOutlinedCard}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition
+        Height="210" />
+                                <RowDefinition
+        Height="*" />
+                                <RowDefinition
+        Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Image
+      Source="/Assets/analytics_thumbnail.png"
+      Height="210"
+      Width="294"
+      Stretch="UniformToFill" />
+                            <StackPanel
+      Grid.Row="1"
+      Margin="12 24 12 24">
+                                <TextBlock
+        FontWeight="Bold" Margin="0 0 0 4">
+      Student Performance Reports
+                                </TextBlock>
+                                <TextBlock
+        TextWrapping="Wrap"
+        VerticalAlignment="Center"                                    
+        Text="Review student task performance reports with interactive visualizations." />
+                            </StackPanel>
+                            
+                                <Button Grid.Column="0" Grid.Row="2" Width="Auto" Height="Auto"
+  Style="{StaticResource MaterialDesignRaisedDarkButton}"
+
+  Content="View Reports"
+                            
+                            Click="Navigate" Tag="\View\UpdatedUI\DefaultView.xaml"/>
+
+                        </Grid>
+                    </materialDesign:Card>
+
+                    <materialDesign:Card Grid.Column="3" Grid.Row="1"
+  Width="300"
+  Style="{DynamicResource MaterialDesignOutlinedCard}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition
+        Height="210" />
+                                <RowDefinition
+        Height="*" />
+                                <RowDefinition
+        Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Image                                
+      Source="/Assets/manageContent_thumbnail.png"
+      Height="210"
+      Width="294"
+      Stretch="UniformToFill" />
+                            <StackPanel
+      Grid.Row="1"
+      Margin="12 24 12 24">
+                                <TextBlock
+        FontWeight="Bold" Margin="0 0 0 4">
+       Manage Learning Content
+                                </TextBlock>
+                                <TextBlock
+        TextWrapping="Wrap"
+        VerticalAlignment="Center"
+        Text="View and edit available tasks. Create new custom tasks for students to practice." />
+                            </StackPanel>
+
+                            <Button Grid.Column="0" Grid.Row="2" Width="Auto" Height="Auto"
+  Style="{StaticResource MaterialDesignRaisedDarkButton}"
+  
+  Content="View Learning Content"
+                            
+                            Click="Navigate" Tag="\View\UpdatedUI\ManageLearningContent.xaml"/>
+
+                        </Grid>
+                    </materialDesign:Card>
+
+
+                    <!--<Button Content="Student Performance Reports"   Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="Navigate" Tag="View\ViewUpdatedUI\DefaultView.xaml" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20" />
+                    <Button Content="Manage Learning Content"   Grid.Column="0" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Bottom" Click="Navigate" Tag="\View\UpdatedUI\ManageLearningContent.xaml" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20" />-->
                 </Grid>
             </ScrollViewer>
         </Grid>

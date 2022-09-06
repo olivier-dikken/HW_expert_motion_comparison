@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
@@ -59,6 +60,10 @@ namespace HandwritingFeedback.View.UpdatedUI
 
         public Card ExerciseToCard(ExerciseItem exerciseItem)
         {
+            PaletteHelper _paletteHelper = new PaletteHelper();
+            ITheme theme = _paletteHelper.GetTheme();
+            MaterialDesignColors.ColorPair playBtnColor = theme.SecondaryMid;
+
             Card exerciseCard = new Card();            
             exerciseCard.Width = 200;
             exerciseCard.Margin = new Thickness(8);
@@ -96,6 +101,7 @@ namespace HandwritingFeedback.View.UpdatedUI
             startExerciseButton.Content = playIcon;
             startExerciseButton.Width = 30;
             startExerciseButton.Padding = new Thickness(2,0,2,0);
+            startExerciseButton.Background = new SolidColorBrush(playBtnColor.Color);
             StackPanel bottomPanel = new StackPanel();
             bottomPanel.HorizontalAlignment = HorizontalAlignment.Right;
             bottomPanel.Orientation = Orientation.Horizontal;

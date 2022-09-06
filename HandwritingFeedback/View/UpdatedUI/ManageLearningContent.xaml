@@ -99,56 +99,84 @@
 
                 <Grid Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#eaeaea">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100" />
                         <ColumnDefinition Width="3*" />
-                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="100" />
                     </Grid.ColumnDefinitions>
-
-                    <Grid Grid.Column="0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="1*" />
-                            <RowDefinition Height="5*" />
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Foreground="Black" FontFamily="Consolas" FontSize="20">Available Exercises</TextBlock>
-                        <!--ListView Name="ListExercises" Grid.Row="1"></ListView-->
-                        <ListView Grid.Row="1"
-  ItemsSource="{Binding ExerciseItems}">
-                            <ListView.View>
-                                <GridView>
-                                    <GridViewColumn
-        DisplayMemberBinding="{Binding Title}"
-        Header="Title" />
-                                    <GridViewColumn
-        DisplayMemberBinding="{Binding Description}"
-        Header="Description" />
-                                    <GridViewColumn
-        DisplayMemberBinding="{Binding Attempts}"
-        Header="Attempts" />
-                                    <GridViewColumn
-        DisplayMemberBinding="{Binding BestScore}"
-        Header="Best Score" />
-                                    <GridViewColumn
-        DisplayMemberBinding="{Binding CreationDate}"
-        Header="Date Created" />
-                                </GridView>
-                            </ListView.View>
-                        </ListView>
-                    </Grid>
 
                     <Grid Grid.Column="1">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="1*" />
-                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="5*" />
                         </Grid.RowDefinitions>
                         <Grid Grid.Row="0">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="1*" />
-                                <RowDefinition Height="1*" />
-                                <RowDefinition Height="1*" />
-                            </Grid.RowDefinitions>
-                            <Button Content="Add Exercise" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Click="Navigate" Tag="\View\CreateContentMode.xaml" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20" />
-                            <Button Content="Edit Exercise"  Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Top" Click="EditExercise" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20" />
-                            <Button Content="Delete Exercise"   Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Top" Click="DeleteExercise" Background="White" Foreground="Black" FontFamily="Consolas" FontSize="20" />
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Foreground="Black" FontFamily="Consolas" FontSize="20">Available Tasks</TextBlock>
+                            <Button Grid.Column="1" Margin="8 8 16 8" Width="48" Height="48" HorizontalAlignment="Right"  Click="Navigate" Tag="\View\CreateContentMode.xaml"
+  Style="{StaticResource MaterialDesignFloatingActionSecondaryButton}"
+  ToolTip="Create New Task">
+                                <materialDesign:PackIcon
+    Kind="Plus"
+    Height="32"
+    Width="32" />
+                            </Button>
                         </Grid>
+
+                        <ScrollViewer
+                        x:Name="TaskListScrollViewer"
+                        Grid.Row="1"
+                        materialDesign:ScrollViewerAssist.IsAutoHideEnabled="True">
+                            <ListView Grid.Row="1"
+  ItemsSource="{Binding ExerciseItems}">
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn
+        DisplayMemberBinding="{Binding Title}"
+        Header="Title" Width=" 110" />
+                                        <GridViewColumn
+        DisplayMemberBinding="{Binding Description}"
+        Header="Description" Width="1070"/>
+                                        <GridViewColumn
+        DisplayMemberBinding="{Binding Attempts}"
+        Header="Attempts" />
+                                        <GridViewColumn
+        DisplayMemberBinding="{Binding BestScore}"
+        Header="Best Score" />
+                                        <GridViewColumn
+        DisplayMemberBinding="{Binding CreationDate}"
+        Header="Date Created" />
+                                        <GridViewColumn
+        Header="Options">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Button Margin="8 4 8 4" Width="Auto" Height="Auto" Click="ListEditButton" Tag="{Binding Path}"
+  Style="{StaticResource MaterialDesignFloatingActionSecondaryButton}"
+  ToolTip="Edit Task">
+                                                            <materialDesign:PackIcon
+    Kind="PencilOutline"
+    Height="Auto"
+    Width="Auto" />
+                                                        </Button>
+                                                        <Button Margin="8 4 8 4" Width="Auto" Height="Auto" Click="ListDeleteButton" Tag="{Binding Path}"
+  Style="{StaticResource MaterialDesignFloatingActionDarkButton}" Background="Red"
+  ToolTip="Delete Task">
+                                                            <materialDesign:PackIcon
+    Kind="Delete"
+    Height="Auto"
+    Width="Auto" />
+                                                        </Button>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+                        </ScrollViewer>
                     </Grid>
                 </Grid>
 
