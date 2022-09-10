@@ -99,7 +99,7 @@ namespace HandwritingFeedback.View
                 FileHandler.SaveTargetTrace(ExpertCanvas.Strokes, path);
 
                 //save target trace as .png for card thumbnail display
-                FileHandler.SaveCanvasAsImage(ExpertCanvas, path, "targetTrace");
+                FileHandler.SaveCanvasAsImage(ExpertCanvas, path, "_targetTrace");
 
                 //navigate to the exercise config screen
                 this.NavigationService.Navigate(new Uri("\\View\\CreateContentConfigMode.xaml", UriKind.Relative));                

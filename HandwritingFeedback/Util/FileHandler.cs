@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,6 +17,7 @@ using HandwritingFeedback.Models;
 using HandwritingFeedback.StylusPlugins.Strokes;
 using Microsoft.Win32;
 using Newtonsoft.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace HandwritingFeedback.Util
 {
@@ -123,7 +127,7 @@ namespace HandwritingFeedback.Util
 
             //create new grid
             //create new canvas, add to grid
-            Grid canvasGrid = new Grid();            
+            Grid canvasGrid = new Grid();
             canvasGrid.Width = strokeBounds.Width;
             canvasGrid.Height = strokeBounds.Height;
             RowDefinition rd = new RowDefinition();
@@ -151,7 +155,7 @@ namespace HandwritingFeedback.Util
 
 
             RenderTargetBitmap rtb = new RenderTargetBitmap((int)strokeBounds.Width, (int)strokeBounds.Height, 96d, 96d, PixelFormats.Default);
-            rtb.Render(canvasGrid);            
+            rtb.Render(canvasGrid);
 
 
 
@@ -160,13 +164,13 @@ namespace HandwritingFeedback.Util
             encoder.Frames.Add(BitmapFrame.Create(rtb));
             encoder.Save(fs);
             fs.Close();
-            
 
-            
+
+
             //draw all strokes on canvas
             //save grid...
         }
-        
+
 
         /// <summary>
         /// Provided by the Microsoft Ink API. Loads a .ISF file into a provided canvas.
@@ -270,7 +274,8 @@ namespace HandwritingFeedback.Util
         {
             // Iterate through all strokes in parallel and parse stroke properties in order to accurately
             // represent expert model prior to saving
-            Parallel.For(0, fetchedStrokes.Count, i => {
+            Parallel.For(0, fetchedStrokes.Count, i =>
+            {
                 Stroke currStroke = fetchedStrokes[i];
 
                 // Construct a new general stroke using same stylus points as the current stroke in order to represent
@@ -304,7 +309,8 @@ namespace HandwritingFeedback.Util
             });
         }
 
-        public static ObservableCollection<ExerciseItem> GetExerciseItems(){
+        public static ObservableCollection<ExerciseItem> GetExerciseItems()
+        {
             string workingDirectory = Environment.CurrentDirectory;
             string exerciseFolderPath = Directory.GetParent(workingDirectory).Parent.FullName + "\\SavedData\\Exercises\\";
             ObservableCollection<ExerciseItem> exerciseItems = new ObservableCollection<ExerciseItem>();
@@ -312,13 +318,21 @@ namespace HandwritingFeedback.Util
             {
 
                 string[] dirs = Directory.GetDirectories(exerciseFolderPath, "*", SearchOption.TopDirectoryOnly);
-                Debug.WriteLine("The number of directories starting with p is {0}.", dirs.Length);
+                Debug.WriteLine("The number of directories matched is {0}.", dirs.Length);
                 foreach (string dir in dirs)
                 {
                     string fileName = System.IO.Path.GetFileName(dir);
                     Debug.WriteLine(fileName);
-                    Debug.WriteLine(dir);                                        
-                    exerciseItems.Add(ExerciseItem.FromExerciseConfigFile(dir));
+                    Debug.WriteLine(dir);
+                    if (File.Exists(dir + "/exerciseConfig.txt"))
+                    {
+                        exerciseItems.Add(ExerciseItem.FromExerciseConfigFile(dir));
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Exercise config not found in folder: " + fileName);
+                    }
+
                 }
             }
             catch (Exception e)
@@ -328,5 +342,61 @@ namespace HandwritingFeedback.Util
             return exerciseItems;
         }
 
+        public static async Task WriteConfigTargetTraceView_Async(int lineType, int lineSpacing, string dir)
+        {
+            //0=title
+            //1=description
+            //2=creationDate
+            //3=attempts
+            //4=bestScore
+            //5=type
+            //6=linetype
+            //7=linespacing
+            //8=startingpoint
+            //9=json
+            //10=starrating
+
+            string[] lines =
+            {
+                "",
+                "",
+                DateTime.Now.ToString(),
+                "0",
+                "0",
+                 "0",
+                lineType.ToString(),
+                lineSpacing.ToString(),
+                "0"
+            };
+
+            await File.WriteAllLinesAsync(dir + "\\exerciseConfig.txt", lines);
+        }
+
+
+        public static async Task UpdateConfigInfoView_Async(string title, string desc, int starRating, ObservableCollection<FeedbackSelectionGridItem> featureGridData, string dir)
+        {
+            //0=title
+            //1=description
+            //2=creationDate
+            //3=attempts
+            //4=bestScore
+            //5=type
+            //6=linetype
+            //7=linespacing
+            //8=startingpoint
+            //9=json
+            //10=starrating
+
+
+            var jsonString = JsonSerializer.Serialize(featureGridData);
+
+
+            string[] lines = System.IO.File.ReadAllLines(dir + "/exerciseConfig.txt");
+            lines[0] = title;
+            lines[1] = desc.Replace("\n", "").Replace("\r", "");
+            List<string> allLines = lines.Append(jsonString).ToList();
+            allLines.Add(starRating.ToString());
+            await File.WriteAllLinesAsync(dir + "\\exerciseConfig.txt", allLines);
+        }
     }
 }

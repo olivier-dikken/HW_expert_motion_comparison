@@ -60,10 +60,6 @@ namespace HandwritingFeedback.View.UpdatedUI
             CommonUtils.Navigate(sender, e, this);
         }
 
-        public void AddExercise(object sender, RoutedEventArgs e)
-        {
-
-        }
 
         public void EditExercise(object sender, RoutedEventArgs e)
         {

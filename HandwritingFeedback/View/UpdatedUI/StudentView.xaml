@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:HandwritingFeedback.View.UpdatedUI" 
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="1080" d:DesignWidth="1920"
       Title="StudentView">
 
 
@@ -99,14 +99,19 @@
                     </Grid.ColumnDefinitions>
 
                     <Grid Grid.Column="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="6*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="1*" />
                             <RowDefinition Height="5*" />
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Foreground="Black" FontFamily="Consolas" FontSize="20">Available Exercises</TextBlock>
+                        <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Foreground="Black" FontFamily="Consolas" FontSize="20">Available Exercises</TextBlock>
                         <!--ListView Name="ListExercises" Grid.Row="1"></ListView-->
 
-                        <WrapPanel Name="ExercisePanel" Grid.Row="1">
+                        <WrapPanel Name="ExercisePanel" Grid.Row="1" Grid.Column="1">
                             
                         </WrapPanel>
                     </Grid>

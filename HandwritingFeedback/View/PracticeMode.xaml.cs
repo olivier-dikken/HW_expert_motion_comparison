@@ -106,8 +106,7 @@ namespace HandwritingFeedback.View
             // We are restarting an exercise when this method is called,
             // so the expert's trace is on the canvas and the student may
             // start writing.
-            StudentCanvas.IsEnabled = true;
-            
+            StudentCanvas.IsEnabled = true;            
         }
 
         

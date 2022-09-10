@@ -1,4 +1,5 @@
 ﻿using HandwritingFeedback.Util;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,27 +9,30 @@ using System.Text;
 
 namespace HandwritingFeedback.Models
 {
-    class ExpertDistributionModel
+    [Serializable()]
+    public class ExpertDistributionModel
     {
-        Dictionary<string, List<double[]>> transformed_data = new Dictionary<string, List<double[]>>();
+        public Dictionary<string, List<double[]>> transformed_data { get; set; } 
 
-        int length = -1;
+        public int length { get; set; } = -1;
 
-        int numberOfSamplesPerFeatures = -1;
 
         public ExpertDistributionModel(int targetLength)
         {
             length = targetLength;
+            transformed_data = new Dictionary<string, List<double[]>>();
         }
 
-        public ExpertDistributionModel(string pathToFile)
+        [JsonConstructor]
+        public ExpertDistributionModel(Dictionary<string, List<double[]>> transformed_data, int length)
         {
-            //TODO load EDM from file (serialized)
+            this.transformed_data = transformed_data;
+            this.length = length;
         }
 
-        public void SetNumberOfSamplesPerFeature(int num)
+        public int SampleCount()
         {
-            numberOfSamplesPerFeatures = num;
+            return transformed_data.Count;
         }
 
         public void AddTransformed(double [] data, string name)
