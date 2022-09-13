@@ -6,25 +6,29 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Windows.Controls.Primitives;
 
 namespace HandwritingFeedback.Models
 {
     [Serializable()]
     public class ExpertDistributionModel
     {
-        public Dictionary<string, List<double[]>> transformed_data { get; set; } 
+        public List<Dictionary<string, double[]>> transformed_data { get; set; } 
 
         public int length { get; set; } = -1;
+
+
+        private EDMData edmData{ get; set; }
 
 
         public ExpertDistributionModel(int targetLength)
         {
             length = targetLength;
-            transformed_data = new Dictionary<string, List<double[]>>();
+            transformed_data = new List<Dictionary<string, double[]>>();
         }
 
         [JsonConstructor]
-        public ExpertDistributionModel(Dictionary<string, List<double[]>> transformed_data, int length)
+        public ExpertDistributionModel(List<Dictionary<string, double[]>> transformed_data, int length)
         {
             this.transformed_data = transformed_data;
             this.length = length;
@@ -35,22 +39,34 @@ namespace HandwritingFeedback.Models
             return transformed_data.Count;
         }
 
+
+        /// <summary>
+        /// add array of stroke data for a certain feature, after transforming the data to match the TargetTrace length
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="name"></param>
         public void AddTransformed(double [] data, string name)
         {
-            if(length == -1) //if not yet initialized with target length, this should be done first
+            Dictionary<string, double[]> add_data = new Dictionary<string, double[]>();
+            if (length == -1) //if not yet initialized with target length, this should be done first
             {
                 Debug.WriteLine("Cannot add data, target length is not set");
             } else //try to add the data
             {
-                if (transformed_data.ContainsKey(name)) //add to existing list
+                if (add_data.ContainsKey(name)) //check if data already added
                 {
-                    transformed_data[name].Add(data);
-                } else //init new list
+                    Debug.WriteLine("Trying to add feature data to non empty dict feature data");
+                } else 
                 {
-                    List<double[]> newList = new List<double[]>();
-                    newList.Add(data);
-                    transformed_data.Add(name, newList);
+                    add_data.Add(name, data);
                 }
+                foreach(string ftName in GlobalState.FeatureNames)
+                {
+                    if (!add_data.ContainsKey(ftName)) //if not all features present then return
+                        return;
+                }
+                //if all features present, then add to transformed_data
+                transformed_data.Add(add_data);
             }
         }
 
@@ -66,7 +82,15 @@ namespace HandwritingFeedback.Models
             {
                 dataPoints[i] = new EDMDataPoint(i);
             }
-            //go over key names
+
+            foreach (string ft in GlobalState.FeatureNames)
+            {
+                //get avg and std for each ft
+                
+                //add to EDM function? where a single dict can be added in weighted manner to existing EDM
+            }
+
+            //go over key names OLD VERSION
             foreach (string ft in GlobalState.FeatureNames)
             {                
                 List<double[]> data = transformed_data[ft];
@@ -127,12 +151,13 @@ namespace HandwritingFeedback.Models
 
         public override string ToString()
         {
-            string ret = $"{length}\n";
-            foreach(KeyValuePair<string, List<double[]>> entry in transformed_data)
-            {
-                ret += $"{entry.Key} size {entry.Value.Count}\n";
-            }
-            return ret;
+            //string ret = $"{length}\n";
+            //foreach(KeyValuePair<string, List<double[]>> entry in transformed_data)
+            //{
+            //    ret += $"{entry.Key} size {entry.Value.Count}\n";
+            //}
+            //return ret;
+            return "EDM TOSTRING() not implemented";
         }
 
     }
@@ -140,11 +165,62 @@ namespace HandwritingFeedback.Models
     [Serializable()]
     public class EDMData
     {
-        public EDMDataPoint[] dataPoints;
+        public EDMDataPoint[] dataPoints;        
         public EDMData(EDMDataPoint[] dataPoints)
         {
             this.dataPoints = dataPoints;
         }
+
+        
+    }
+
+    /// <summary>
+    /// storing sample count, mean, M2 to use as part of Welford's algorithm
+    /// for more info see: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Compute_running_.28continuous.29_variance
+    /// </summary>
+    public class EDMDataPointFeatureValue
+    {
+        public string name;
+        public int numberOfSamples;
+        
+        public double mean;
+        public double M2;
+        private double std;
+
+        public EDMDataPointFeatureValue(string name, double mean, double m2, int nSamples=1)
+        {
+            this.name = name;
+            this.mean = mean;
+            this.numberOfSamples = nSamples;
+            M2 = m2;
+            if (nSamples > 1)
+                UpdateSTD();
+            else
+                std = 0;
+        }
+
+        private void UpdateSTD()
+        {
+            std = M2 / (double) numberOfSamples;
+        }
+
+        public double GetSTD()
+        {
+            return std;
+        }
+
+        public void AddSample(double newSample)
+        {
+            numberOfSamples++;
+            double delta = newSample - mean;
+            mean += delta / numberOfSamples;
+            double delta2 = newSample = mean;
+            M2 += delta * delta2;
+            if (numberOfSamples > 1)
+                UpdateSTD();
+        }
+
+
     }
 
     [Serializable()]
@@ -161,6 +237,8 @@ namespace HandwritingFeedback.Models
         public double Speed_std;
         public double Curvature;
         public double Curvature_std;
+
+        public int numberOfSamples;
 
         public EDMDataPoint(int i)
         {
