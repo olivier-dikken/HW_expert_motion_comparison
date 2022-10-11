@@ -33,7 +33,7 @@ namespace HandwritingFeedback.View.UpdatedUI
             BackCommand = new AnotherCommandImplementation(
                 _ =>
                 {
-                    HomeButton(null, null);
+                    BackButton(null, null);
                 });
 
             this.DataContext = this;
@@ -102,6 +102,8 @@ namespace HandwritingFeedback.View.UpdatedUI
             startExerciseButton.Width = 30;
             startExerciseButton.Padding = new Thickness(2,0,2,0);
             startExerciseButton.Background = new SolidColorBrush(playBtnColor.Color);
+            startExerciseButton.Click += CardOnClick;
+            startExerciseButton.Tag = exerciseItem.path;
             StackPanel bottomPanel = new StackPanel();
             bottomPanel.HorizontalAlignment = HorizontalAlignment.Right;
             bottomPanel.Orientation = Orientation.Horizontal;
@@ -113,6 +115,15 @@ namespace HandwritingFeedback.View.UpdatedUI
             exerciseCard.Content = cardGrid;
 
             return exerciseCard;
+        }
+
+        public void CardOnClick(object sender, RoutedEventArgs e)
+        {
+            //start corresponding ex
+            GlobalState.SelectedExercisePath = ((Button)sender).Tag.ToString();
+            Button fakeButton = new Button();
+            fakeButton.Tag = "\\View\\UpdatedUI\\StudentPracticeView.xaml";
+            CommonUtils.Navigate(fakeButton, null, this);
         }
 
         private void StartSelectedExercise(object sender, RoutedEventArgs e)
@@ -150,7 +161,7 @@ namespace HandwritingFeedback.View.UpdatedUI
             catch (Exception e)
             {
                 Debug.WriteLine("The process failed: {0}", e.ToString());
-            }
+            }            
         }
 
         
@@ -162,7 +173,9 @@ namespace HandwritingFeedback.View.UpdatedUI
 
         public void BackButton(object sender, RoutedEventArgs e)
         {
-            CommonUtils.Navigate(sender, e, this);
+            Button fakeButton = new Button();
+            fakeButton.Tag = "\\View\\UpdatedUI\\StudentView.xaml";
+            CommonUtils.Navigate(fakeButton, null, this);
         }
 
         public void CloseApplicationButton(object sender, RoutedEventArgs e)

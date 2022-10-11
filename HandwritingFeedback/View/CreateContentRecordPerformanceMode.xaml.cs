@@ -393,10 +393,14 @@ namespace HandwritingFeedback.View
         private void NextIteration()
         {
             //store expertPerformance of previous iteration
-            foreach(string featureName in GlobalState.FeatureNames)
+            Dictionary<string, double[]> add_data = new Dictionary<string, double[]>();
+            foreach (string featureName in GlobalState.FeatureNames)
             {
                 AddToEDM(featureName);
-            }                        
+                double[] transformed = TransformStrokeDataToTarget(TargetTrace, expertPerformance, featureName);
+                add_data.Add(featureName, transformed);
+            }
+            edm.AddTransformed(add_data);
             expertPerformances[iteration - 1] = expertPerformance;
             
             iteration++;
@@ -406,8 +410,8 @@ namespace HandwritingFeedback.View
         
         private void AddToEDM(string featureName)
         {
-            double[] transformed = TransformStrokeDataToTarget(TargetTrace, expertPerformance, featureName);
-            edm.AddTransformed(transformed, featureName);
+            
+            
         }
 
         private void FinishExercise()
@@ -427,7 +431,7 @@ namespace HandwritingFeedback.View
             //TargetTrace and config already saved, need to save EDM and add RDY to config file
             //convert arrays per dimension to avg + std per dimension
             Debug.WriteLine(edm.ToString());
-            EDMData edmData = edm.GetDistributionModel();
+            EDMData edmData = edm.GetEDMData();
             string fileName = "EDMData";
             ExpertDistributionModel.SaveToFile(GlobalState.CreateContentsPreviousFolder + "\\" + fileName, edmData);
 
@@ -445,15 +449,15 @@ namespace HandwritingFeedback.View
             ExpertCanvas.Reset();
 
             EDMData loadedData = ExpertDistributionModel.LoadFromFile(GlobalState.CreateContentsPreviousFolder + "\\" + fileName);
-            Debug.WriteLine($"number of loaded datapoints: {loadedData.dataPoints.Length}");
+            Debug.WriteLine($"number of loaded datapoints: {loadedData.GetLength()}");
 
             Plotter _plotter = new Plotter(null, graphDock);
 
-            ShowEDMGraph(loadedData, "X", _plotter);
-            ShowEDMGraph(loadedData, "Y", _plotter);
+            //ShowEDMGraph(loadedData, "X", _plotter);
+            //ShowEDMGraph(loadedData, "Y", _plotter);
 
-            //show tolerance thresholds in plot!
-            ShowXYThresholds(loadedData);
+            ////show tolerance thresholds in plot!
+            //ShowXYThresholds(loadedData);
 
             //show exercise target trace, in black
             TargetTrace = FileHandler.LoadStrokeCollection(GlobalState.CreateContentsPreviousFolder + "\\TargetTrace.isf");
@@ -480,7 +484,7 @@ namespace HandwritingFeedback.View
             //TargetTrace and config already saved, need to save EDM and add RDY to config file
             //convert arrays per dimension to avg + std per dimension
             Debug.WriteLine(edm.ToString());
-            EDMData edmData = edm.GetDistributionModel();
+            EDMData edmData = edm.GetEDMData();
             string fileName = "EDMData";
             ExpertDistributionModel.SaveToFile(GlobalState.CreateContentsPreviousFolder + "\\" + fileName, edmData);
 
@@ -499,15 +503,15 @@ namespace HandwritingFeedback.View
             ExpertCanvas.Reset();            
 
             EDMData loadedData = ExpertDistributionModel.LoadFromFile(GlobalState.CreateContentsPreviousFolder + "\\" + fileName);
-            Debug.WriteLine($"number of loaded datapoints: {loadedData.dataPoints.Length}");
+            Debug.WriteLine($"number of loaded datapoints: {loadedData.GetLength()}");
 
             Plotter _plotter = new Plotter(null, graphDock);
 
-            ShowEDMGraph(loadedData, "X", _plotter);
-            ShowEDMGraph(loadedData, "Y", _plotter);
+            //ShowEDMGraph(loadedData, "X", _plotter);
+            //ShowEDMGraph(loadedData, "Y", _plotter);
 
-            //show tolerance thresholds in plot!
-            ShowXYThresholds(loadedData);
+            ////show tolerance thresholds in plot!
+            //ShowXYThresholds(loadedData);
 
             //show exercise target trace, in black
             TargetTrace = FileHandler.LoadStrokeCollection(GlobalState.CreateContentsPreviousFolder + "\\TargetTrace.isf");
@@ -525,130 +529,130 @@ namespace HandwritingFeedback.View
         /// TODO WIP plot thresholds of X,Y of EDM
         /// </summary>
         /// <param name="data"></param>
-        private void ShowXYThresholds(EDMData data)
-        {
-            int steps = 10;
-            int length = data.dataPoints.Length;
-            double[] avg_X = new double[length];
-            double[] avg_Y = new double[length];
-            double[] std_X = new double[length];
-            double[] std_Y = new double[length];
-            StylusPoint[] ellipse_points = new StylusPoint[steps];
-            float t = 0;
-            double new_x;
-            double new_y;
-            DrawingAttributes da = new DrawingAttributes();
-            da.Color = Colors.Green;
-            for (int i = 0; i < length; i++)
-            {
-                avg_X[i] = data.dataPoints[i].X;
-                avg_Y[i] = data.dataPoints[i].Y;
-                std_X[i] = data.dataPoints[i].X_std;
-                std_Y[i] = data.dataPoints[i].Y_std;
-                for(int j = 0; j < steps; j ++)
-                {
-                    t = j * (2 * MathF.PI) / 10;
-                    new_x = data.dataPoints[i].X + data.dataPoints[i].X_std * MathF.Cos(t);
-                    new_y = data.dataPoints[i].Y + data.dataPoints[i].Y_std * MathF.Sin(t);
+        //private void ShowXYThresholds(EDMData data)
+        //{
+        //    int steps = 10;
+        //    int length = data.GetLength();
+        //    double[] avg_X = new double[length];
+        //    double[] avg_Y = new double[length];
+        //    double[] std_X = new double[length];
+        //    double[] std_Y = new double[length];
+        //    StylusPoint[] ellipse_points = new StylusPoint[steps];
+        //    float t = 0;
+        //    double new_x;
+        //    double new_y;
+        //    DrawingAttributes da = new DrawingAttributes();
+        //    da.Color = Colors.Green;
+        //    for (int i = 0; i < length; i++)
+        //    {
+        //        avg_X[i] = data.dataPoints[i].X;
+        //        avg_Y[i] = data.dataPoints[i].Y;
+        //        std_X[i] = data.dataPoints[i].X_std;
+        //        std_Y[i] = data.dataPoints[i].Y_std;
+        //        for(int j = 0; j < steps; j ++)
+        //        {
+        //            t = j * (2 * MathF.PI) / 10;
+        //            new_x = data.dataPoints[i].X + data.dataPoints[i].X_std * MathF.Cos(t);
+        //            new_y = data.dataPoints[i].Y + data.dataPoints[i].Y_std * MathF.Sin(t);
 
-                    ellipse_points[j] = new StylusPoint(new_x, new_y);
-                }
-                StylusPointCollection spc = new StylusPointCollection(ellipse_points);
-                Stroke newStroke = new Stroke(spc, da);
-                ExpertCanvasBG.Strokes.Add(newStroke);
-            }
+        //            ellipse_points[j] = new StylusPoint(new_x, new_y);
+        //        }
+        //        StylusPointCollection spc = new StylusPointCollection(ellipse_points);
+        //        Stroke newStroke = new Stroke(spc, da);
+        //        ExpertCanvasBG.Strokes.Add(newStroke);
+        //    }
 
-        }
+        //}
 
-        private void ShowEDMGraph(EDMData data, string feature, Plotter _plotter)
-        {
-            Debug.WriteLine("In ShowEDMGraph");
+        //private void ShowEDMGraph(EDMData data, string feature, Plotter _plotter)
+        //{
+        //    Debug.WriteLine("In ShowEDMGraph");
 
-            LineGraph Synthesis = new LineGraph
-            {
-                Title = "EDM graph",
-                XAxisLabel = $"{feature} AVG and STD",
-                YAxisLabel = "Datapoint index",                
-                CurvedLine = false,
-                MinimumYRange = 100,
-                AbsoluteMinimumY = 100
-            };            
+        //    LineGraph Synthesis = new LineGraph
+        //    {
+        //        Title = "EDM graph",
+        //        XAxisLabel = $"{feature} AVG and STD",
+        //        YAxisLabel = "Datapoint index",                
+        //        CurvedLine = false,
+        //        MinimumYRange = 100,
+        //        AbsoluteMinimumY = 100
+        //    };            
             
 
 
-            List<DataPoint> dataPoints = new List<DataPoint>();
-            dataPoints.Add(new DataPoint(0, 0));
-            for(int i = 0; i < data.dataPoints.Length; i++)
-            {
-                switch (feature)
-                {
-                    case "X":
-                        dataPoints.Add(new DataPoint(i, data.dataPoints[i].X));
-                        break;
+        //    List<DataPoint> dataPoints = new List<DataPoint>();
+        //    dataPoints.Add(new DataPoint(0, 0));
+        //    for(int i = 0; i < data.dataPoints.Length; i++)
+        //    {
+        //        switch (feature)
+        //        {
+        //            case "X":
+        //                dataPoints.Add(new DataPoint(i, data.dataPoints[i].X));
+        //                break;
 
-                    case "Y":
-                        dataPoints.Add(new DataPoint(i, data.dataPoints[i].Y));
-                        break;
+        //            case "Y":
+        //                dataPoints.Add(new DataPoint(i, data.dataPoints[i].Y));
+        //                break;
 
-                    default:
-                        Debug.WriteLine($"Wrong feature name: {feature}");
-                        break;
-                }
+        //            default:
+        //                Debug.WriteLine($"Wrong feature name: {feature}");
+        //                break;
+        //        }
                 
-            }
-            var avgSeries = LineGraph.CreateSeries(dataPoints, OxyColors.Blue, "Student Trace");
-            Synthesis.AddSeries(avgSeries);
+        //    }
+        //    var avgSeries = LineGraph.CreateSeries(dataPoints, OxyColors.Blue, "Student Trace");
+        //    Synthesis.AddSeries(avgSeries);
 
-            List<DataPoint> dataPoints_bound_upper = new List<DataPoint>();
-            dataPoints_bound_upper.Add(new DataPoint(0, 0));
-            for (int i = 0; i < data.dataPoints.Length; i++)
-            {
-                switch (feature)
-                {
-                    case "X":
-                        dataPoints_bound_upper.Add(new DataPoint(i, data.dataPoints[i].X + 5*data.dataPoints[i].X_std));
-                        break;
+        //    List<DataPoint> dataPoints_bound_upper = new List<DataPoint>();
+        //    dataPoints_bound_upper.Add(new DataPoint(0, 0));
+        //    for (int i = 0; i < data.dataPoints.Length; i++)
+        //    {
+        //        switch (feature)
+        //        {
+        //            case "X":
+        //                dataPoints_bound_upper.Add(new DataPoint(i, data.dataPoints[i].X + 5*data.dataPoints[i].X_std));
+        //                break;
 
-                    case "Y":
-                        dataPoints_bound_upper.Add(new DataPoint(i, data.dataPoints[i].Y + 5*data.dataPoints[i].Y_std));
-                        break;
+        //            case "Y":
+        //                dataPoints_bound_upper.Add(new DataPoint(i, data.dataPoints[i].Y + 5*data.dataPoints[i].Y_std));
+        //                break;
 
-                    default:
-                        Debug.WriteLine($"Wrong feature name: {feature}");
-                        break;
-                }
+        //            default:
+        //                Debug.WriteLine($"Wrong feature name: {feature}");
+        //                break;
+        //        }
 
-            }
-            var bound_upper_Series = LineGraph.CreateSeries(dataPoints_bound_upper, OxyColors.Orange, "UpperBound");
-            Synthesis.AddSeries(bound_upper_Series);
+        //    }
+        //    var bound_upper_Series = LineGraph.CreateSeries(dataPoints_bound_upper, OxyColors.Orange, "UpperBound");
+        //    Synthesis.AddSeries(bound_upper_Series);
 
-            List<DataPoint> dataPoints_bound_lower = new List<DataPoint>();
-            dataPoints_bound_lower.Add(new DataPoint(0, 0));
-            for (int i = 0; i < data.dataPoints.Length; i++)
-            {
-                switch (feature)
-                {
-                    case "X":
-                        dataPoints_bound_lower.Add(new DataPoint(i, data.dataPoints[i].X - 5*data.dataPoints[i].X_std));
-                        break;
+        //    List<DataPoint> dataPoints_bound_lower = new List<DataPoint>();
+        //    dataPoints_bound_lower.Add(new DataPoint(0, 0));
+        //    for (int i = 0; i < data.dataPoints.Length; i++)
+        //    {
+        //        switch (feature)
+        //        {
+        //            case "X":
+        //                dataPoints_bound_lower.Add(new DataPoint(i, data.dataPoints[i].X - 5*data.dataPoints[i].X_std));
+        //                break;
 
-                    case "Y":
-                        dataPoints_bound_lower.Add(new DataPoint(i, data.dataPoints[i].Y - 5*data.dataPoints[i].Y_std));
-                        break;
+        //            case "Y":
+        //                dataPoints_bound_lower.Add(new DataPoint(i, data.dataPoints[i].Y - 5*data.dataPoints[i].Y_std));
+        //                break;
 
-                    default:
-                        Debug.WriteLine($"Wrong feature name: {feature}");
-                        break;
-                }
+        //            default:
+        //                Debug.WriteLine($"Wrong feature name: {feature}");
+        //                break;
+        //        }
 
-            }
-            var bound_lower_Series = LineGraph.CreateSeries(dataPoints_bound_lower, OxyColors.Orange, "LowerBound");            
-            Synthesis.AddSeries(bound_lower_Series);
+        //    }
+        //    var bound_lower_Series = LineGraph.CreateSeries(dataPoints_bound_lower, OxyColors.Orange, "LowerBound");            
+        //    Synthesis.AddSeries(bound_lower_Series);
 
 
 
-            _plotter.RenderLineGraph((LineGraph)Synthesis);
-        }
+        //    _plotter.RenderLineGraph((LineGraph)Synthesis);
+        //}
 
         private double[] ExtractFeatureArrayFromStrokeCollection()
         {

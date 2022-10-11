@@ -244,11 +244,11 @@ namespace HandwritingFeedback.RealtimeFeedback
 
             // Destroy current list of input sources in visual feedback singleton
             VisualFeedback.GetInstance().InputSources.Clear();
-            AuditoryFeedback.GetInstance().InputSources.Clear();
+            //AuditoryFeedback.GetInstance().InputSources.Clear();
 
             // Load any additional input sources below
             VisualFeedback.GetInstance().InputSources.Add(new TabletSource());
-            AuditoryFeedback.GetInstance().InputSources.Add(new TabletSource());
+            //AuditoryFeedback.GetInstance().InputSources.Add(new TabletSource());
         }
     }
 }

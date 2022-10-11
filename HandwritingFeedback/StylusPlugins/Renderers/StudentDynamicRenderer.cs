@@ -46,7 +46,7 @@ namespace HandwritingFeedback.StylusPlugins.Renderers
             // Add method calls for different feedback types used
             // by the TabletSource (e.g. visual, auditory, haptic, etc.) below
             VisualFeedback.GetInstance().Feedback(drawingContext, stylusPoints);
-            AuditoryFeedback.GetInstance().Feedback(AuditoryFeedback.GetInstance()?.Player, stylusPoints);
+            //AuditoryFeedback.GetInstance().Feedback(AuditoryFeedback.GetInstance()?.Player, stylusPoints);
         }
     }
 }

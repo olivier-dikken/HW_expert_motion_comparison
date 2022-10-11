@@ -440,7 +440,7 @@ namespace HandwritingFeedback.View
                     Debug.WriteLine("Student point " + previousStudentMatchIndex + " comparison with EDM point. X diff: " + score_x + " Y diff: " + score_y);
                     firstPointSet = true;
                 }
-                relevantEDMPoints.Add(edmData.dataPoints[aV[i].Item2]);                
+                //relevantEDMPoints.Add(edmData.dataPoints[aV[i].Item2]);                
 
                 previousStudentMatchIndex = aV[i].Item1;
             }

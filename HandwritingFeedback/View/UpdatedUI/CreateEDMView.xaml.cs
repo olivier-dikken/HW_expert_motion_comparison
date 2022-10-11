@@ -47,7 +47,7 @@ namespace HandwritingFeedback.View.UpdatedUI
 
             InitializeComponent();
 
-            this._EDMCreationHelpler = new EDMCreationHelpler(_currentExercise, CanvasBG, ExpertEditCanvas);
+            this._EDMCreationHelpler = new EDMCreationHelpler(_currentExercise, CanvasBG, ExpertEditCanvas, OverlayCanvas, this);
         }
 
 
@@ -84,7 +84,16 @@ namespace HandwritingFeedback.View.UpdatedUI
 
         public void DiscardSampleButton(object sender, RoutedEventArgs e)
         {
-            _EDMCreationHelpler.DiscardNewSample();            
+            _EDMCreationHelpler.DiscardNewSample();
+            SubmitButton.IsEnabled = false;
+
+            ConfirmSampleButton.Visibility = Visibility.Collapsed;
+            ConfirmSampleButton.IsEnabled = false;
+            DiscardSampleSubmissionButton.Visibility = Visibility.Collapsed;
+            DiscardSampleSubmissionButton.IsEnabled = false;
+
+            CanvasToolBar.Visibility = Visibility.Visible;
+            CanvasToolBar.IsEnabled = true;
         }
 
 

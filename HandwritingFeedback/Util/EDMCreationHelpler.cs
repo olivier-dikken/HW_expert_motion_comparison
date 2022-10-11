@@ -1,21 +1,31 @@
-﻿using HandwritingFeedback.Config;
+﻿using HandwritingFeedback.BatchedFeedback;
+using HandwritingFeedback.Config;
 using HandwritingFeedback.InkCanvases;
 using HandwritingFeedback.Models;
+using HandwritingFeedback.View.UpdatedUI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
+using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
+using static HandwritingFeedback.Util.EDMCreationHelpler.EDMModelComparison;
 
 namespace HandwritingFeedback.Util
 {
     public class EDMCreationHelpler
     {
+        private Page createEDMView;
+
         private ExpertInkCanvas bgCanvas;
         private ExpertInkCanvas editCanvas;
+        private Canvas overlayCanvas;
 
         private ExerciseItem theExercise;
         private StrokeCollection _targetTrace;
@@ -26,11 +36,16 @@ namespace HandwritingFeedback.Util
         private List<StrokeCollection> performances;
         private int iteration;
 
-        public EDMCreationHelpler(ExerciseItem theExercise, ExpertInkCanvas bgC, ExpertInkCanvas editC)
+        private Dictionary<string, double[]> previousSampleTransformedData;
+        
+
+        public EDMCreationHelpler(ExerciseItem theExercise, ExpertInkCanvas bgC, ExpertInkCanvas editC, Canvas overlayC, Page createEDMView)
         {
             this.theExercise = theExercise;
             this.bgCanvas = bgC;
             this.editCanvas = editC;
+            this.overlayCanvas = overlayC;
+            this.createEDMView = createEDMView;
             Setup();
         }
 
@@ -39,11 +54,29 @@ namespace HandwritingFeedback.Util
             iteration = 0;
             this._targetTrace = theExercise.targetTrace;
             TraceUtils tu = new TraceUtils(_targetTrace);
-            int ttNumberOfStylusPoints = tu.GetNumberOfStylusPoints();
-            currentEDM = new ExpertDistributionModel(ttNumberOfStylusPoints);
-            newSampleEDM = new ExpertDistributionModel(_targetTrace.Count);
+            int ttNumberOfStylusPoints = tu.GetNumberOfStylusPoints();            
+            currentEDM = new ExpertDistributionModel(ttNumberOfStylusPoints);            
+            newSampleEDM = new ExpertDistributionModel(ttNumberOfStylusPoints);
             performances = new List<StrokeCollection>();
+            previousSampleTransformedData = new Dictionary<string, double[]>();
+            foreach(string ft in GlobalState.FeatureNames)
+            {
+                previousSampleTransformedData[ft] = new double[ttNumberOfStylusPoints];
+            }
             ReloadCanvas();
+        }
+
+        private void SaveExercise()
+        {
+
+            EDMData edmData = currentEDM.GetEDMData();
+            string fileName = "EDMData";
+            ExpertDistributionModel.SaveToFile(GlobalState.CreateContentsPreviousFolder + "\\" + fileName, edmData);
+
+            //TODO save strokecollection to file
+ 
+            //return to menu & show success message
+            
         }
 
 
@@ -57,10 +90,178 @@ namespace HandwritingFeedback.Util
             performances.Add(submittedPerformance);
             //add to newSampleEDM
             AddSampleToEDM(newSampleEDM, submittedPerformance);
-            //TODO compare to currentEDM
-            //TODO show vis
 
-        }        
+            if (iteration > 0) //dont compare edm models on first iteration, because there is only 1 model and no other model to compare to
+            {
+                //compare to currentEDM
+                EDMModelComparison edmModelComparison = new EDMModelComparison(currentEDM, newSampleEDM);
+                //TODO show vis
+                ShowEDMModelComparisonDiffZonesOnTrace(edmModelComparison);
+            }
+
+
+        }
+
+        /// <summary>
+        /// highlight the x,y coords with the biggest EDMModelComparison diff in avg and/or std 
+        /// </summary>
+        private void ShowEDMModelComparisonDiffZonesOnTrace(EDMModelComparison edmModelComparison)
+        {
+            SolidColorBrush sb;
+            overlayCanvas.Children.RemoveRange(0, overlayCanvas.Children.Count);
+            overlayCanvas.Visibility = System.Windows.Visibility.Visible; //show overlay canvas
+            Dictionary<string, EDMModelComparisonValue[]> edmMCData = edmModelComparison.GetModelComparisonData();
+            foreach (string ft in GlobalState.FeatureNames)
+            {
+                if (ft == "Pressure")
+                {
+                    sb = new SolidColorBrush(Colors.Blue);
+                    EDMModelComparisonValue[] pressureData = edmMCData[ft];
+                    for (int i = 0; i < edmModelComparison.length; i++)
+                    {
+                        double diffFormulaValue = Math.Abs((pressureData[i].meanOld - previousSampleTransformedData[ft][i]))/2;
+                        Debug.WriteLine("Pressure diffFormulaValue: " + diffFormulaValue);
+                        if(diffFormulaValue > 0.1) //if big diff in STD then draw overlay point
+                        {                            
+                            double x = previousSampleTransformedData["X"][i];
+                            double y = previousSampleTransformedData["Y"][i];
+                            OverlayDrawDatapoint(x, y, sb, ellipseDiameter: 7);
+                        }
+                    }
+                }
+                else if (ft == "Curvature")
+                {
+                    sb = new SolidColorBrush(Colors.Red);
+                    EDMModelComparisonValue[] curvatureData = edmMCData[ft];
+                    for (int i = 0; i < edmModelComparison.length; i++)
+                    {
+                        double meanCurv = curvatureData[i].meanOld;
+                        double newCurv = previousSampleTransformedData[ft][i];
+                        if (curvatureData[i].meanOld > 300 && curvatureData[i].meanOld < 60)
+                        {
+                            meanCurv += 180;
+                            newCurv += 180;
+
+                            meanCurv = meanCurv % 360;
+                            newCurv = newCurv % 360;
+
+                        }
+                        double diffFormulaValue = Math.Abs((meanCurv - newCurv)) / 200;
+                        Debug.WriteLine("Curvature data meanCurv: " + meanCurv + " newCurv: " + newCurv);
+                        Debug.WriteLine("Curvature diffFormulaValue: " + diffFormulaValue);
+                        if (diffFormulaValue > 0.1) //if big diff in STD then draw overlay point
+                        {
+                            double x = previousSampleTransformedData["X"][i];
+                            double y = previousSampleTransformedData["Y"][i];
+                            OverlayDrawDatapoint(x, y, sb, ellipseDiameter: 12);
+                        }
+                    }
+                }
+                //else if (ft == "Speed")
+                //{
+                //    sb = new SolidColorBrush(Colors.Orange);
+                //    EDMModelComparisonValue[] speedData = edmMCData[ft];
+                //    for (int i = 0; i < edmModelComparison.length; i++)
+                //    {
+                //        double diffFormulaValue = Math.Abs((speedData[i].avgRawDiff - previousSampleTransformedData[ft][i])) / 25;
+                //        Debug.WriteLine("Speed diffFormulaValue: " + diffFormulaValue);
+                //        if (diffFormulaValue > 0.2) //if big diff in STD then draw overlay point
+                //        {
+                //            double x = previousSampleTransformedData["X"][i];
+                //            double y = previousSampleTransformedData["Y"][i];
+                //            OverlayDrawDatapoint(x, y, sb, ellipseDiameter: 7);
+                //        }
+                //    }
+                //}
+                else //onlylimited ft for demo
+                    continue;
+
+
+                //remember which dots belong to which ft?
+            }            
+        }
+
+        void OverlayDrawDatapoint(double X, double Y, SolidColorBrush strokeColor, int ellipseDiameter = 8)
+        {
+
+            
+
+            Ellipse ellipse = new Ellipse();
+            ellipse.StrokeThickness = 1;
+            //ellipse.Fill = new SolidColorBrush(Color.FromRgb(255, 240, 31));
+            ellipse.Fill = strokeColor;
+            ellipse.Stroke = strokeColor;
+           // ellipse.Stroke = new SolidColorBrush(Color.FromRgb(0, 32, 255));
+            ellipse.Width = ellipseDiameter;
+            ellipse.Height = ellipseDiameter;
+
+            Canvas.SetLeft(ellipse, X - (ellipseDiameter / 2));
+            Canvas.SetTop(ellipse, Y - (ellipseDiameter / 2));
+
+            overlayCanvas.Children.Add(ellipse);
+        }
+
+
+
+
+        public class EDMModelComparison
+        {
+            Dictionary<string, EDMModelComparisonValue[]> edmModelComparisonData;
+            public int length { get; }
+
+            public EDMModelComparison(ExpertDistributionModel edm1, ExpertDistributionModel edm2)
+            {
+                length = edm1.length;
+                edmModelComparisonData = new Dictionary<string, EDMModelComparisonValue[]>();
+                foreach (string ft in GlobalState.FeatureNames)
+                {
+                    edmModelComparisonData[ft] = new EDMModelComparisonValue[edm1.length];
+                }
+                CompareEDMData(edm1.GetEDMData(), edm2.GetEDMData());
+            }
+
+            public Dictionary<string, EDMModelComparisonValue[]> GetModelComparisonData()
+            {
+                return edmModelComparisonData;
+            }
+
+            /// <summary>
+            /// get diff in std and avg for all index of each feature
+            /// </summary>
+            /// <param name="edm1"></param>
+            /// <param name="edm2"></param>
+            private void CompareEDMData(EDMData edmD1, EDMData edmD2)
+            {
+                foreach(string ft in GlobalState.FeatureNames)
+                {
+                    for (int i = 0; i < edmD1.GetLength(); i++)
+                    {                        
+                        edmModelComparisonData[ft][i] = new EDMModelComparisonValue(edmD1.GetData()[ft][i].mean, edmD2.GetData()[ft][i].mean, edmD1.GetData()[ft][i].GetSTD(), edmD2.GetData()[ft][i].GetSTD());
+                    }
+                }
+            }
+
+            public class EDMModelComparisonValue
+            {
+                public double avgRawDiff;
+                public double stdRawDiff;
+                public double avgNormDiff;
+                public double stdNormDiff;
+
+                public double meanOld;
+                public double stdOld;
+
+                public EDMModelComparisonValue(double mean1, double mean2, double std1, double std2)
+                {
+                    meanOld = mean1;
+                    stdOld = std1;
+                    avgRawDiff = mean1 - mean2;
+                    stdRawDiff = std1 - std2;
+                    avgNormDiff = mean1 - mean2;//TODO WRONG FORUMLA FOR NORM USE MIN/MAX values
+                    stdNormDiff = std1 - std2;
+                }
+            }
+        }
 
 
         /// <summary>
@@ -69,16 +270,27 @@ namespace HandwritingFeedback.Util
         public void ConfirmNewSample()
         {
             iteration++;
+
             currentEDM = newSampleEDM.DeepCopy();
 
             //reload canvas to be ready for next sample
             ReloadCanvas();
+
+            if(iteration == 5)
+            {
+                //save and go to main menu
+                SaveExercise();
+
+                Button fakeButton = new Button();
+                fakeButton.Tag = "\\View\\UpdatedUI\\MainMenu.xaml";
+                CommonUtils.Navigate(fakeButton, null, createEDMView);
+            }
         }
 
         public void DiscardNewSample()
         {
             //TODO attach to a discard sample button
-            performances.RemoveAt(performances.Count);
+            performances.RemoveAt(performances.Count-1);
             newSampleEDM = currentEDM.DeepCopy();//rm new sample from newSampleEDM
             ReloadCanvas();
         }
@@ -89,6 +301,7 @@ namespace HandwritingFeedback.Util
         /// </summary>
         public void ReloadCanvas()
         {
+            overlayCanvas.Visibility = System.Windows.Visibility.Collapsed; //hide overlay canvas
             bgCanvas.Reset();
             editCanvas.Reset();
             //load outline trace
@@ -123,11 +336,15 @@ namespace HandwritingFeedback.Util
         private void AddSampleToEDM(ExpertDistributionModel edm, StrokeCollection newSample)
         {
             //store expertPerformance of previous iteration
+            Dictionary<string, double[]> add_data = new Dictionary<string, double[]>();
             foreach (string featureName in GlobalState.FeatureNames)
             {
                 double[] transformed = TransformStrokeDataToTarget(_targetTrace, newSample, featureName);
-                edm.AddTransformed(transformed, featureName);
+                add_data[featureName] = transformed;
+                previousSampleTransformedData[featureName] = transformed;
             }
+
+            edm.AddTransformed(add_data);
         }
 
         /// <summary>
@@ -207,8 +424,10 @@ namespace HandwritingFeedback.Util
                                 {
                                     previousPoint = GetPointFromTraceAt(toTransform, (alignmentVector[j].Item2 - 1));
                                     float x_diff = (float)(currentPoint.X - previousPoint.X);
-                                    float y_diff = (float)(currentPoint.Y - previousPoint.Y);
-                                    toAdd = MathF.Atan2(y_diff, x_diff);
+                                    float y_diff = (float)(currentPoint.Y - previousPoint.Y);                                    
+                                    float rad = MathF.Atan2(y_diff, x_diff);
+                                    var deg = rad * (180 / Math.PI);
+                                    toAdd = deg;
                                 }
                                 break;
 
@@ -239,4 +458,6 @@ namespace HandwritingFeedback.Util
 
 
     }
+
+
 }

@@ -9,6 +9,7 @@ using HandwritingFeedback.StylusPlugins.Strokes;
 using HandwritingFeedback.StylusPlugins.Wrappers;
 using HandwritingFeedback.Util;
 using HandwritingFeedback.View;
+using HandwritingFeedback.View.UpdatedUI;
 
 namespace HandwritingFeedback.RealtimeFeedback.FeedbackTypes
 {
@@ -93,7 +94,7 @@ namespace HandwritingFeedback.RealtimeFeedback.FeedbackTypes
                     pressure * ApplicationConfig.Instance.VisualConfig.PenThicknessModifier);
 
                 // Calculate the closest expert point for the current student point.
-                double distance = PracticeMode.ExpertTraceUtils.GetClosestPoint(pt).distance;
+                double distance = StudentPracticeView.ExpertTraceUtils.GetClosestPoint(pt).distance;
 
                 // If a closest expert point was found calculate feedback
                 if (double.IsFinite(distance))

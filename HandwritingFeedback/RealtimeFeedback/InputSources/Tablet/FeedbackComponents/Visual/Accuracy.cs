@@ -3,6 +3,7 @@ using System.Windows.Media;
 using HandwritingFeedback.Config;
 using HandwritingFeedback.Util;
 using HandwritingFeedback.View;
+using HandwritingFeedback.View.UpdatedUI;
 
 namespace HandwritingFeedback.RealtimeFeedback.InputSources.Tablet.FeedbackComponents.Visual
 {
@@ -33,7 +34,7 @@ namespace HandwritingFeedback.RealtimeFeedback.InputSources.Tablet.FeedbackCompo
 
             // The ratio will either be 0, in which case the student was on the expert's trace,
             // or some positive value, in which case the student was not on the expert's trace.
-            double ratio = RealtimeFeedback.AccuracyRatio(PracticeMode.ExpertTraceUtils, input.StylusPoint);
+            double ratio = RealtimeFeedback.AccuracyRatio(StudentPracticeView.ExpertTraceUtils, input.StylusPoint);
 
             // If the ratio is 0, the student is within MaxDeviationRadius
             // and therefore on the expert's trace.

@@ -124,6 +124,12 @@
                                                 Grid.Column="1"
                                                 Grid.Row="0"
                                                 SizeChanged="ReloadCanvasOnSizeChange" />
+                        <Canvas x:Name="OverlayCanvas"
+                                Background="Transparent"
+                                Grid.Column="1"
+                                Grid.Row="0"
+                                Visibility="Collapsed"/>
+
                         <Grid Grid.Column="1"
                               Grid.Row="1">
                             <Grid.ColumnDefinitions>

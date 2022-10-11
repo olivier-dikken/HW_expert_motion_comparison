@@ -2,10 +2,12 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Windows;
 using System.Windows.Controls.Primitives;
 
 namespace HandwritingFeedback.Models
@@ -15,7 +17,7 @@ namespace HandwritingFeedback.Models
     {
         public List<Dictionary<string, double[]>> transformed_data { get; set; } 
 
-        public int length { get; set; } = -1;
+        public int length;
 
 
         private EDMData edmData{ get; set; }
@@ -24,6 +26,7 @@ namespace HandwritingFeedback.Models
         public ExpertDistributionModel(int targetLength)
         {
             length = targetLength;
+            edmData = new EDMData(length);
             transformed_data = new List<Dictionary<string, double[]>>();
         }
 
@@ -32,6 +35,7 @@ namespace HandwritingFeedback.Models
         {
             this.transformed_data = transformed_data;
             this.length = length;
+            edmData = new EDMData(length);
         }
 
         public int SampleCount()
@@ -45,29 +49,29 @@ namespace HandwritingFeedback.Models
         /// </summary>
         /// <param name="data"></param>
         /// <param name="name"></param>
-        public void AddTransformed(double [] data, string name)
-        {
-            Dictionary<string, double[]> add_data = new Dictionary<string, double[]>();
-            if (length == -1) //if not yet initialized with target length, this should be done first
-            {
-                Debug.WriteLine("Cannot add data, target length is not set");
-            } else //try to add the data
-            {
-                if (add_data.ContainsKey(name)) //check if data already added
-                {
-                    Debug.WriteLine("Trying to add feature data to non empty dict feature data");
-                } else 
-                {
-                    add_data.Add(name, data);
-                }
-                foreach(string ftName in GlobalState.FeatureNames)
-                {
-                    if (!add_data.ContainsKey(ftName)) //if not all features present then return
-                        return;
-                }
-                //if all features present, then add to transformed_data
-                transformed_data.Add(add_data);
-            }
+        public void AddTransformed(Dictionary<string, double[]> add_data)
+        {            
+            //if (length == -1) //if not yet initialized with target length, this should be done first
+            //{
+            //    Debug.WriteLine("Cannot add data, target length is not set");
+            //} else //try to add the data
+            //{
+            //    if (add_data.ContainsKey(name)) //check if data already added
+            //    {
+            //        Debug.WriteLine("Trying to add feature data to non empty dict feature data");
+            //    } else 
+            //    {
+            //        add_data.Add(name, data);
+            //    }
+            //    //foreach(string ftName in GlobalState.FeatureNames) //Code causes problem
+            //    //{
+            //    //    if (!add_data.ContainsKey(ftName)) //if not all features present then return
+            //    //        return;
+            //    //}
+            //    //if all features present, then add to transformed_data
+                
+            //}
+            transformed_data.Add(add_data);
         }
 
         /// <summary>
@@ -75,46 +79,45 @@ namespace HandwritingFeedback.Models
         /// to a dictionary with a double_avg[] and double_std[] 
         /// per feature
         /// </summary>
-        public EDMData GetDistributionModel()
-        {
-            EDMDataPoint[] dataPoints = new EDMDataPoint[length];
-            for(int i = 0; i < length; i++) //init return array
+        public void RecomputeDistributionModel()
+        {            
+            foreach(Dictionary<string, double[]> ftData in transformed_data) // for each recording sample (sample contains data for each feature)
             {
-                dataPoints[i] = new EDMDataPoint(i);
-            }
-
-            foreach (string ft in GlobalState.FeatureNames)
-            {
-                //get avg and std for each ft
-                
-                //add to EDM function? where a single dict can be added in weighted manner to existing EDM
-            }
-
-            //go over key names OLD VERSION
-            foreach (string ft in GlobalState.FeatureNames)
-            {                
-                List<double[]> data = transformed_data[ft];
-                //get avg and std for ft
-                double[] avg = new double[length];
-                double[] std = new double[length];
-                for (int i = 0; i < length; i++) //for each datapoint
+                foreach (string ft in GlobalState.FeatureNames) //for each feature in a single recording sample
                 {
-                    double avgSum = 0;
-                    double[] samples = new double[data.Count];
-                    for(int j = 0; j < data.Count; j++) //for each sample recording
-                    {
-                        Debug.WriteLine($"{j} {i}");
-                        avgSum += data[j][i];
-                        samples[j] = data[j][i];
-                    }
-                    avg[i] = avgSum / data.Count;
-                    std[i] = computeSTD(avg[i], samples);
+                    edmData.AddFeatureData(ft, ftData[ft]);
+                }
+            }            
+        }
 
-                    dataPoints[i].SetValue($"{ft}", avg[i]);
-                    dataPoints[i].SetValue($"{ft}_std", std[i]);
+        /// <summary>
+        /// check if edm data has all transformed_data, and if not then add the missing data
+        /// </summary>
+        private void UpdateEDMData()
+        {
+            int tdSampleCount = transformed_data.Count;
+            int edmSampleCount = edmData.GetData()[GlobalState.FeatureNames[0]][0].numberOfSamples;
+            if(tdSampleCount != edmSampleCount) //add missing samples
+            {
+                for (int i = tdSampleCount-edmSampleCount; i < tdSampleCount; i++)
+                {
+                    foreach (string ft in GlobalState.FeatureNames) //for each feature in a single recording sample
+                    {
+                        edmData.AddFeatureData(ft, transformed_data[i][ft]);
+                    }
                 }
             }
-            return new EDMData(dataPoints);
+        }
+
+        /// <summary>
+        /// Get EDMData object, with most recent transformed_data added to the model
+        /// </summary>
+        /// <returns></returns>
+        public EDMData GetEDMData()
+        {
+            //UpdateEDMData();
+            RecomputeDistributionModel();
+            return edmData;
         }
 
         public static void SaveToFile(string fileName, EDMData toSave)
@@ -151,46 +154,33 @@ namespace HandwritingFeedback.Models
 
         public override string ToString()
         {
-            //string ret = $"{length}\n";
-            //foreach(KeyValuePair<string, List<double[]>> entry in transformed_data)
-            //{
-            //    ret += $"{entry.Key} size {entry.Value.Count}\n";
-            //}
-            //return ret;
             return "EDM TOSTRING() not implemented";
         }
 
     }
 
-    [Serializable()]
-    public class EDMData
-    {
-        public EDMDataPoint[] dataPoints;        
-        public EDMData(EDMDataPoint[] dataPoints)
-        {
-            this.dataPoints = dataPoints;
-        }
 
-        
-    }
 
     /// <summary>
     /// storing sample count, mean, M2 to use as part of Welford's algorithm
     /// for more info see: https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Compute_running_.28continuous.29_variance
     /// </summary>
+    [Serializable()]
     public class EDMDataPointFeatureValue
     {
         public string name;
         public int numberOfSamples;
+        public int index;
         
         public double mean;
         public double M2;
         private double std;
 
-        public EDMDataPointFeatureValue(string name, double mean, double m2, int nSamples=1)
+        public EDMDataPointFeatureValue(string name, int idx, double mean = 0, double m2 = 0, int nSamples=0)
         {
             this.name = name;
             this.mean = mean;
+            this.index = idx;
             this.numberOfSamples = nSamples;
             M2 = m2;
             if (nSamples > 1)
@@ -210,17 +200,71 @@ namespace HandwritingFeedback.Models
         }
 
         public void AddSample(double newSample)
-        {
+        {            
             numberOfSamples++;
             double delta = newSample - mean;
             mean += delta / numberOfSamples;
-            double delta2 = newSample = mean;
+            double delta2 = newSample - mean;
             M2 += delta * delta2;
             if (numberOfSamples > 1)
                 UpdateSTD();
         }
 
 
+    }
+
+    [Serializable()]
+    public class EDMData
+    {
+        // use array because faster for frequent access compared to list
+        Dictionary<string, EDMDataPointFeatureValue[]> edmData = new Dictionary<string, EDMDataPointFeatureValue[]>();
+        //Dictionary<string, double[]> edmDataMinMax = new Dictionary<string, double[]>(); //store min and max values per feature, used later for normalization
+
+        private int length;
+        public EDMData(int length)
+        {
+            this.length = length;
+            foreach(string ft in GlobalState.FeatureNames)
+            {
+                edmData[ft] = new EDMDataPointFeatureValue[length];
+                for (int i = 0; i < length; i++)
+                {
+                    edmData[ft][i] = new EDMDataPointFeatureValue(ft, i); //create edmdatapointftvalue for each index of each feature
+                }                
+            }
+        }
+
+        /// <summary>
+        /// add feature data double[] of a single sample
+        /// </summary>
+        public void AddFeatureData(string ftName, double[] ftDataNew)
+        {
+            Debug.WriteLine("Adding feature data to EDMData");
+            for (int i = 0; i < length; i++)
+            {
+                edmData[ftName][i].AddSample(ftDataNew[i]);
+            }
+        }
+
+        public Dictionary<string, EDMDataPointFeatureValue[]> GetData()
+        {
+            return edmData;
+        }        
+
+        public int GetLength()
+        {
+            return length;
+        }
+    }
+
+    [Serializable()]
+    public class oldEDMData
+    {
+        public EDMDataPoint[] dataPoints;
+        public oldEDMData(EDMDataPoint[] dataPoints)
+        {
+            this.dataPoints = dataPoints;
+        }
     }
 
     [Serializable()]

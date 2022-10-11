@@ -37,7 +37,7 @@ namespace HandwritingFeedback.InkCanvases
         public void CustomOnStrokeCollected(InkCanvasStrokeCollectedEventArgs e)
         {
             // Stop audio given based on pen pressure
-            AuditoryFeedback.GetInstance().Player?.Pause();
+            //AuditoryFeedback.GetInstance().Player?.Pause();
             
             // Remove the original stroke and add a custom stroke.
             Strokes.Remove(e.Stroke);

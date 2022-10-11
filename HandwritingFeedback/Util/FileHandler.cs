@@ -309,6 +309,15 @@ namespace HandwritingFeedback.Util
             });
         }
 
+        public static ExerciseItem GetExericseItem(string path)
+        {
+            if (File.Exists(path + "/exerciseConfig.txt"))
+            {
+                return ExerciseItem.FromExerciseConfigFile(path);
+            }
+            return null;
+        }
+
         public static ObservableCollection<ExerciseItem> GetExerciseItems()
         {
             string workingDirectory = Environment.CurrentDirectory;
