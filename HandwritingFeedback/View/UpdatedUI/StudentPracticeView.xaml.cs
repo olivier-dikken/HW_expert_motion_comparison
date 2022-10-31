@@ -155,14 +155,17 @@ namespace HandwritingFeedback.View.UpdatedUI
 
         public void ClearCanvasButton(object sender, RoutedEventArgs e)
         {
-            //TODO
-            throw new NotImplementedException();
+            StudentEditCanvas.Strokes.Clear();
+            RedrawHelperLines();
+            CanvasBG.Strokes.Add(TargetTrace.Clone());
         }
 
         public void UndoCanvasButton(object sender, RoutedEventArgs e)
-        {
-            //TODO
-            throw new NotImplementedException();
+        {            
+            if (StudentEditCanvas.Strokes.Count > 0)
+            {
+                StudentEditCanvas.Strokes.RemoveAt(StudentEditCanvas.Strokes.Count - 1);
+            }
         }
 
        

@@ -80,6 +80,7 @@
                 <RowDefinition Height="128" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="64" />
             </Grid.RowDefinitions>
             <Grid  Grid.Row="1">
                 <Grid.ColumnDefinitions>
@@ -155,8 +156,14 @@
                 </Grid>
 
             </Grid>
-            <Grid Grid.Row="2">
-                <Button
+            <Grid Grid.Row="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="256" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="1"
+                    Height="64"
                     x:Name="SaveAndContinueButton"
                     Style="{StaticResource MaterialDesignRaisedDarkButton}"
                     Content="Save and Continue"

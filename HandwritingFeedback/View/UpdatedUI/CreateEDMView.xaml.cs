@@ -119,14 +119,15 @@ namespace HandwritingFeedback.View.UpdatedUI
 
         public void ClearCanvasButton(object sender, RoutedEventArgs e)
         {
-            //TODO
-            throw new NotImplementedException();
+            this._EDMCreationHelpler.ReloadCanvas();
         }
 
         public void UndoCanvasButton(object sender, RoutedEventArgs e)
         {
-            //TODO
-            throw new NotImplementedException();
+            if (ExpertEditCanvas.Strokes.Count > 0)
+            {
+                ExpertEditCanvas.Strokes.RemoveAt(ExpertEditCanvas.Strokes.Count - 1);
+            }
         }
 
         public void BackButton(object sender, RoutedEventArgs e)
