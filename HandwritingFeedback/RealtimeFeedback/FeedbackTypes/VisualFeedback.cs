@@ -89,9 +89,9 @@ namespace HandwritingFeedback.RealtimeFeedback.FeedbackTypes
                 float pressure = stylusPoints[i].PressureFactor;
 
                 // Pen controls the thickness and color of the stroke
-                // Set thickness based on pressure
+                // Set thickness based on pressure * 3
                 var pen = new Pen(_defaultBrush,
-                    pressure * ApplicationConfig.Instance.VisualConfig.PenThicknessModifier);
+                    pressure * 3 * ApplicationConfig.Instance.VisualConfig.PenThicknessModifier);
 
                 // Calculate the closest expert point for the current student point.
                 double distance = StudentPracticeView.ExpertTraceUtils.GetClosestPoint(pt).distance;

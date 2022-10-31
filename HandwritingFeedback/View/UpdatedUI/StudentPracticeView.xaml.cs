@@ -1,4 +1,5 @@
 ﻿using HandwritingFeedback.Config;
+using HandwritingFeedback.Config.Visual;
 using HandwritingFeedback.Models;
 using HandwritingFeedback.RealtimeFeedback.FeedbackTypes;
 using HandwritingFeedback.Templates;
@@ -16,6 +17,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Ink;
 using System.Windows.Input;
+using System.Windows.Input.StylusPlugIns;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -80,6 +82,7 @@ namespace HandwritingFeedback.View.UpdatedUI
                 ApplicationConfig.Instance.StylusPointDescription;
             // After the first stroke is completed, the submit button will be enabled
             StudentEditCanvas.StrokeCollected += EnableSubmission;
+            //add target trace to trace over
             CanvasBG.Strokes.Add(TargetTrace.Clone());
             StudentEditCanvas.IsEnabled = true;
 
@@ -89,8 +92,59 @@ namespace HandwritingFeedback.View.UpdatedUI
             VisualFeedback.GetInstance();
             //AuditoryFeedback.GetInstance();
 
-
+            HighlightStroke(TargetTrace.Clone(), 0);
             
+        }
+
+        protected override void OnStylusDown(RawStylusInput rawStylusInput)
+        {
+            
+        }
+
+        private void HighlightStrokeStartingPoint(Stroke stroke)
+        {
+            if(stroke == null)
+            {
+                Debug.WriteLine("HighlightStrokeStartingPoint received empty stroke");
+                return;
+            }
+
+            //draw ellipse on first point of stroke
+            StylusPoint strokeStart = stroke.StylusPoints[0];
+
+            double radius = 5;
+
+            StylusPointCollection pts = new StylusPointCollection();
+            pts.Add(new StylusPoint(strokeStart.X, strokeStart.Y));
+
+            Stroke st = new customDotStroke(pts, radius);
+            st.DrawingAttributes.Color = Colors.DarkOrange;
+
+            CanvasBG.Strokes.Add(st);
+
+       
+        }
+
+        private void HighlightStroke(StrokeCollection strokeCollection, int strokeIndex)
+        {
+            CanvasBG.Strokes.Clear();
+            Stroke toHighlight = null;
+
+
+             if (strokeCollection.Count > strokeIndex)
+            {                
+                toHighlight = strokeCollection[strokeIndex];
+                strokeCollection.RemoveAt(strokeIndex);
+                //SolidColorBrush scb = new SolidColorBrush(Colors.Purple);
+                toHighlight.DrawingAttributes.Color = Colors.Purple;
+                strokeCollection.Add(toHighlight);      //add as last element so appears on top of all other targetTrace strokes           
+            } else
+            {
+                Debug.WriteLine("highlight stroke, strokeIndex out of bounds");
+            }
+            CanvasBG.Strokes.Add(strokeCollection);
+
+            HighlightStrokeStartingPoint(toHighlight);
         }
 
 
