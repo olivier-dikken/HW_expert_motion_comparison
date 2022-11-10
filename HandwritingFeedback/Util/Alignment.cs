@@ -79,6 +79,73 @@ namespace HandwritingFeedback.Util
             return result;
         }
 
+
+        /// <summary>
+        /// gets total length of stroke in pixels
+        /// </summary>
+        /// <returns></returns>       
+        private static float getStrokeLength(Stroke stroke)
+        {
+            StylusPointCollection strokePoints = stroke.StylusPoints;
+            StylusPoint previousPoint = strokePoints[0];
+            double x1, x2, y1, y2;
+            double dist = 0;
+            for (int i = 0; i < strokePoints.Count; i++)
+            {
+                x1 = previousPoint.X;
+                y1 = previousPoint.Y;
+
+                x2 = strokePoints[i].X;
+                y2 = strokePoints[i].Y;
+
+                dist += Math.Sqrt(Math.Pow(x2 - x1, 2) + Math.Pow(y2 - y1, 2));
+
+                previousPoint = strokePoints[i];
+            }
+            return (float)dist;
+        }
+
+        /// <summary>
+        /// check alignment of student stroke with target trace stroke
+        /// distance is normalized based on number of points and stroke length
+        /// so when scaling x,y the distance value stays similar
+        /// </summary>
+        /// <param name="studentStroke"></param>
+        /// <param name="targetTraceStroke"></param>
+        public static float getAlignmentDistance(Stroke strokeStudent, Stroke strokeTargetTrace)
+        {
+            //IEnumerable<Stroke> scStrokeEnumerable = strokeStudent;
+            StrokeCollection scStudent = new StrokeCollection(new List<Stroke> { strokeStudent });
+            StrokeCollection scTargetTrace = new StrokeCollection(new List<Stroke> { strokeTargetTrace });
+            List<(float, float)> coordsE = Alignment.TraceToCoords(scTargetTrace);
+            List<(float, float)> coordsS = Alignment.TraceToCoords(scStudent);
+            float[,] coordDistances = Alignment.GetCoordinateDistanceMatrix(coordsE, coordsS);
+
+            //float totalDistance = coordDistances[coordDistances.GetLength(0)-1, coordDistances.GetLength(1)-1];
+            List<(int, int)> bestPath = GetBestPath(coordDistances);
+            float bestPathDistance = pathToTotalDistance(bestPath, coordDistances);
+            //normalize distance over number of TargetTrace datapoints            
+            float strokeStudentLength = getStrokeLength(strokeStudent);
+            float strokeTargetTraceLength = getStrokeLength(strokeTargetTrace);
+
+            float normalizedDistance = (bestPathDistance / strokeTargetTrace.StylusPoints.Count) / strokeTargetTraceLength;
+            //Debug.WriteLine("ratio student/target trace length: " + (strokeStudentLength / strokeTargetTraceLength));
+            //Debug.WriteLine("normalized by TT length: " + (normalizedDistance / strokeTargetTraceLength));
+            return normalizedDistance;
+        }
+
+        private static float pathToTotalDistance(List<(int, int)> path, float[,] distances)
+        {
+            float totalDistance = 0;
+            for (int i = 0; i < path.Count; i++)
+            {
+                totalDistance += distances[path[i].Item1, path[i].Item2];
+            }
+
+            return totalDistance;
+        }
+
+
         /// <summary>
         /// dynamic programming, computes path best distance score from end to start
         /// </summary>

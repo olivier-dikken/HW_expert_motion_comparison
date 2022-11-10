@@ -30,6 +30,7 @@ namespace HandwritingFeedback.View.UpdatedUI
     /// </summary>
     public partial class StudentPracticeView : Page, IMenuHeaderControls
     {
+        private float alignmentDistanceSeriousAttemptThreshold = 0.2f;
 
         public static TraceUtils ExpertTraceUtils { get; set; }
         public static TraceUtils StudentTraceUtils { get; private set; }
@@ -47,6 +48,11 @@ namespace HandwritingFeedback.View.UpdatedUI
 
         int helperLineType = 0;
         int lineSpacing = 20;
+
+        Stroke refStartingPoint = null;
+
+        int currentStrokeIndex = 0;
+        bool incorrectAttempt = false;
 
         public StudentPracticeView()
         {
@@ -82,6 +88,8 @@ namespace HandwritingFeedback.View.UpdatedUI
                 ApplicationConfig.Instance.StylusPointDescription;
             // After the first stroke is completed, the submit button will be enabled
             StudentEditCanvas.StrokeCollected += EnableSubmission;
+            StudentEditCanvas.StrokeCollected += OnStrokeCollected;
+            StudentEditCanvas.StylusDown += OnStylusDown;
             //add target trace to trace over
             CanvasBG.Strokes.Add(TargetTrace.Clone());
             StudentEditCanvas.IsEnabled = true;
@@ -93,13 +101,63 @@ namespace HandwritingFeedback.View.UpdatedUI
             //AuditoryFeedback.GetInstance();
 
             HighlightStroke(TargetTrace.Clone(), 0);
-            
+        
         }
 
-        protected override void OnStylusDown(RawStylusInput rawStylusInput)
+        /// <summary>
+        /// on stylus down remove highlighted starting point
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnStylusDown(object sender, StylusDownEventArgs e)
         {
-            
+            //remove highlighted starting point
+            if(refStartingPoint == null)
+            {
+                Debug.WriteLine("Starting point not yet set");
+            } else
+            {
+                CanvasBG.Strokes.Remove(refStartingPoint);
+            }
         }
+
+
+        /// <summary>
+        /// when a stroke is collected, if it was a serious attempt then move on to next stroke
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnStrokeCollected(object sender, InkCanvasStrokeCollectedEventArgs e)
+        {
+            //get alignment distance between last student stroke and the target trace stroke it should correspond to
+            if(currentStrokeIndex >= TargetTrace.Count)
+            {
+                Debug.WriteLine("All strokes have been matched. Previous stroke has no target trace stroke to match with");
+                return;
+            }
+            
+            
+            if (!incorrectAttempt && Alignment.getAlignmentDistance(e.Stroke, TargetTrace[currentStrokeIndex]) < alignmentDistanceSeriousAttemptThreshold) //if stroke was a serious attempt. Block is an incorrect attempt was made
+            {
+                Debug.WriteLine("Incorrect attempt");
+                //highlight the next stroke                
+                HighlightStroke(TargetTrace.Clone(), currentStrokeIndex+1);//highlight next stroke
+            } else
+            {
+                //stroke was not a serious attempt, show message to undo? / highlight undo button?
+                Debug.WriteLine("Highlight undo button!");
+                UndoButton.Foreground = new SolidColorBrush(Colors.Red);
+                //also highlight current stroke in RED to show it has become inactive due to incorrect attempt
+                incorrectAttempt = true;
+            }
+
+
+            currentStrokeIndex++; //end function by incrementing index counter
+        }
+
+    
+        
+
 
         private void HighlightStrokeStartingPoint(Stroke stroke)
         {
@@ -112,17 +170,15 @@ namespace HandwritingFeedback.View.UpdatedUI
             //draw ellipse on first point of stroke
             StylusPoint strokeStart = stroke.StylusPoints[0];
 
-            double radius = 5;
+            double radius = 6;
 
             StylusPointCollection pts = new StylusPointCollection();
             pts.Add(new StylusPoint(strokeStart.X, strokeStart.Y));
 
-            Stroke st = new customDotStroke(pts, radius);
-            st.DrawingAttributes.Color = Colors.DarkOrange;
+            refStartingPoint = new customDotStroke(pts, radius);
+            refStartingPoint.DrawingAttributes.Color = Colors.DarkOrange;
 
-            CanvasBG.Strokes.Add(st);
-
-       
+            CanvasBG.Strokes.Add(refStartingPoint);       
         }
 
         private void HighlightStroke(StrokeCollection strokeCollection, int strokeIndex)
@@ -194,7 +250,7 @@ namespace HandwritingFeedback.View.UpdatedUI
         private void RedrawHelperLines()
         {
             CanvasBG.Reset();
-            TraceUtils.DrawHelperLines(CanvasBG, helperLineType, lineSpacing);
+            TraceUtils.DrawHelperLines(CanvasBG, helperLineType, lineSpacing);         
         }
 
         /// <summary>
@@ -210,15 +266,24 @@ namespace HandwritingFeedback.View.UpdatedUI
         public void ClearCanvasButton(object sender, RoutedEventArgs e)
         {
             StudentEditCanvas.Strokes.Clear();
+            currentStrokeIndex = 0;
             RedrawHelperLines();
-            CanvasBG.Strokes.Add(TargetTrace.Clone());
+            //redraw next stroke
+            HighlightStroke(TargetTrace.Clone(), currentStrokeIndex);
         }
 
         public void UndoCanvasButton(object sender, RoutedEventArgs e)
         {            
             if (StudentEditCanvas.Strokes.Count > 0)
             {
+                incorrectAttempt = false;
+
                 StudentEditCanvas.Strokes.RemoveAt(StudentEditCanvas.Strokes.Count - 1);
+                currentStrokeIndex--;
+                HighlightStroke(TargetTrace.Clone(), currentStrokeIndex);
+
+                UndoButton.Background = Brushes.White; //set back to white incase it was highlighted
+                UndoButton.Foreground = Brushes.Black;
             }
         }
 

@@ -138,10 +138,10 @@
                                             VerticalAlignment="Stretch"
                                             Content="{materialDesign:PackIcon Kind=Eraser}"
                                             IsEnabled="True" />
-                                    <Button x:Name="UndoButton"
+                                    <Button x:Name="UndoButton"                                            
                                             VerticalAlignment="Stretch"
                                             ToolTip="Undo last stroke"
-                                            Click="UndoCanvasButton"
+                                            Click="UndoCanvasButton"                                            
                                             Content="{materialDesign:PackIcon Kind=Undo}"
                                             IsEnabled="True" />
                                     <Separator />
