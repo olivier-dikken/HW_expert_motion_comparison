@@ -19,7 +19,10 @@
         <ScrollViewer Height = "Auto" Width = "Auto" HorizontalScrollBarVisibility = "Auto" VerticalScrollBarVisibility = "Auto">
             <Grid>
                 <TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" Foreground="Black" FontFamily="Consolas" FontSize="40"><Run Language="en-as" Text="Batched Analytics"/></TextBlock>
-                <Button Content="Back to Menu" Click="Navigate" Tag="\View\MainPage.xaml" VerticalAlignment="Top" HorizontalAlignment="Left" Height="40" Width="137" Background="Black" Foreground="White" FontFamily="Consolas" FontSize="18" />
+                <Button Content="Back to Menu"
+                        Click="Navigate"
+                        Tag="\View\UpdatedUI\MainMenu.xaml"
+                        VerticalAlignment="Top" HorizontalAlignment="Left" Height="40" Width="137" Background="Black" Foreground="White" FontFamily="Consolas" FontSize="18" />
                 <Button Content="Zoom" Click="ToggleZoom" Grid.Column="0" HorizontalAlignment= "Right" VerticalAlignment="Top" Height="40" Width="100" Background="Coral" Foreground="Black" FontFamily="Consolas" FontSize="25" Margin="218,5,0,0" Grid.Row="1" BorderThickness="0"/>
             </Grid>
         </ScrollViewer>

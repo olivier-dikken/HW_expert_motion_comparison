@@ -364,6 +364,7 @@ namespace HandwritingFeedback.Util
             //8=startingpoint
             //9=json
             //10=starrating
+            //11=repititionsAmount
 
             string[] lines =
             {
@@ -382,7 +383,7 @@ namespace HandwritingFeedback.Util
         }
 
 
-        public static async Task UpdateConfigInfoView_Async(string title, string desc, int starRating, ObservableCollection<FeedbackSelectionGridItem> featureGridData, string dir)
+        public static async Task UpdateConfigInfoView_Async(string title, string desc, int starRating, ObservableCollection<FeedbackSelectionGridItem> featureGridData, string dir, int repAmount)
         {
             //0=title
             //1=description
@@ -395,6 +396,7 @@ namespace HandwritingFeedback.Util
             //8=startingpoint
             //9=json
             //10=starrating
+            //11=repititionAmount
 
 
             var jsonString = JsonSerializer.Serialize(featureGridData);
@@ -405,6 +407,7 @@ namespace HandwritingFeedback.Util
             lines[1] = desc.Replace("\n", "").Replace("\r", "");
             List<string> allLines = lines.Append(jsonString).ToList();
             allLines.Add(starRating.ToString());
+            allLines.Add(repAmount.ToString());
             await File.WriteAllLinesAsync(dir + "\\exerciseConfig.txt", allLines);
         }
     }

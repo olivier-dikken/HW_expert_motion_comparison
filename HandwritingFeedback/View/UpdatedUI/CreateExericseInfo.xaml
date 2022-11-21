@@ -108,7 +108,23 @@
                              materialDesign:HintAssist.Hint="Description"
                              x:Name="DescriptionTextBox"
                              IsEnabled="{Binding ElementName=MaterialDesignOutlinedTextBoxEnabledComboBox}" />
-
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock  Text="Repetitions:"
+                                    Margin="12 12 12 12"
+                                    ToolTip="Scale: 1 is tolerant, 5 is very strict."
+                                    Grid.Column="0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"></TextBlock>
+                        <TextBox Grid.Column="1"
+                                 PreviewTextInput="PreviewTextInputNumerical"
+                                 Text="12"
+                                 x:Name="RepititionsAmount" />
+                    </Grid>
+                    
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />

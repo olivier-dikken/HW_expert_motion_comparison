@@ -26,8 +26,9 @@ namespace HandwritingFeedback.Models
 
         public List<FeedbackSelectionGridItem> fbItems;
         public int starRating;
+        public int repititionAmount;
 
-        public ExerciseItem(string path, string title, string description, DateTime creationDate, int attempts, int bestScore, StrokeCollection targetTrace, BitmapImage targetTraceImage, int lineType, int lineSpacing, List<FeedbackSelectionGridItem> fbGridItems, int stars)
+        public ExerciseItem(string path, string title, string description, DateTime creationDate, int attempts, int bestScore, StrokeCollection targetTrace, BitmapImage targetTraceImage, int lineType, int lineSpacing, List<FeedbackSelectionGridItem> fbGridItems, int stars, int repititionAmount)
         {
             this.path = path;
             this.title = title;
@@ -41,6 +42,7 @@ namespace HandwritingFeedback.Models
             this.starRating = stars;
             this.lineType = lineType;
             this.lineSpacing = lineSpacing;
+            this.repititionAmount = repititionAmount;
         }
 
         public string? Title
@@ -91,6 +93,7 @@ namespace HandwritingFeedback.Models
             //8=startingpoint
             //9=json
             //10=starrating
+            //11=repititionAmount
 
             ExerciseItem item = null;
             try
@@ -104,13 +107,14 @@ namespace HandwritingFeedback.Models
                 int lineType = int.Parse(lines[6]);
                 int lineSpacing = int.Parse(lines[7]);
                 int starRating = int.Parse(lines[10]);
+                int repititionAmount = int.Parse(lines[11]);
 
                 BitmapImage image = new BitmapImage(new Uri(exerciseFolderPath + "/TargetTrace.png", UriKind.Absolute));
                 StrokeCollection tt = FileHandler.LoadStrokeCollection(exerciseFolderPath + "\\TargetTrace.isf");
 
                 List<FeedbackSelectionGridItem> fbItems = JsonConvert.DeserializeObject<List<FeedbackSelectionGridItem>>(lines[9]);
 
-                item = new ExerciseItem(exerciseFolderPath, title, description, creationDate, attempts, bestScore, tt, image,lineType, lineSpacing, fbItems, starRating);
+                item = new ExerciseItem(exerciseFolderPath, title, description, creationDate, attempts, bestScore, tt, image,lineType, lineSpacing, fbItems, starRating, repititionAmount);
             }
             catch (FormatException)
             {

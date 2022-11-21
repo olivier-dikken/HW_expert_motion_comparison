@@ -112,6 +112,35 @@
                                 <RowDefinition Height="1*" />
                                 <RowDefinition Height="64" />
                             </Grid.RowDefinitions>
+                            <Grid x:Name="ExerciseInfoGrid" Grid.Row="0" Grid.Column="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Repetition:"
+                                               Margin="12 12 12 12"
+                                               Grid.Column="0"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Top"></TextBlock>
+                                    <TextBlock x:Name="repititionStatusTextBlock"
+                                        Text="0/0"
+                                               Margin="12 12 12 12"
+                                               Grid.Column="1"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Top"></TextBlock>   
+                                </Grid>
+                            <TextBlock x:Name="exerciseInfoTextBlock"
+                                       Margin="12 12 12 12"
+                                       Grid.Row="1"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Top"></TextBlock>
+                            </Grid>
                             <global:ExpertInkCanvas x:Name="CanvasBG"
                                                     IsEnabled="False"
                                                     Background="White"

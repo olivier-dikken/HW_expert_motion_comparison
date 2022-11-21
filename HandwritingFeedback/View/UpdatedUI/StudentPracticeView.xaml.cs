@@ -54,6 +54,8 @@ namespace HandwritingFeedback.View.UpdatedUI
         int currentStrokeIndex = 0;
         bool incorrectAttempt = false;
 
+        int currentRepitition = 1;
+
         public StudentPracticeView()
         {
 
@@ -61,6 +63,7 @@ namespace HandwritingFeedback.View.UpdatedUI
             helperLineType = exerciseItem.lineType;
             lineSpacing = exerciseItem.lineSpacing;
 
+            
             HomeCommand = new AnotherCommandImplementation(
                 _ =>
                 {
@@ -77,6 +80,9 @@ namespace HandwritingFeedback.View.UpdatedUI
             this.DataContext = this;
 
             InitializeComponent();
+
+            exerciseInfoTextBlock.Text = exerciseItem.description;
+            SetRepititionText();
 
             TargetTrace = FileHandler.LoadStrokeCollection(GlobalState.SelectedExercisePath + "\\TargetTrace.isf");
             ExpertTraceUtils = new TraceUtils(TargetTrace);
@@ -104,6 +110,11 @@ namespace HandwritingFeedback.View.UpdatedUI
         
         }
 
+        private void SetRepititionText()
+        {
+            repititionStatusTextBlock.Text = currentRepitition + " / " + exerciseItem.repititionAmount;
+        }
+
         /// <summary>
         /// on stylus down remove highlighted starting point
         /// </summary>
@@ -129,30 +140,42 @@ namespace HandwritingFeedback.View.UpdatedUI
         /// <param name="e"></param>
         private void OnStrokeCollected(object sender, InkCanvasStrokeCollectedEventArgs e)
         {
+            UndoButton.IsEnabled = true;
             //get alignment distance between last student stroke and the target trace stroke it should correspond to
             if(currentStrokeIndex >= TargetTrace.Count)
             {
                 Debug.WriteLine("All strokes have been matched. Previous stroke has no target trace stroke to match with");
                 return;
-            }
-            
-            
+            } 
+
+
+
             if (!incorrectAttempt && Alignment.getAlignmentDistance(e.Stroke, TargetTrace[currentStrokeIndex]) < alignmentDistanceSeriousAttemptThreshold) //if stroke was a serious attempt. Block is an incorrect attempt was made
             {
                 Debug.WriteLine("Incorrect attempt");
                 //highlight the next stroke                
                 HighlightStroke(TargetTrace.Clone(), currentStrokeIndex+1);//highlight next stroke
+                currentStrokeIndex++; //increment index counter
             } else
             {
                 //stroke was not a serious attempt, show message to undo? / highlight undo button?
                 Debug.WriteLine("Highlight undo button!");
-                UndoButton.Foreground = new SolidColorBrush(Colors.Red);
+                HighlightStrokeAsError(TargetTrace.Clone(), currentStrokeIndex);//highlight stroke as error
+                UndoButton.Foreground = new SolidColorBrush(Colors.Orange);
                 //also highlight current stroke in RED to show it has become inactive due to incorrect attempt
                 incorrectAttempt = true;
+                StudentEditCanvas.IsEnabled = false;
             }
 
-
-            currentStrokeIndex++; //end function by incrementing index counter
+            if(currentStrokeIndex == TargetTrace.Count && !incorrectAttempt) //when all strokes are done and is a serious attempt, enable submit button
+            {
+                SubmitButton.IsEnabled = true;
+                StudentEditCanvas.IsEnabled = false;
+            } else
+            {
+                SubmitButton.IsEnabled = false;
+            }
+            
         }
 
     
@@ -203,29 +226,56 @@ namespace HandwritingFeedback.View.UpdatedUI
             HighlightStrokeStartingPoint(toHighlight);
         }
 
+        private void HighlightStrokeAsError(StrokeCollection strokeCollection, int strokeIndex)
+        {
+            CanvasBG.Strokes.Clear();
+            Stroke toHighlight = null;
+
+
+            if (strokeCollection.Count > strokeIndex)
+            {
+                toHighlight = strokeCollection[strokeIndex];
+                strokeCollection.RemoveAt(strokeIndex);
+                //SolidColorBrush scb = new SolidColorBrush(Colors.Purple);
+                toHighlight.DrawingAttributes.Color = Colors.Red;
+                strokeCollection.Add(toHighlight);      //add as last element so appears on top of all other targetTrace strokes           
+            }
+            else
+            {
+                Debug.WriteLine("highlight stroke, strokeIndex out of bounds");
+            }
+            CanvasBG.Strokes.Add(strokeCollection);            
+        }
+
 
         private void SubmitTrace(object sender, RoutedEventArgs e)
-        {
-            // The student should not be able to write after clicking submit
-            StudentEditCanvas.IsEnabled = false;
-
-            StudentTraceUtils = new TraceUtils(StudentEditCanvas.Strokes.Clone());
-
-            // Add student and expert traces to be sent to batched analytics
-            var inputData = new BFInputData
-            {
-                StudentTraceUtils = StudentTraceUtils,
-                ExpertTraceUtils = ExpertTraceUtils,
-                ExpertOutline = ExpertTraceUtils.Trace//ExpertOutline
-            };
-
-            Debug.WriteLine("studentTraceUtils.Trace.Count: " + inputData.StudentTraceUtils.Trace.Count);
-            Debug.WriteLine("expertTraceUtils.Trace.Count: " + inputData.ExpertTraceUtils.Trace.Count);
-            Debug.WriteLine("expertOutline.Count: " + inputData.ExpertOutline.Count);
-
+        {                                    
             // Navigate to batched analytics view and transfer traces
-            var destination = new BatchedAnalytics_EDM(inputData, loadedEDMData);
-            NavigationService.Navigate(destination);
+            if(currentRepitition == exerciseItem.repititionAmount)
+            {
+                // The student should not be able to write after clicking submit
+                StudentEditCanvas.IsEnabled = false;
+
+                StudentTraceUtils = new TraceUtils(StudentEditCanvas.Strokes.Clone());
+
+                // Add student and expert traces to be sent to batched analytics
+                var inputData = new BFInputData
+                {
+                    StudentTraceUtils = StudentTraceUtils,
+                    ExpertTraceUtils = ExpertTraceUtils,
+                    ExpertOutline = ExpertTraceUtils.Trace//ExpertOutline
+                };
+
+                var destination = new BatchedAnalytics_EDM(inputData, loadedEDMData);
+                NavigationService.Navigate(destination);
+            } else
+            {
+                //move on to next repitition
+                currentRepitition++;
+                ResetCanvas();
+                StudentEditCanvas.IsEnabled = true;
+            }
+            
         }
 
         /// <summary>
@@ -253,38 +303,53 @@ namespace HandwritingFeedback.View.UpdatedUI
             TraceUtils.DrawHelperLines(CanvasBG, helperLineType, lineSpacing);         
         }
 
-        /// <summary>
-        /// Removes all strokes from the canvas.
-        /// </summary>
-        /// <param name="sender">The Button which invoked the method</param>
-        /// <param name="e">Event arguments</param>
-        private void ClearCanvas(object sender, RoutedEventArgs e)
-        {
-            //TODO
-        }
-
-        public void ClearCanvasButton(object sender, RoutedEventArgs e)
+  
+        private void ResetCanvas()
         {
             StudentEditCanvas.Strokes.Clear();
             currentStrokeIndex = 0;
             RedrawHelperLines();
             //redraw next stroke
             HighlightStroke(TargetTrace.Clone(), currentStrokeIndex);
+            SetRepititionText();
+        }
+
+        public void ClearCanvasButton(object sender, RoutedEventArgs e)
+        {
+            ResetCanvas();
         }
 
         public void UndoCanvasButton(object sender, RoutedEventArgs e)
-        {            
+        {
+            CanvasBG.Strokes.Clear();
+            CanvasBG.Strokes = TargetTrace.Clone();
+
             if (StudentEditCanvas.Strokes.Count > 0)
             {
-                incorrectAttempt = false;
-
+                if (StudentEditCanvas.Strokes.Count == currentStrokeIndex)
+                {
+                    currentStrokeIndex--;
+                }
+                                    
                 StudentEditCanvas.Strokes.RemoveAt(StudentEditCanvas.Strokes.Count - 1);
-                currentStrokeIndex--;
-                HighlightStroke(TargetTrace.Clone(), currentStrokeIndex);
+
+                if (StudentEditCanvas.Strokes.Count == currentStrokeIndex)
+                {
+                    incorrectAttempt = false;
+                    HighlightStroke(TargetTrace.Clone(), currentStrokeIndex);
+                } else
+                {
+                    HighlightStrokeAsError(TargetTrace.Clone(), currentStrokeIndex);//highlight stroke as error
+                }                
 
                 UndoButton.Background = Brushes.White; //set back to white incase it was highlighted
                 UndoButton.Foreground = Brushes.Black;
             }
+            if (StudentEditCanvas.Strokes.Count == 0)
+            {
+                UndoButton.IsEnabled = false;
+            }
+            StudentEditCanvas.IsEnabled = true;
         }
 
        

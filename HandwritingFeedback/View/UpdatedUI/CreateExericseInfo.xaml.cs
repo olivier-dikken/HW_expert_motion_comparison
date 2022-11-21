@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,6 +19,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Text.RegularExpressions;
 
 namespace HandwritingFeedback.View.UpdatedUI
 {
@@ -57,7 +59,14 @@ namespace HandwritingFeedback.View.UpdatedUI
             InitializeComponent();
         }
 
-        private ObservableCollection<FeedbackSelectionGridItem> PrepareFeatureDataForGrid()
+       
+    private void PreviewTextInputNumerical(object sender, TextCompositionEventArgs e)
+    {
+        Regex regex = new Regex("[^0-9]+");
+        e.Handled = regex.IsMatch(e.Text);
+    }
+
+    private ObservableCollection<FeedbackSelectionGridItem> PrepareFeatureDataForGrid()
         {
             ObservableCollection<FeedbackSelectionGridItem> griditems = new ObservableCollection<FeedbackSelectionGridItem>();
             foreach (string ftName in GlobalState.FeatureNames)
@@ -82,7 +91,7 @@ namespace HandwritingFeedback.View.UpdatedUI
 
         public async void SaveAndContinue_Async(object sender, RoutedEventArgs e)
         {            
-            await FileHandler.UpdateConfigInfoView_Async(NameTextBox.Text, DescriptionTextBox.Text, BasicRatingBar.Value, FeatureSelectionGridData, GlobalState.CreateContentsPreviousFolder);
+            await FileHandler.UpdateConfigInfoView_Async(NameTextBox.Text, DescriptionTextBox.Text, BasicRatingBar.Value, FeatureSelectionGridData, GlobalState.CreateContentsPreviousFolder, Int32.Parse(RepititionsAmount.Text));
 
             //go to record performance screen and load correct trace with the specified exercise config conditions
             this.NavigationService.Navigate(new Uri("\\View\\UpdatedUI\\CreateEDMView.xaml", UriKind.Relative));
