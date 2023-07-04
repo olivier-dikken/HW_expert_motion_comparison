@@ -30,7 +30,7 @@ namespace HandwritingFeedback.View.UpdatedUI
     /// </summary>
     public partial class StudentPracticeView : Page, IMenuHeaderControls
     {
-        private float alignmentDistanceSeriousAttemptThreshold = 0.2f;
+        private float alignmentDistanceSeriousAttemptThreshold = 0.15f;
 
         public static TraceUtils ExpertTraceUtils { get; set; }
         public static TraceUtils StudentTraceUtils { get; private set; }
@@ -161,7 +161,7 @@ namespace HandwritingFeedback.View.UpdatedUI
                 //stroke was not a serious attempt, show message to undo? / highlight undo button?
                 Debug.WriteLine("Highlight undo button!");
                 HighlightStrokeAsError(TargetTrace.Clone(), currentStrokeIndex);//highlight stroke as error
-                UndoButton.Foreground = new SolidColorBrush(Colors.Orange);
+                UndoButton.Foreground = new SolidColorBrush(Colors.Red);
                 //also highlight current stroke in RED to show it has become inactive due to incorrect attempt
                 incorrectAttempt = true;
                 StudentEditCanvas.IsEnabled = false;
@@ -237,7 +237,7 @@ namespace HandwritingFeedback.View.UpdatedUI
                 toHighlight = strokeCollection[strokeIndex];
                 strokeCollection.RemoveAt(strokeIndex);
                 //SolidColorBrush scb = new SolidColorBrush(Colors.Purple);
-                toHighlight.DrawingAttributes.Color = Colors.Red;
+                toHighlight.DrawingAttributes.Color = Colors.Orange;
                 strokeCollection.Add(toHighlight);      //add as last element so appears on top of all other targetTrace strokes           
             }
             else
