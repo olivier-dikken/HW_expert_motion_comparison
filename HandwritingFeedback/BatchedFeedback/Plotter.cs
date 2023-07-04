@@ -156,6 +156,11 @@ namespace HandwritingFeedback.BatchedFeedback
 
         }
 
+        public static void HighlightErrors(PlotModel plot, List<double> xValues, double discardThisValue)
+        {
+            HighlightErrors(plot, xValues);
+        }
+
         /// <summary>
         /// Draws transparent rectangles on a plot using the provided x-values and <br />
         /// displays the total error count in the subtitle of the plot. Used for highlighting <br />

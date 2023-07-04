@@ -1,4 +1,5 @@
 ﻿using System.Windows.Controls;
+using System.Windows.Input.StylusPlugIns;
 using HandwritingFeedback.RealtimeFeedback.FeedbackTypes;
 using HandwritingFeedback.StylusPlugins.Renderers;
 using HandwritingFeedback.StylusPlugins.Strokes;
@@ -28,7 +29,7 @@ namespace HandwritingFeedback.InkCanvases
             // We cancel any erase attempt because it would
             // interfere greatly with feedback and stroke analysis
             e.Cancel = true;
-        }
+        }       
 
         /// <summary>
         /// Invoked when the user lifts their stylus. Dry ink processing begins here.
@@ -37,7 +38,7 @@ namespace HandwritingFeedback.InkCanvases
         public void CustomOnStrokeCollected(InkCanvasStrokeCollectedEventArgs e)
         {
             // Stop audio given based on pen pressure
-            AuditoryFeedback.GetInstance().Player?.Pause();
+            //AuditoryFeedback.GetInstance().Player?.Pause();
             
             // Remove the original stroke and add a custom stroke.
             Strokes.Remove(e.Stroke);

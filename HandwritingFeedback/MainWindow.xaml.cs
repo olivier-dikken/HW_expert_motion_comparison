@@ -3,6 +3,7 @@ using System.Windows.Input;
 using System.Windows.Navigation;
 using HandwritingFeedback.Config;
 using HandwritingFeedback.View;
+using HandwritingFeedback.View.UpdatedUI;
 
 namespace HandwritingFeedback
 {
@@ -12,7 +13,7 @@ namespace HandwritingFeedback
     public partial class MainWindow : Window
     {
         //public static CompareAlignmentAlgorithms Page;
-        public static MainPage Page;
+        public static MainMenu Page;
 
         public MainWindow()
         {
@@ -32,7 +33,7 @@ namespace HandwritingFeedback
 
             // Navigate to main page
             //Page ??= new CompareAlignmentAlgorithms();
-            Page ??= new MainPage();
+            Page ??= new MainMenu();
 
             navFrame.NavigationService.Navigate(Page);
 

@@ -65,7 +65,7 @@ namespace HandwritingFeedback.View
 
             // Add all singleton classes with expensive constructors here
             VisualFeedback.GetInstance();
-            AuditoryFeedback.GetInstance();
+            //AuditoryFeedback.GetInstance();
 
             ReadConfigFile();
         }
@@ -84,7 +84,7 @@ namespace HandwritingFeedback.View
             ExpertTraceUtils = new TraceUtils(TargetTrace);
 
             loadedEDMData = ExpertDistributionModel.LoadFromFile(GlobalState.SelectedExercisePath + "\\EDMData");
-            Debug.WriteLine($"number of loaded datapoints: {loadedEDMData.dataPoints.Length}");
+            Debug.WriteLine($"number of loaded datapoints: {loadedEDMData.GetLength()}");
         }
 
         /// <summary>
@@ -106,8 +106,7 @@ namespace HandwritingFeedback.View
             // We are restarting an exercise when this method is called,
             // so the expert's trace is on the canvas and the student may
             // start writing.
-            StudentCanvas.IsEnabled = true;
-            
+            StudentCanvas.IsEnabled = true;            
         }
 
         

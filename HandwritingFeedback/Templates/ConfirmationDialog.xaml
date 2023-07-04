@@ -1,0 +1,40 @@
+﻿<UserControl x:Class="HandwritingFeedback.Templates.ConfirmationDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:HandwritingFeedback.Templates"
+             xmlns:domain="clr-namespace:HandwritingFeedback.Templates"
+             xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf" xmlns:system="http://schemas.microsoft.com/winfx/2009/xaml"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="400">
+    <Grid Margin="16">
+
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <TextBlock>Continue saving target trace? Cannot modify after save.</TextBlock>
+        <TextBox wpf:HintAssist.Hint="Name" Style="{StaticResource MaterialDesignFloatingHintTextBox}"                 
+                 Margin="0 6 0 0"
+                 FontSize="18" Grid.Row="1">
+        </TextBox>
+        <TextBox wpf:HintAssist.Hint="Number" Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                 Margin="0 8 0 0"
+                 FontSize="16" Grid.Row="2"
+                 />
+        <StackPanel Orientation="Horizontal" Grid.Row="3"
+                    Margin="0 16 0 0">
+            <Button IsDefault="True" Style="{StaticResource MaterialDesignFlatButton}"
+                    Click="SetConfirmed">
+                ACCEPT
+            </Button>
+            <Button IsCancel="True" Margin="8 0 0 0" Style="{StaticResource MaterialDesignFlatButton}"
+                    Click="SetCanceled">
+                CANCEL
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

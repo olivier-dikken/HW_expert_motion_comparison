@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -7,16 +7,31 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\analytics_thumbnail.png" />
+    <None Remove="Assets\cat_logo.png" />
+    <None Remove="Assets\manageContent_thumbnail.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\cat_logo.png" />
+    <Resource Include="Assets\manageContent_thumbnail.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="InkCanvases\" />
     <Folder Include="StylusPlugins\" />
-	<Folder Include="RealtimeFeedback\" />
   </ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="MaterialDesignThemes" Version="4.5.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="NAudio" Version="2.0.0" />
 		<PackageReference Include="OxyPlot.Core" Version="2.0.0" />
 		<PackageReference Include="OxyPlot.Wpf" Version="2.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Include="Assets\analytics_thumbnail.png" />
 	</ItemGroup>
 
 	<ItemGroup>

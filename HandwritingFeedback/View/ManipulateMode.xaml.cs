@@ -43,7 +43,7 @@ namespace HandwritingFeedback.View
         {
             // Add all singleton classes with expensive constructors here
             VisualFeedback.GetInstance();
-            AuditoryFeedback.GetInstance();
+            //AuditoryFeedback.GetInstance();
         }
 
         /// <summary>

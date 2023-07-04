@@ -80,15 +80,32 @@ namespace HandwritingFeedback.View
 
         public static async Task WriteConfigAsync(string desc, int type, int lineType, int startingPoint)
         {
+            //    string[] lines =
+            //    {
+            //        desc,
+            //        type.ToString(),
+            //        lineType.ToString(),
+            //        startingPoint.ToString()
+            //    };
+
+            //0=title
+            //1=description
+            //2=creationDate
+            //3=attempts
+            //4=bestScore
             string[] lines =
-            {
+            {                
+                "ExerciseTitle",
                 desc,
-                type.ToString(),
+                DateTime.Now.ToString(),
+                "0",
+                "0",
+                 type.ToString(),
                 lineType.ToString(),
                 startingPoint.ToString()
             };
 
-            
+
             string path = GlobalState.CreateContentsPreviousFolder;
 
             await File.WriteAllLinesAsync(path + "\\exerciseConfig.txt", lines);

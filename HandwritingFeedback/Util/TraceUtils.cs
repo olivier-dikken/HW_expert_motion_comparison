@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Windows;
@@ -545,28 +546,33 @@ namespace HandwritingFeedback.Util
         {
             int intervalSize = spacing;
             int start = 0;
-            int end = 1600;
+            int xend = (int)canvas.ActualWidth;
+            int yend = (int)canvas.ActualHeight;
+
             Stroke addLine = null;
 
             //add red base line as reference for main line
             //baseline
-            addLine = MakeLine(start, startY, end, startY);
+            addLine = MakeLine(start, startY, xend, startY);
             addLine.DrawingAttributes.Color = Colors.Red;
             canvas.Strokes.Add(addLine);
 
-            for (int i = -50; i < (int)Math.Round((double)end / intervalSize); i++)
+            for (int i = 0; i < (int)Math.Round((double)xend / intervalSize); i++)
             {
                 //add vertical line
-                addLine = MakeLine(i * intervalSize, start, i * intervalSize, end);
+                addLine = MakeLine(i * intervalSize, start, i * intervalSize, yend);
                 canvas.Strokes.Add(addLine);
+            }
+            for (int i = 0; i < (int)Math.Round((double)yend / intervalSize); i++)
+            {
                 //add horizondal line
-                addLine = MakeLine(start, i * intervalSize + startY, end, i * intervalSize + startY);
+                addLine = MakeLine(start, i * intervalSize + startY, xend, i * intervalSize + startY);
                 canvas.Strokes.Add(addLine);
             }
         }
 
         public static void DrawHelperLines(InkCanvas canvas, int type, int spacing = 20)
-        {
+        {            
             if (type == 0)
                 return;
             // 0 no line
@@ -574,8 +580,11 @@ namespace HandwritingFeedback.Util
             // 2 square lines
             // 3 staved lines
 
-            int startY = 200;
-            int startX = 100;
+            int maxHeight = Math.Max((int)canvas.ActualHeight, (int)canvas.Height);
+            int maxWidth = Math.Max((int)canvas.ActualWidth, (int)canvas.Width);
+
+            int startY = 50;            
+            int startX = 0;
             int pageWidth = 1600;
 
             Stroke newLine = null;
@@ -587,27 +596,49 @@ namespace HandwritingFeedback.Util
 
                 case 1:
                     //baseline
-                    newLine = MakeLine(startX, startY, pageWidth, startY);
-                    canvas.Strokes.Add(newLine);
+                    for(int i = 0; i < 100; i++)
+                    {
+                        startY += spacing * 3;
+                        if (startY >= maxHeight)
+                        {
+                            break;
+                        }
+                        newLine = MakeLine(startX, startY, pageWidth, startY);
+                        canvas.Strokes.Add(newLine);
+                    }
+                    
                     break;
 
                 case 2:                    
-                    DrawHelperSquareGrid(canvas, spacing, startY);
+                    DrawHelperSquareGrid(canvas, spacing, 0);
                     break;
 
                 case 3:
-                    //baseline
-                    newLine = MakeLine(startX, startY, pageWidth, startY);
-                    canvas.Strokes.Add(newLine);
-                    //descender line
-                    newLine = MakeLine(startX, startY + spacing, pageWidth, startY + spacing);
-                    canvas.Strokes.Add(newLine);
-                    //ascender line
-                    newLine = MakeLine(startX, startY - 3* spacing, pageWidth, startY - 3* spacing);
-                    canvas.Strokes.Add(newLine);
-                    //mid line
-                    newLine = MakeLine(startX, startY - 2* spacing, pageWidth, startY - 2* spacing);
-                    canvas.Strokes.Add(newLine);
+
+                    for (int i = 0; i < 100; i++)
+                    {
+                        startY += spacing * 8;
+
+                        if(startY + spacing >= maxHeight)
+                        {
+                            break;
+                        }
+                        //baseline (double thickness)
+                        newLine = MakeLine(startX, startY, pageWidth, startY);
+                        canvas.Strokes.Add(newLine);
+                        newLine = MakeLine(startX, startY+1, pageWidth, startY+1);
+                        canvas.Strokes.Add(newLine);
+                        //descender line
+                        newLine = MakeLine(startX, startY + spacing, pageWidth, startY + spacing);
+                        canvas.Strokes.Add(newLine);
+                        //ascender line
+                        newLine = MakeLine(startX, startY - 3 * spacing, pageWidth, startY - 3 * spacing);
+                        canvas.Strokes.Add(newLine);
+                        //mid line
+                        newLine = MakeLine(startX, startY - 2 * spacing, pageWidth, startY - 2 * spacing);
+                        canvas.Strokes.Add(newLine);
+                    }
+                    
                     break;               
 
                 default:
@@ -635,6 +666,28 @@ namespace HandwritingFeedback.Util
             stroke.DrawingAttributes.Height = 0.4;
 
             return stroke;
+        }
+
+        public static StrokeCollection OffsetStrokeCollection(StrokeCollection toOffset, int xOffset, int yOffset)
+        {
+            StrokeCollection offsetCollection = new StrokeCollection();
+
+            for (int i = 0; i < toOffset.Count; i++)
+            {
+                StylusPointDescription spd = toOffset[i].StylusPoints.Description;
+                StylusPointCollection offsetPoints = new StylusPointCollection(spd);
+                for (int j = 0; j < toOffset[i].StylusPoints.Count; j++)
+                {
+                    StylusPoint newPoint = toOffset[i].StylusPoints[j];
+
+                    newPoint.Y += yOffset;
+                    newPoint.X += xOffset;
+                    offsetPoints.Add(newPoint);
+                }
+                Stroke newStroke = new Stroke(offsetPoints);
+                offsetCollection.Add(newStroke);
+            }
+            return offsetCollection;
         }
     }
 }
