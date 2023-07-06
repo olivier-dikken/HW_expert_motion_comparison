@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using System.Collections.Generic;
+using System.Windows.Controls;
 using System.Windows.Ink;
 
 namespace HandwritingFeedback.Util
@@ -8,6 +9,9 @@ namespace HandwritingFeedback.Util
     /// </summary>
     public class BFInputData
     {
+        //the set of all the student traces of the exercise
+        public List<TraceUtils> StudentTraceUtilsSet;
+
         public TraceUtils StudentTraceUtils;
 
         public TraceUtils ExpertTraceUtils;
