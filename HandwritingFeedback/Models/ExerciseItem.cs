@@ -26,7 +26,7 @@ namespace HandwritingFeedback.Models
 
         public List<FeedbackSelectionGridItem> fbItems;
         public int starRating;
-        public int repititionAmount;
+        public int repetitionAmount;
 
         public ExerciseItem(string path, string title, string description, DateTime creationDate, int attempts, int bestScore, StrokeCollection targetTrace, BitmapImage targetTraceImage, int lineType, int lineSpacing, List<FeedbackSelectionGridItem> fbGridItems, int stars, int repititionAmount)
         {
@@ -42,7 +42,7 @@ namespace HandwritingFeedback.Models
             this.starRating = stars;
             this.lineType = lineType;
             this.lineSpacing = lineSpacing;
-            this.repititionAmount = repititionAmount;
+            this.repetitionAmount = repititionAmount;
         }
 
         public string? Title

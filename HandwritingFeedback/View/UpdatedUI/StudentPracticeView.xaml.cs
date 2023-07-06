@@ -32,8 +32,10 @@ namespace HandwritingFeedback.View.UpdatedUI
     {
         private float alignmentDistanceSeriousAttemptThreshold = 0.15f;
 
+        private List<TraceUtils> StudentTraceUtilsSet = new List<TraceUtils>();
+
         public static TraceUtils ExpertTraceUtils { get; set; }
-        public static TraceUtils StudentTraceUtils { get; private set; }
+        public static TraceUtils StudentTraceUtils { get; private set; }       
         public static StrokeCollection ExpertOutline = new StrokeCollection();
 
         EDMData loadedEDMData;
@@ -54,15 +56,14 @@ namespace HandwritingFeedback.View.UpdatedUI
         int currentStrokeIndex = 0;
         bool incorrectAttempt = false;
 
-        int currentRepitition = 1;
+        int currentRepetition = 1;
 
         public StudentPracticeView()
         {
 
             exerciseItem = FileHandler.GetExericseItem(GlobalState.SelectedExercisePath);
             helperLineType = exerciseItem.lineType;
-            lineSpacing = exerciseItem.lineSpacing;
-
+            lineSpacing = exerciseItem.lineSpacing;            
             
             HomeCommand = new AnotherCommandImplementation(
                 _ =>
@@ -112,7 +113,7 @@ namespace HandwritingFeedback.View.UpdatedUI
 
         private void SetRepititionText()
         {
-            repititionStatusTextBlock.Text = currentRepitition + " / " + exerciseItem.repititionAmount;
+            repititionStatusTextBlock.Text = currentRepetition + " / " + exerciseItem.repetitionAmount;
         }
 
         /// <summary>
@@ -251,16 +252,18 @@ namespace HandwritingFeedback.View.UpdatedUI
         private void SubmitTrace(object sender, RoutedEventArgs e)
         {                                    
             // Navigate to batched analytics view and transfer traces
-            if(currentRepitition == exerciseItem.repititionAmount)
+            if(currentRepetition == exerciseItem.repetitionAmount)
             {
                 // The student should not be able to write after clicking submit
                 StudentEditCanvas.IsEnabled = false;
 
                 StudentTraceUtils = new TraceUtils(StudentEditCanvas.Strokes.Clone());
+                StudentTraceUtilsSet.Add(new TraceUtils(StudentEditCanvas.Strokes.Clone()));
 
                 // Add student and expert traces to be sent to batched analytics
                 var inputData = new BFInputData
                 {
+                    StudentTraceUtilsSet = StudentTraceUtilsSet,
                     StudentTraceUtils = StudentTraceUtils,
                     ExpertTraceUtils = ExpertTraceUtils,
                     ExpertOutline = ExpertTraceUtils.Trace//ExpertOutline
@@ -270,12 +273,14 @@ namespace HandwritingFeedback.View.UpdatedUI
                 NavigationService.Navigate(destination);
             } else
             {
+                //store stroke of current repetition to submit later
+                StudentTraceUtilsSet.Add(new TraceUtils(StudentEditCanvas.Strokes.Clone()));
+
                 //move on to next repitition
-                currentRepitition++;
+                currentRepetition++;
                 ResetCanvas();
                 StudentEditCanvas.IsEnabled = true;
-            }
-            
+            }            
         }
 
         /// <summary>
