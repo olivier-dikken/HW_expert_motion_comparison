@@ -20,19 +20,14 @@ namespace HandwritingFeedback.View.UpdatedUI
     public partial class StudentPracticeView : Page, IMenuHeaderControls
     {
         private float alignmentDistanceSeriousAttemptThreshold = 0.15f;
-
-        private List<TraceUtils> StudentTraceUtilsSet = new List<TraceUtils>();
+        private List<TraceUtils> studentTraceUtilsSet = new List<TraceUtils>();
 
         public static TraceUtils ExpertTraceUtils { get; set; }
-        public static TraceUtils StudentTraceUtils { get; private set; }       
-        public static StrokeCollection ExpertOutline = new StrokeCollection();
+        public static TraceUtils StudentTraceUtils { get; private set; }               
 
         EDMData loadedEDMData;
-
-        public static StrokeCollection TargetTrace;
-
-        public ExerciseItem exerciseItem;
-
+        public static StrokeCollection TargetTrace { get; private set; }
+        public ExerciseItem ExerciseItem { get; private set; }
 
         public AnotherCommandImplementation HomeCommand { get; set; }
         public AnotherCommandImplementation BackCommand { get; set; }
@@ -78,10 +73,10 @@ namespace HandwritingFeedback.View.UpdatedUI
 
         private void LoadExercise()
         {
-            exerciseItem = FileHandler.GetExericseItem(GlobalState.SelectedExercisePath);
-            helperLineType = exerciseItem.lineType;
-            lineSpacing = exerciseItem.lineSpacing;
-            exerciseInfoTextBlock.Text = exerciseItem.description;
+            ExerciseItem = FileHandler.GetExericseItem(GlobalState.SelectedExercisePath);
+            helperLineType = ExerciseItem.lineType;
+            lineSpacing = ExerciseItem.lineSpacing;
+            exerciseInfoTextBlock.Text = ExerciseItem.description;
             SetRepetitionText();
             TargetTrace = FileHandler.LoadStrokeCollection(GlobalState.SelectedExercisePath + "\\TargetTrace.isf");
             ExpertTraceUtils = new TraceUtils(TargetTrace);
@@ -102,7 +97,7 @@ namespace HandwritingFeedback.View.UpdatedUI
 
         private void SetRepetitionText()
         {
-            repetitionStatusTextBlock.Text = $"{currentRepetition} / {exerciseItem.repetitionAmount}";
+            repetitionStatusTextBlock.Text = $"{currentRepetition} / {ExerciseItem.repetitionAmount}";
         }
 
         /// <summary>
@@ -203,15 +198,11 @@ namespace HandwritingFeedback.View.UpdatedUI
 
             //draw ellipse on first point of stroke
             StylusPoint strokeStart = stroke.StylusPoints[0];
-
             double radius = 6;
-
             StylusPointCollection pts = new StylusPointCollection();
             pts.Add(new StylusPoint(strokeStart.X, strokeStart.Y));
-
             refStartingPoint = new customDotStroke(pts, radius);
             refStartingPoint.DrawingAttributes.Color = Colors.DarkOrange;
-
             CanvasBG.Strokes.Add(refStartingPoint);       
         }
 
@@ -232,7 +223,6 @@ namespace HandwritingFeedback.View.UpdatedUI
                 Debug.WriteLine("highlight stroke, strokeIndex out of bounds");
             }
             CanvasBG.Strokes.Add(strokeCollection);
-
             HighlightStrokeStartingPoint(toHighlight);
         }
 
@@ -240,7 +230,6 @@ namespace HandwritingFeedback.View.UpdatedUI
         {
             CanvasBG.Strokes.Clear();
             Stroke toHighlight = null;
-
 
             if (strokeCollection.Count > strokeIndex)
             {
@@ -260,7 +249,7 @@ namespace HandwritingFeedback.View.UpdatedUI
         private void SubmitTrace(object sender, RoutedEventArgs e)
         {                                    
             // Navigate to batched analytics view and transfer traces
-            if(currentRepetition == exerciseItem.repetitionAmount)
+            if(currentRepetition == ExerciseItem.repetitionAmount)
             {
                 SubmitLastRepetition();
             } else
@@ -274,11 +263,11 @@ namespace HandwritingFeedback.View.UpdatedUI
         {
             StudentEditCanvas.IsEnabled = false;
             StudentTraceUtils = new TraceUtils(StudentEditCanvas.Strokes.Clone());
-            StudentTraceUtilsSet.Add(new TraceUtils(StudentEditCanvas.Strokes.Clone()));
+            studentTraceUtilsSet.Add(new TraceUtils(StudentEditCanvas.Strokes.Clone()));
 
             var inputData = new BFInputData
             {
-                StudentTraceUtilsSet = StudentTraceUtilsSet,
+                StudentTraceUtilsSet = studentTraceUtilsSet,
                 StudentTraceUtils = StudentTraceUtils,
                 ExpertTraceUtils = ExpertTraceUtils,
                 ExpertOutline = ExpertTraceUtils.Trace
@@ -290,7 +279,7 @@ namespace HandwritingFeedback.View.UpdatedUI
 
         private void StoreCurrentRepetition()
         {
-            StudentTraceUtilsSet.Add(new TraceUtils(StudentEditCanvas.Strokes.Clone()));
+            studentTraceUtilsSet.Add(new TraceUtils(StudentEditCanvas.Strokes.Clone()));
         }
 
         private void MoveToNextRepetition()
