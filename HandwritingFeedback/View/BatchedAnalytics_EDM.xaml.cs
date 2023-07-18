@@ -10,31 +10,10 @@ using System.Windows.Shapes;
 using HandwritingFeedback.BatchedFeedback;
 using HandwritingFeedback.Models;
 using HandwritingFeedback.Util;
+using static HandwritingFeedback.Util.ReportUtils;
 
 namespace HandwritingFeedback.View
 {
-    public struct EDMComparisonResult
-    {
-        public EDMComparisonResult(List<float> val_student, List<float> val_scores, List<float> val_avg, List<float> val_std, string theTitle, string theYlabel)
-        {
-            Value_student = val_student;
-            Value_scores = val_scores;
-            Value_avg = val_avg;
-            Value_std = val_std;
-            title= theTitle;
-            ylabel = theYlabel;
-        }
-
-        public List<float> Value_student { get; set; }
-        public List<float> Value_scores{ get; set; }
-        public List<float> Value_avg { get; set; }
-        public List<float> Value_std { get; set; }
-
-        public string title { get; }
-        public string ylabel { get; }
-
-    }
-
     /// <summary>
     /// Interaction logic for BatchedAnalytics.xaml
     /// </summary>

@@ -273,7 +273,8 @@ namespace HandwritingFeedback.View.UpdatedUI
                 ExpertOutline = ExpertTraceUtils.Trace
             };
 
-            var destination = new BatchedAnalytics_EDM(inputData, loadedEDMData);
+            //var destination = new BatchedAnalytics_EDM(inputData, loadedEDMData);
+            var destination = new ExerciseReport(inputData, loadedEDMData);
             NavigationService.Navigate(destination);
         }
 

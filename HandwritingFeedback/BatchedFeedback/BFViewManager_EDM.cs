@@ -16,6 +16,7 @@ using System.Diagnostics;
 using HandwritingFeedback.Models;
 using HandwritingFeedback.View;
 using OxyPlot;
+using static HandwritingFeedback.Util.ReportUtils;
 
 namespace HandwritingFeedback.BatchedFeedback
 {

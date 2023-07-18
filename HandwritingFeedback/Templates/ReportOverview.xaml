@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="HandwritingFeedback.Templates.ReportOverview"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:HandwritingFeedback.Templates"
+             mc:Ignorable="d" 
+             d:DesignHeight="200" d:DesignWidth="400">
+    <DataGrid ItemsSource="{Binding ReportOverviewParameterData}">
+        <DataGrid.Columns>
+            <DataGridTextColumn Header="Parameter Name"
+                                Binding="{Binding Parameter}" />
+            <DataGridTextColumn Header="Big Errors"
+                                Binding="{Binding BigError}" />
+            <DataGridTextColumn Header="% Correct"
+                                Binding="{Binding Correctness}" />
+        </DataGrid.Columns>
+    </DataGrid>
+</UserControl>
