@@ -13,6 +13,7 @@ using HandwritingFeedback.View;
 using OxyPlot;
 using OxyPlot.Annotations;
 using OxyPlot.Series;
+using static HandwritingFeedback.Util.ReportUtils;
 
 namespace HandwritingFeedback.BatchedFeedback.Components.CanvasComponents.AccuracyComponents
 {
