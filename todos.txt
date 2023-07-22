@@ -1,0 +1,31 @@
+*** CaT workflows with EDM ***
+
+0 - Refactor base datastructures
+
+-- exercise info / data
+-- global state? global features?
+-- re-think datastructure/class for computing/storing feature data + feature list curvature (location dd), speed, (acceleration/deceleration = speed d, speed dd?, slope = location d)?
+-- allow alignment by other param than location(x,y)? (e.g. exercise about pressure where location does not matter), allow multiple variable alignment with weights?
+-- student practice: compute feature values in real time? (fast forumla / less granular or less accurate to gain speed?, how to do real-time alignment?, compare with custom version of EDM?)
+-- edm creation + student report: compute feature values in post processing (better alignment, process all features values )
+
+1 - Expert create exercise
+
+fill in exercise info
+-- {name, strictness, description, features, feature weights?}
+make target-trace
+-- x,y and number of datapoints used for aligning all trace-over attempts to
+make demonstration data
+-- several trace-over (pre-set to 5 for dev):
+--- align(x,y) each to target-trace, interpolate/merge datapoints to have a trace-over-aligned
+--- compute feature values for each trace-over-aligned datapoint
+--- update the EDM with the trace-over-aligned-featurevalues (std, mean per feature)
+save the exercise
+
+
+2 - Student report: compare student trace(s) with EDMdata
+
+-- compare several student traces, one at a time with the EDMdata (to have scores for each attempt, which can later be aggregated, also important to be able to score a single attempt so that student can see score after each attempt during a multiple-repetition-practicesession)
+--- for each student trace:
+---- compare each datapoint with the edm, store the comparison result in a exercise-result datasctucture
+!!! think of the results that will be displayed, to make sure the datastructure is well chosen for the exercise-result
