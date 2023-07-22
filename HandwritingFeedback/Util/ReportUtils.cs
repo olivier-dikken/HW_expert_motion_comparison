@@ -31,6 +31,13 @@ namespace HandwritingFeedback.Util
             ComparisonResult = ComputeErrorBasedOnEDM();
         }
 
+        private void refactorCompareStudentToEDM()
+        {
+            StrokeCollection studentTrace = _studentTraceUtils.Trace;
+            List<EDMComparisonResult> result = new List<EDMComparisonResult>(); 
+            EDMData eDMData = _edmData;
+        }
+
         private List<EDMComparisonResult> ComputeErrorBasedOnEDM()
         {
             StrokeCollection trace = _studentTraceUtils.Trace;
@@ -73,6 +80,7 @@ namespace HandwritingFeedback.Util
             StylusPoint previousStudentPoint;
             StylusPoint studentPoint;
             bool firstPointSet = false;
+            Debug.WriteLine("Alignment vector count: " + _alignmentVector.Count);
             for (int i = _alignmentVector.Count - 1; i >= 0; i--)
             {
                 if (_alignmentVector[i].Item1 == previousStudentMatchIndex || previousStudentMatchIndex == -1) // student point aligned to several expert points
@@ -101,6 +109,7 @@ namespace HandwritingFeedback.Util
                     float score_y = GetEDMScore(studentPoint, correspondingDataPoints[previousStudentMatchIndex], "Y", 1);
                     float score_pressure = GetEDMScore(studentPoint, correspondingDataPoints[previousStudentMatchIndex], "Pressure", 1);
 
+                    
                     x_student.Add((float)studentPoint.X);
                     x_scores.Add(score_x);
                     x_avg.Add((float)correspondingDataPoints[previousStudentMatchIndex].X);
@@ -143,6 +152,7 @@ namespace HandwritingFeedback.Util
                     firstPointSet = true;
                 }
                 //relevantEDMPoints.Add(edmData.dataPoints[_alignmentVector[i].Item2]);                
+                //relevantEDMPoints.Add(_edmData.);
 
                 previousStudentMatchIndex = _alignmentVector[i].Item1;
             }
@@ -157,6 +167,11 @@ namespace HandwritingFeedback.Util
             EDMComparisonResult speed_comparison = new EDMComparisonResult(speed_student, speed_scores, speed_avg, speed_std, "Speed of student vs EDM", "Trace speed");
             result.Add(speed_comparison);
             return result;
+        }
+
+        private float GetEDMFeatureScore()
+        {
+              return 0;
         }
 
         private float GetEDMScore(StylusPoint studentPoint, EDMDataPoint edmPoint, String feature, float scale)
@@ -271,7 +286,7 @@ namespace HandwritingFeedback.Util
                 Value_scores = val_scores;
                 Value_avg = val_avg;
                 Value_std = val_std;
-                Value_scores_all = val_scores.Average();
+                Value_scores_overall = val_scores.Average();
                 title = theTitle;
                 ylabel = theYlabel;
             }
@@ -281,7 +296,7 @@ namespace HandwritingFeedback.Util
             public List<float> Value_avg { get; set; }
             public List<float> Value_std { get; set; }
 
-            public float Value_scores_all { get; set; }
+            public float Value_scores_overall { get; set; }
 
             public string title { get; }
             public string ylabel { get; }

@@ -1,4 +1,5 @@
 ﻿using HandwritingFeedback.Util;
+using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,8 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls.Primitives;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
+using System.Windows.Media;
 
 namespace HandwritingFeedback.Models
 {
@@ -168,92 +171,91 @@ namespace HandwritingFeedback.Models
     [Serializable()]
     public class EDMDataPointFeatureValue
     {
-        public string name;
-        public int numberOfSamples;
-        public int index;
-        
-        public double mean;
-        public double M2;
-        private double std;
+        public double Mean { get; private set; }
+        public double Variance { get; private set; }
+        public int NumberOfSamples { get; private set; }
 
-        public EDMDataPointFeatureValue(string name, int idx, double mean = 0, double m2 = 0, int nSamples=0)
+        public EDMDataPointFeatureValue(double mean = 0, double variance = 0, int numberOfSamples = 0)
         {
-            this.name = name;
-            this.mean = mean;
-            this.index = idx;
-            this.numberOfSamples = nSamples;
-            M2 = m2;
-            if (nSamples > 1)
-                UpdateSTD();
-            else
-                std = 0;
-        }
-
-        private void UpdateSTD()
-        {
-            std = M2 / (double) numberOfSamples;
-        }
-
-        public double GetSTD()
-        {
-            return std;
+            Mean = mean;
+            Variance = variance;
+            NumberOfSamples = numberOfSamples;
         }
 
         public void AddSample(double newSample)
-        {            
-            numberOfSamples++;
-            double delta = newSample - mean;
-            mean += delta / numberOfSamples;
-            double delta2 = newSample - mean;
-            M2 += delta * delta2;
-            if (numberOfSamples > 1)
-                UpdateSTD();
+        {
+            NumberOfSamples++;
+            double delta = newSample - Mean;
+            Mean += delta / NumberOfSamples;
+            double delta2 = newSample - Mean;
+            Variance += delta * delta2;
         }
 
-
+        public double GetStandardDeviation()
+        {
+            if (NumberOfSamples < 2)
+                return 0;
+            return Math.Sqrt(Variance / (NumberOfSamples - 1));
+        }
     }
+
 
     [Serializable()]
     public class EDMData
     {
-        // use array because faster for frequent access compared to list
-        Dictionary<string, EDMDataPointFeatureValue[]> edmData = new Dictionary<string, EDMDataPointFeatureValue[]>();
-        //Dictionary<string, double[]> edmDataMinMax = new Dictionary<string, double[]>(); //store min and max values per feature, used later for normalization
-
+        private EDMDataPointFeatureValue[][] edmData;
         private int length;
+
         public EDMData(int length)
         {
             this.length = length;
-            foreach(string ft in GlobalState.FeatureNames)
-            {
-                edmData[ft] = new EDMDataPointFeatureValue[length];
-                for (int i = 0; i < length; i++)
-                {
-                    edmData[ft][i] = new EDMDataPointFeatureValue(ft, i); //create edmdatapointftvalue for each index of each feature
-                }                
-            }
-        }
+            edmData = new EDMDataPointFeatureValue[length][];
 
-        /// <summary>
-        /// add feature data double[] of a single sample
-        /// </summary>
-        public void AddFeatureData(string ftName, double[] ftDataNew)
-        {
-            Debug.WriteLine("Adding feature data to EDMData");
+            // Initialize the EDMData array for each data point and feature.
             for (int i = 0; i < length; i++)
             {
-                edmData[ftName][i].AddSample(ftDataNew[i]);
+                edmData[i] = new EDMDataPointFeatureValue[GlobalState.FeatureNames.Length];
+                for (int j = 0; j < GlobalState.FeatureNames.Length; j++)
+                {
+                    edmData[i][j] = new EDMDataPointFeatureValue();
+                }
             }
         }
 
-        public Dictionary<string, EDMDataPointFeatureValue[]> GetData()
+        public void AddFeatureData(string ftName, double[] ftDataNew)
         {
-            return edmData;
-        }        
+            for (int i = 0; i < length; i++)
+            {
+                int ftIndex = GetFeatureIndex(ftName);
+                edmData[i][ftIndex].AddSample(ftDataNew[i]);
+            }
+        }
+
+        public double GetFeatureMean(int dataIndex, string ftName)
+        {
+            int ftIndex = GetFeatureIndex(ftName);
+            return edmData[dataIndex][ftIndex].Mean;
+        }
+
+        public double GetFeatureVariance(int dataIndex, string ftName)
+        {
+            int ftIndex = GetFeatureIndex(ftName);
+            return edmData[dataIndex][ftIndex].Variance;
+        }
+
+        public double GetFeatureStandardDeviation(int dataIndex, string ftName)
+        {
+            return edmData[dataIndex][GetFeatureIndex(ftName)].GetStandardDeviation();
+        }
 
         public int GetLength()
         {
             return length;
+        }
+
+        private int GetFeatureIndex(string ftName)
+        {
+            return Array.IndexOf(GlobalState.FeatureNames, ftName);
         }
     }
 

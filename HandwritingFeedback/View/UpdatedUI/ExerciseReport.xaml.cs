@@ -60,8 +60,8 @@ namespace HandwritingFeedback.View.UpdatedUI
             {
                 ParameterData parameterData = new ParameterData();
                 parameterData.Parameter = result.title;
-                parameterData.BigError = result.Value_scores_all;
-                parameterData.Correctness = result.Value_scores_all;
+                parameterData.BigError = result.Value_scores_overall;
+                parameterData.Correctness = result.Value_scores_overall;
                 ReportOverviewParameterData.Add(parameterData);
             }
             ObservableCollection<ParameterData> observableCollection = new ObservableCollection<ParameterData>(ReportOverviewParameterData);
