@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -29,10 +30,16 @@ namespace HandwritingFeedback.View.UpdatedUI
         public AnotherCommandImplementation HomeCommand { get; }
         public AnotherCommandImplementation BackCommand { get; }
 
+        // The exercise data object that will be passed to the next page
+        private ExerciseData exerciseData;
+
+        // Variable to store the expert's target trace strokes
+        private StrokeCollection targetTraceStrokes;
+
         int helperLineType = 0;
         int lineSpacing = 20;
 
-        public CreateTargetTraceView()
+        public CreateTargetTraceView(ExerciseData exerciseData)
         {
             HomeCommand = new AnotherCommandImplementation(
                 _ =>
@@ -46,6 +53,7 @@ namespace HandwritingFeedback.View.UpdatedUI
                     fakeButton.Tag = "\\View\\UpdatedUI\\ManageLearningContent.xaml";
                     BackButton(fakeButton, null);
                 });
+            this.exerciseData = exerciseData;
 
             this.DataContext = this;
 
@@ -54,7 +62,7 @@ namespace HandwritingFeedback.View.UpdatedUI
             ExpertEditCanvas.DefaultStylusPointDescription =
                 ApplicationConfig.Instance.StylusPointDescription;
 
-            TraceUtils.DrawHelperLines(CanvasBG, helperLineType, lineSpacing);
+            TraceUtils.DrawHelperLines(CanvasBG, helperLineType, lineSpacing);            
         }
 
         /// <summary>
@@ -110,6 +118,7 @@ namespace HandwritingFeedback.View.UpdatedUI
             ExpertEditCanvas.Reset();
         }
 
+
         public void ClearCanvasButton(object sender, RoutedEventArgs e)
         {
             ExpertEditCanvas.Reset();
@@ -146,15 +155,26 @@ namespace HandwritingFeedback.View.UpdatedUI
 
         public async void SubmitCanvasButton(object sender, RoutedEventArgs e)
         {
+            // Save the expert's target trace
+            targetTraceStrokes = ExpertEditCanvas.Strokes.Clone();
+
             if (await ConfigureSaveFolder())
             {
-                //navigate to the exercise config screen
-                this.NavigationService.Navigate(new Uri("\\View\\UpdatedUI\\CreateExericseInfo.xaml", UriKind.Relative));
-            } else //something went wrong, display error message and take back to teacher menu
+                // Save the target trace strokes to the ExerciseData object
+                exerciseData.TargetTraceStrokes = targetTraceStrokes;
+
+                // Save helper line type and spacing to ExerciseData object
+                exerciseData.LineType = helperLineType;
+                exerciseData.LineSpacing = lineSpacing;
+
+                // Navigate to the exercise config screen
+                NavigateToCreateEDMView();
+            }
+            else // Something went wrong, display error message and take back to teacher menu
             {
                 Debug.WriteLine("Trying to create exercise folder failed. Please contact admin");
                 this.NavigationService.Navigate(new Uri("\\View\\UpdatedUI\\ManageLearningContent.xaml", UriKind.Relative));
-            }            
+            }
         }
 
         private async Task<bool> ConfigureSaveFolder()
@@ -170,14 +190,16 @@ namespace HandwritingFeedback.View.UpdatedUI
             {
                 GlobalState.CreateContentsPreviousFolder = path;
                 Directory.CreateDirectory(path);
-                //save trace to folder as TargetTrace.isf
-                //FileHandler.SaveTargetTrace(RemoveOffsetFromStrokeCollection(ExpertCanvas.Strokes), path);
-                FileHandler.SaveTargetTrace(ExpertEditCanvas.Strokes, path);
 
-                //save target trace as .png for card thumbnail display
+                // Save exercise data
+
+                // Save trace to folder as TargetTrace.isf
+                FileHandler.SaveTargetTrace(targetTraceStrokes, path);
+
+                // Save target trace as .png for card thumbnail display
                 FileHandler.SaveCanvasAsImage(ExpertEditCanvas, path, "TargetTrace");
 
-                //create exercise config .txt file and write line type and spacing
+                // Create exercise config .txt file and write line type and spacing
                 await FileHandler.WriteConfigTargetTraceView_Async(helperLineType, lineSpacing, path);
 
                 return true;
@@ -189,8 +211,11 @@ namespace HandwritingFeedback.View.UpdatedUI
             return false;
         }
 
-
-        
+        private void NavigateToCreateEDMView()
+        {
+            // Navigates to the CreateEDMView page with the updated ExerciseData
+            this.NavigationService.Navigate(new CreateEDMView(exerciseData));
+        }
 
 
         public void BackButton(object sender, RoutedEventArgs e)

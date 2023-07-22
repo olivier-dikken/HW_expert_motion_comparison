@@ -383,7 +383,7 @@ namespace HandwritingFeedback.Util
         }
 
 
-        public static async Task UpdateConfigInfoView_Async(string title, string desc, int starRating, ObservableCollection<FeedbackSelectionGridItem> featureGridData, string dir, int repAmount)
+        public static async Task UpdateConfigInfoView_Async(string title, string desc, int starRating, List<FeedbackSelectionGridItem> featureGridData, string dir, int repAmount)
         {
             //0=title
             //1=description

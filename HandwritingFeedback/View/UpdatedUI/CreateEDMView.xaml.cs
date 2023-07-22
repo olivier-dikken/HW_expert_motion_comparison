@@ -1,18 +1,9 @@
 ﻿using HandwritingFeedback.Models;
 using HandwritingFeedback.Util;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace HandwritingFeedback.View.UpdatedUI
 {
@@ -24,10 +15,10 @@ namespace HandwritingFeedback.View.UpdatedUI
         public AnotherCommandImplementation HomeCommand { get; }
         public AnotherCommandImplementation BackCommand { get; }
 
-        EDMCreationHelpler _EDMCreationHelpler;
-        ExerciseItem _currentExercise;
-        
-        public CreateEDMView()
+        private EDMCreationHelpler _EDMCreationHelper;
+        private ExerciseData _currentExercise;
+
+        public CreateEDMView(ExerciseData exerciseData)
         {
             HomeCommand = new AnotherCommandImplementation(
                 _ =>
@@ -41,60 +32,66 @@ namespace HandwritingFeedback.View.UpdatedUI
                     fakeButton.Tag = "\\View\\UpdatedUI\\ManageLearningContent.xaml";
                     BackButton(fakeButton, null);
                 });
-            _currentExercise = ExerciseItem.FromExerciseConfigFile(GlobalState.CreateContentsPreviousFolder);
-            
+
+            _currentExercise = exerciseData;
+
             this.DataContext = this;
 
             InitializeComponent();
 
-            this._EDMCreationHelpler = new EDMCreationHelpler(_currentExercise, CanvasBG, ExpertEditCanvas, OverlayCanvas, this);
+            this._EDMCreationHelper = new EDMCreationHelpler(_currentExercise, CanvasBG, ExpertEditCanvas, OverlayCanvas, this);
         }
 
 
-        public void SubmitCanvasButton(object sender, RoutedEventArgs e)
+        private void SubmitCanvasButton_Click(object sender, RoutedEventArgs e)
         {
-            _EDMCreationHelpler.SubmitNewSample();
-            CanvasToolBar.Visibility = Visibility.Collapsed;
-            CanvasToolBar.IsEnabled = false;
+            _EDMCreationHelper.SubmitNewSample();
+            DisableCanvasToolBar();
 
             ConfirmSampleButton.Visibility = Visibility.Visible;
-            ConfirmSampleButton.IsEnabled = true;
             DiscardSampleSubmissionButton.Visibility = Visibility.Visible;
-            DiscardSampleSubmissionButton.IsEnabled = true;
+        }
+
+        private void ConfirmSampleSubmissionButton_Click(object sender, RoutedEventArgs e)
+        {
+            _EDMCreationHelper.ConfirmNewSample();
+            SubmitButton.IsEnabled = false;
+
+            ConfirmSampleButton.Visibility = Visibility.Collapsed;
+            DiscardSampleSubmissionButton.Visibility = Visibility.Collapsed;
+
+            EnableCanvasToolBar();
+        }
+
+        private void DiscardSampleButton_Click(object sender, RoutedEventArgs e)
+        {
+            _EDMCreationHelper.DiscardNewSample();
+            SubmitButton.IsEnabled = false;
+
+            ConfirmSampleButton.Visibility = Visibility.Collapsed;
+            DiscardSampleSubmissionButton.Visibility = Visibility.Collapsed;
+
+            EnableCanvasToolBar();
+        }
+
+        private void ClearCanvasButton_Click(object sender, RoutedEventArgs e)
+        {
+            _EDMCreationHelper.ReloadCanvas();
+        }
+
+        private void UndoCanvasButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ExpertEditCanvas.Strokes.Count > 0)
+            {
+                ExpertEditCanvas.Strokes.RemoveAt(ExpertEditCanvas.Strokes.Count - 1);
+            }
         }
 
         public void ReloadCanvasOnSizeChange(object sender, SizeChangedEventArgs e)
         {
-            _EDMCreationHelpler.ReloadCanvas();
+            _EDMCreationHelper.ReloadCanvas();
         }
 
-        public void ConfirmSampleSubmissionButton(object sender, RoutedEventArgs e)
-        {
-            _EDMCreationHelpler.ConfirmNewSample();
-            SubmitButton.IsEnabled = false;
-
-            ConfirmSampleButton.Visibility = Visibility.Collapsed;
-            ConfirmSampleButton.IsEnabled = false;
-            DiscardSampleSubmissionButton.Visibility = Visibility.Collapsed;
-            DiscardSampleSubmissionButton.IsEnabled = false;
-
-            CanvasToolBar.Visibility = Visibility.Visible;
-            CanvasToolBar.IsEnabled = true;
-        }
-
-        public void DiscardSampleButton(object sender, RoutedEventArgs e)
-        {
-            _EDMCreationHelpler.DiscardNewSample();
-            SubmitButton.IsEnabled = false;
-
-            ConfirmSampleButton.Visibility = Visibility.Collapsed;
-            ConfirmSampleButton.IsEnabled = false;
-            DiscardSampleSubmissionButton.Visibility = Visibility.Collapsed;
-            DiscardSampleSubmissionButton.IsEnabled = false;
-
-            CanvasToolBar.Visibility = Visibility.Visible;
-            CanvasToolBar.IsEnabled = true;
-        }
 
 
         public void EnableSubmit(object sender, InkCanvasStrokeCollectedEventArgs e)
@@ -119,7 +116,7 @@ namespace HandwritingFeedback.View.UpdatedUI
 
         public void ClearCanvasButton(object sender, RoutedEventArgs e)
         {
-            this._EDMCreationHelpler.ReloadCanvas();
+            this._EDMCreationHelper.ReloadCanvas();
         }
 
         public void UndoCanvasButton(object sender, RoutedEventArgs e)
@@ -164,6 +161,18 @@ namespace HandwritingFeedback.View.UpdatedUI
         private void Navigate(object sender, RoutedEventArgs e)
         {
             CommonUtils.Navigate(sender, e, this);
+        }
+
+        private void EnableCanvasToolBar()
+        {
+            CanvasToolBar.IsEnabled = true;
+            CanvasToolBar.Visibility = Visibility.Visible;
+        }
+
+        private void DisableCanvasToolBar()
+        {
+            CanvasToolBar.IsEnabled = false;
+            CanvasToolBar.Visibility = Visibility.Collapsed;
         }
     }
 }

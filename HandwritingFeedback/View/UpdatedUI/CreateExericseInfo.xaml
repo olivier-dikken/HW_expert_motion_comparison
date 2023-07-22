@@ -179,12 +179,12 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <Button Grid.Column="1"
-                    Height="64"
-                    x:Name="SaveAndContinueButton"
-                    Style="{StaticResource MaterialDesignRaisedDarkButton}"
-                    Content="Save and Continue"
-                    Click="SaveAndContinue_Async"
-                    IsEnabled="False" />
+                        Height="64"
+                        x:Name="SaveAndContinueButton"
+                        Style="{StaticResource MaterialDesignRaisedDarkButton}"
+                        Content="Save and Continue"
+                        Command="{Binding NavigateToCreateTargetTraceViewCommand}"
+                        IsEnabled="False" />
             </Grid>
         </Grid>
 

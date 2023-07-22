@@ -20,6 +20,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace HandwritingFeedback.View.UpdatedUI
 {
@@ -31,9 +32,15 @@ namespace HandwritingFeedback.View.UpdatedUI
         public AnotherCommandImplementation HomeCommand { get; }
         public AnotherCommandImplementation BackCommand { get; }
 
+        // The exercise data object that will be passed to the next page
+        public ExerciseData ExerciseData { get; set; }
+
+
         public ObservableCollection<FeedbackSelectionGridItem> FeatureSelectionGridData { get; }
 
         public string TextBoxExerciseName { get; set; }
+
+        public ICommand NavigateToCreateTargetTraceViewCommand { get; }
 
         public CreateExericseInfo()
         {
@@ -51,8 +58,14 @@ namespace HandwritingFeedback.View.UpdatedUI
                     BackButton(fakeButton, null);
                 });
 
+            ExerciseData = new ExerciseData();
+
             FeatureSelectionGridData = PrepareFeatureDataForGrid();
             this.TextBoxExerciseName = "";
+
+            // Initialize the command to navigate to the next page
+            NavigateToCreateTargetTraceViewCommand = new AnotherCommandImplementation(NavigateToCreateTargetTraceView);
+
 
             this.DataContext = this;
 
@@ -89,13 +102,35 @@ namespace HandwritingFeedback.View.UpdatedUI
             }
         }
 
-        public async void SaveAndContinue_Async(object sender, RoutedEventArgs e)
-        {            
-            await FileHandler.UpdateConfigInfoView_Async(NameTextBox.Text, DescriptionTextBox.Text, BasicRatingBar.Value, FeatureSelectionGridData, GlobalState.CreateContentsPreviousFolder, Int32.Parse(RepititionsAmount.Text));
+        private async void NavigateToCreateTargetTraceView(object parameter)
+        {
+            // Save the exercise information to the ExerciseData object
+            ExerciseData.ExerciseName = TextBoxExerciseName;
+            ExerciseData.Description = DescriptionTextBox.Text;
+            ExerciseData.StrictnessRating = BasicRatingBar.Value;
+            ExerciseData.RepetitionsAmount = int.Parse(RepititionsAmount.Text);
+            ExerciseData.FeatureSelectionGridData = FeatureSelectionGridData.ToList();
 
-            //go to record performance screen and load correct trace with the specified exercise config conditions
-            this.NavigationService.Navigate(new Uri("\\View\\UpdatedUI\\CreateEDMView.xaml", UriKind.Relative));
+            // Update the exercise data to the exercise configuration file
+            await FileHandler.UpdateConfigInfoView_Async(
+                ExerciseData.ExerciseName,
+                ExerciseData.Description,
+                ExerciseData.StrictnessRating,
+                ExerciseData.FeatureSelectionGridData,
+                GlobalState.CreateContentsPreviousFolder,
+                ExerciseData.RepetitionsAmount);
+
+            // Navigate to the next page, passing the ExerciseData object
+            this.NavigationService.Navigate(new CreateTargetTraceView(ExerciseData));
         }
+
+        //public async void SaveAndContinue_Async(object sender, RoutedEventArgs e)
+        //{            
+        //    await FileHandler.UpdateConfigInfoView_Async(NameTextBox.Text, DescriptionTextBox.Text, BasicRatingBar.Value, FeatureSelectionGridData, GlobalState.CreateContentsPreviousFolder, Int32.Parse(RepititionsAmount.Text));
+
+        //    //go to record performance screen and load correct trace with the specified exercise config conditions
+        //    this.NavigationService.Navigate(new Uri("\\View\\UpdatedUI\\CreateEDMView.xaml", UriKind.Relative));
+        //}
 
 
         public void BackButton(object sender, RoutedEventArgs e)

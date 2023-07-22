@@ -14,9 +14,8 @@
 
 
     <DockPanel>
-        <materialDesign:ColorZone Padding="16"
-                                  Mode="PrimaryMid"
-                                  DockPanel.Dock="Top">
+            <materialDesign:ColorZone Padding="16" Mode="PrimaryMid" DockPanel.Dock="Top">
+
             <DockPanel>
                 <StackPanel Orientation="Horizontal">
                     <Button Margin="24,0,0,0"
@@ -143,7 +142,7 @@
                             <Button x:Name="DiscardSampleSubmissionButton"
                                     Content="Discard Sample"
                                     ToolTip="Discard most recent sample"
-                                    Click="DiscardSampleButton"
+                                    Click="DiscardSampleButton_Click"
                                     IsEnabled="False"
                                     VerticalAlignment="Stretch"
                                     Background="Red" 
@@ -152,7 +151,7 @@
                             <Button x:Name="ConfirmSampleButton"
                                     Content="Confirm adding last sample to Exercise Correction Model"
                                     ToolTip="Add sample to the EDM"
-                                    Click="ConfirmSampleSubmissionButton"
+                                    Click="ConfirmSampleSubmissionButton_Click"
                                     IsEnabled="False"
                                     VerticalAlignment="Stretch"
                                     Grid.Column="2"
@@ -172,14 +171,14 @@
                                      ClipToBounds="True">
                                 <Button x:Name="ClearButton"
                                         ToolTip="Clear the ink canvas"
-                                        Click="ClearCanvasButton"
+                                        Click="ClearCanvasButton_Click"
                                         VerticalAlignment="Stretch"
                                         Content="{materialDesign:PackIcon Kind=Eraser}"
                                         IsEnabled="True" />
                                 <Button x:Name="UndoButton"
                                         VerticalAlignment="Stretch"
                                         ToolTip="Undo last stroke"
-                                        Click="UndoCanvasButton"
+                                        Click="UndoCanvasButton_Click"
                                         Content="{materialDesign:PackIcon Kind=Undo}"
                                         IsEnabled="True" />
 
@@ -194,106 +193,13 @@
                                         HorizontalContentAlignment="Right"
                                         x:Name="SubmitButton"
                                         ToolTip="Submit"
-                                        Click="SubmitCanvasButton"
+                                        Click="SubmitCanvasButton_Click"
                                         Content="{materialDesign:PackIcon Kind=Check}"
                                         IsEnabled="False" />
                             </ToolBar>
                         </ToolBarTray>
                     </Grid>
-
-                    <!--<Grid x:Name="DrawingCanvas"
-                          Grid.Row="0"
-                          Grid.Column="0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="210" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="210" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="1*" />
-                            <RowDefinition Height="64" />
-                        </Grid.RowDefinitions>
-                        <global:ExpertInkCanvas x:Name="CanvasBG"
-                                                IsEnabled="False"
-                                                Background="White"
-                                                Grid.Column="1"
-                                                Grid.Row="0"
-                                                Grid.ColumnSpan="2"
-                                                Margin="0,0,0,64"
-                                                Grid.RowSpan="1" />
-                        <global:ExpertInkCanvas x:Name="ExpertEditCanvas"
-                                                IsEnabled="True"
-                                                StrokeCollected="EnableSubmit"
-                                                Background="Transparent"
-                                                Grid.Column="1"
-                                                Grid.Row="0"
-                                                Grid.ColumnSpan="2"
-                                                Margin="0,0,0,64"
-                                                Grid.RowSpan="1"
-                                                SizeChanged="ReloadCanvasOnSizeChange"/>
-                        <StackPanel Grid.Column="1"
-                                    Grid.Row="1"
-                                    Orientation="Horizontal"
-                                    Grid.ColumnSpan="2">
-                            <Button x:Name="ConfirmSampleButton"
-                                    Content="Confirm adding last sample to Exercise Correction Model"
-                                    ToolTip="Add sample to the EDM"
-                                    Click="ConfirmSampleSubmissionButton"
-                                    IsEnabled="False"
-                                    Visibility="Collapsed"
-                                    HorizontalAlignment="Stretch"
-                                    VerticalAlignment="Stretch" />
-                            <Button x:Name="DiscardSampleSubmissionButton"
-                                    Content="Discard Sample"
-                                    ToolTip="Discard most recent sample"
-                                    Click="DiscardSampleButton"
-                                    IsEnabled="False"
-                                    Visibility="Collapsed"
-                                    HorizontalAlignment="Stretch"
-                                    VerticalAlignment="Stretch"
-                                    Background="Red" />
-                        </StackPanel>
-                        <ToolBarTray x:Name="CanvasToolBar"
-                                     Grid.Column="1"
-                                     Grid.Row="1"
-                                     Grid.ColumnSpan="2">
-                            <ToolBar HorizontalAlignment="Right"
-                                     HorizontalContentAlignment="Right"
-                                     Style="{StaticResource MaterialDesignToolBar}"
-                                     ClipToBounds="True">
-                                <Button x:Name="ClearButton"
-                                        ToolTip="Clear the ink canvas"
-                                        Click="ClearCanvasButton"
-                                        VerticalAlignment="Stretch"
-                                        Content="{materialDesign:PackIcon Kind=Eraser}"
-                                        IsEnabled="False" />
-                                <Button x:Name="UndoButton"
-                                        VerticalAlignment="Stretch"
-                                        ToolTip="Undo last stroke"
-                                        Click="UndoCanvasButton"
-                                        Content="{materialDesign:PackIcon Kind=Undo}"
-                                        IsEnabled="False" />
-                                <Separator />
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="1235" />
-                                    </Grid.ColumnDefinitions>
-                                </Grid>
-                                <Separator />
-                                <Button HorizontalAlignment="Right"
-                                        HorizontalContentAlignment="Right"
-                                        x:Name="SubmitButton"
-                                        ToolTip="Submit"
-                                        Click="SubmitCanvasButton"
-                                        Content="{materialDesign:PackIcon Kind=Check}"
-                                        IsEnabled="False" />
-                            </ToolBar>
-                        </ToolBarTray>
-                    </Grid>-->
-
-
-
-
+                   
                 </Grid>
             </ScrollViewer>
         </Grid>
