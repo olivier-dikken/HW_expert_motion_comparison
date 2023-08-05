@@ -99,7 +99,7 @@ namespace HandwritingFeedback.Models
         private void UpdateEDMData()
         {
             int tdSampleCount = transformed_data.Count;
-            int edmSampleCount = edmData.GetData()[GlobalState.FeatureNames[0]][0].numberOfSamples;
+            int edmSampleCount = edmData.GetNumberOfSamples();
             if(tdSampleCount != edmSampleCount) //add missing samples
             {
                 for (int i = tdSampleCount-edmSampleCount; i < tdSampleCount; i++)
@@ -252,6 +252,16 @@ namespace HandwritingFeedback.Models
         {
             return length;
         }
+
+        /// <summary>
+        /// Get the number of samples for a given data point.
+        /// </summary>
+        /// <param name="dataIndex"></param>
+        /// <returns></returns>
+        public int GetNumberOfSamples(int dataIndex=0)
+        {
+            return edmData[dataIndex][0].NumberOfSamples;
+        }   
 
         private int GetFeatureIndex(string ftName)
         {

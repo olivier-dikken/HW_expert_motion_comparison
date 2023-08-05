@@ -28,6 +28,7 @@ namespace HandwritingFeedback.Util
         private Canvas overlayCanvas;
 
         private ExerciseItem theExercise;
+        private ExerciseData theExerciseData;
         private StrokeCollection _targetTrace;
 
         private ExpertDistributionModel currentEDM;
@@ -39,9 +40,10 @@ namespace HandwritingFeedback.Util
         private Dictionary<string, double[]> previousSampleTransformedData;
         
 
-        public EDMCreationHelpler(ExerciseItem theExercise, ExpertInkCanvas bgC, ExpertInkCanvas editC, Canvas overlayC, Page createEDMView)
+        public EDMCreationHelpler(ExerciseData theExercise, ExpertInkCanvas bgC, ExpertInkCanvas editC, Canvas overlayC, Page createEDMView)
         {
-            this.theExercise = theExercise;
+            this.theExerciseData = theExercise;
+            //this.theExercise = theExercise;
             this.bgCanvas = bgC;
             this.editCanvas = editC;
             this.overlayCanvas = overlayC;
@@ -235,8 +237,9 @@ namespace HandwritingFeedback.Util
                 foreach(string ft in GlobalState.FeatureNames)
                 {
                     for (int i = 0; i < edmD1.GetLength(); i++)
-                    {                        
-                        edmModelComparisonData[ft][i] = new EDMModelComparisonValue(edmD1.GetData()[ft][i].mean, edmD2.GetData()[ft][i].mean, edmD1.GetData()[ft][i].GetSTD(), edmD2.GetData()[ft][i].GetSTD());
+                    {
+                        //edmModelComparisonData[ft][i] = new EDMModelComparisonValue(edmD1.GetData()[ft][i].mean, edmD2.GetData()[ft][i].mean, edmD1.GetData()[ft][i].GetSTD(), edmD2.GetData()[ft][i].GetSTD());
+                        edmModelComparisonData[ft][i] = new EDMModelComparisonValue(edmD1.GetFeatureMean(i,ft), edmD2.GetFeatureMean(i, ft), edmD1.GetFeatureStandardDeviation(i,ft), edmD2.GetFeatureStandardDeviation(i, ft));
                     }
                 }
             }
