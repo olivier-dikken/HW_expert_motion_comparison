@@ -22,11 +22,15 @@ namespace HandwritingFeedback.Models
         public int RepetitionsAmount { get; set; }
         public List<FeedbackSelectionGridItem> FeatureSelectionGridData { get; set; }
 
+        public DateTime CreationDate { get; }
+        public string Path { get; set; }
+
         public ExerciseData()
         {
             TargetTraceStrokes = new StrokeCollection();
             TraceOverAttempts = new List<StrokeCollection>();
             FeatureSelectionGridData = new List<FeedbackSelectionGridItem>();
+            CreationDate = DateTime.Now;
         }
     }
 }

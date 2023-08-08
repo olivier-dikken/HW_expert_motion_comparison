@@ -180,8 +180,8 @@
                                 <Button HorizontalAlignment="Right"
                                         HorizontalContentAlignment="Right"
                                         x:Name="SubmitButton"
-                                        ToolTip="Submit"
-                                        Click="SubmitCanvasButton"
+                                        ToolTip="Submit"                                        
+                                        Command="{Binding SubmitCanvasButtonCommand}"
                                         Content="{materialDesign:PackIcon Kind=Check}"
                                         IsEnabled="False" />
                             </ToolBar>

@@ -39,6 +39,8 @@ namespace HandwritingFeedback.View.UpdatedUI
         int helperLineType = 0;
         int lineSpacing = 20;
 
+        public ICommand SubmitCanvasButtonCommand { get; }
+
         public CreateTargetTraceView(ExerciseData exerciseData)
         {
             HomeCommand = new AnotherCommandImplementation(
@@ -54,6 +56,9 @@ namespace HandwritingFeedback.View.UpdatedUI
                     BackButton(fakeButton, null);
                 });
             this.exerciseData = exerciseData;
+
+            // Initialize the command to submit the target trace
+            SubmitCanvasButtonCommand = new AnotherCommandImplementation(SubmitCanvasButton);
 
             this.DataContext = this;
 
@@ -153,12 +158,12 @@ namespace HandwritingFeedback.View.UpdatedUI
             => Debug.WriteLine("You can intercept the closing event, and cancel here.");
 
 
-        public async void SubmitCanvasButton(object sender, RoutedEventArgs e)
+        public async void SubmitCanvasButton(object parameter)
         {
             // Save the expert's target trace
             targetTraceStrokes = ExpertEditCanvas.Strokes.Clone();
 
-            if (await ConfigureSaveFolder())
+            try
             {
                 // Save the target trace strokes to the ExerciseData object
                 exerciseData.TargetTraceStrokes = targetTraceStrokes;
@@ -167,49 +172,22 @@ namespace HandwritingFeedback.View.UpdatedUI
                 exerciseData.LineType = helperLineType;
                 exerciseData.LineSpacing = lineSpacing;
 
+                //save exercise data to file
+                await FileHandler.WriteExerciseData_Async(exerciseData);
+
+                // Save target trace as .png for card thumbnail display
+                FileHandler.SaveCanvasAsImage(ExpertEditCanvas, exerciseData.Path, "TargetTrace");
+
                 // Navigate to the exercise config screen
                 NavigateToCreateEDMView();
             }
-            else // Something went wrong, display error message and take back to teacher menu
+            catch (Exception ex)
             {
-                Debug.WriteLine("Trying to create exercise folder failed. Please contact admin");
+                Debug.WriteLine("Trying to create exercise folder failed. Please contact admin. " + ex.Message);
                 this.NavigationService.Navigate(new Uri("\\View\\UpdatedUI\\ManageLearningContent.xaml", UriKind.Relative));
             }
         }
 
-        private async Task<bool> ConfigureSaveFolder()
-        {
-            String folderName = Guid.NewGuid().ToString();
-            string workingDirectory = Environment.CurrentDirectory;
-            string path = Directory.GetParent(workingDirectory).Parent.FullName + "\\SavedData\\Exercises\\" + folderName;
-
-            Debug.WriteLine("working directory: " + workingDirectory);
-            Debug.WriteLine("path to create folder at: " + path);
-
-            if (!Directory.Exists(path))
-            {
-                GlobalState.CreateContentsPreviousFolder = path;
-                Directory.CreateDirectory(path);
-
-                // Save exercise data
-
-                // Save trace to folder as TargetTrace.isf
-                FileHandler.SaveTargetTrace(targetTraceStrokes, path);
-
-                // Save target trace as .png for card thumbnail display
-                FileHandler.SaveCanvasAsImage(ExpertEditCanvas, path, "TargetTrace");
-
-                // Create exercise config .txt file and write line type and spacing
-                await FileHandler.WriteConfigTargetTraceView_Async(helperLineType, lineSpacing, path);
-
-                return true;
-            }
-            else
-            {
-                Debug.WriteLine("Error, folder name already exists");
-            }
-            return false;
-        }
 
         private void NavigateToCreateEDMView()
         {

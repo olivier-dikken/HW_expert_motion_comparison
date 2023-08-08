@@ -111,26 +111,29 @@ namespace HandwritingFeedback.View.UpdatedUI
             ExerciseData.RepetitionsAmount = int.Parse(RepititionsAmount.Text);
             ExerciseData.FeatureSelectionGridData = FeatureSelectionGridData.ToList();
 
-            // Update the exercise data to the exercise configuration file
-            await FileHandler.UpdateConfigInfoView_Async(
-                ExerciseData.ExerciseName,
-                ExerciseData.Description,
-                ExerciseData.StrictnessRating,
-                ExerciseData.FeatureSelectionGridData,
-                GlobalState.CreateContentsPreviousFolder,
-                ExerciseData.RepetitionsAmount);
+            try
+            {
+                // Create the exercise folder and return the path
+                string exerciseFolderPath = FileHandler.CreateExerciseFolder();
+                ExerciseData.Path = exerciseFolderPath;
 
-            // Navigate to the next page, passing the ExerciseData object
-            this.NavigationService.Navigate(new CreateTargetTraceView(ExerciseData));
+                // Save the exercise data to a file
+                await FileHandler.WriteExerciseData_Async(ExerciseData);
+
+                // Navigate to the next page, passing the ExerciseData object
+                this.NavigationService.Navigate(new CreateTargetTraceView(ExerciseData));
+            } catch (Exception ex)
+            {
+                Debug.WriteLine("Trying to create exercise folder failed. Please contact admin." + ex.Message);
+                this.NavigationService.Navigate(new Uri("\\View\\UpdatedUI\\ManageLearningContent.xaml", UriKind.Relative));
+            }
+            
         }
+        
+        
 
-        //public async void SaveAndContinue_Async(object sender, RoutedEventArgs e)
-        //{            
-        //    await FileHandler.UpdateConfigInfoView_Async(NameTextBox.Text, DescriptionTextBox.Text, BasicRatingBar.Value, FeatureSelectionGridData, GlobalState.CreateContentsPreviousFolder, Int32.Parse(RepititionsAmount.Text));
+        
 
-        //    //go to record performance screen and load correct trace with the specified exercise config conditions
-        //    this.NavigationService.Navigate(new Uri("\\View\\UpdatedUI\\CreateEDMView.xaml", UriKind.Relative));
-        //}
 
 
         public void BackButton(object sender, RoutedEventArgs e)

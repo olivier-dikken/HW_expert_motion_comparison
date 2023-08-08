@@ -27,8 +27,7 @@ namespace HandwritingFeedback.Util
         private ExpertInkCanvas editCanvas;
         private Canvas overlayCanvas;
 
-        private ExerciseItem theExercise;
-        private ExerciseData theExerciseData;
+        private ExerciseData _exerciseData;
         private StrokeCollection _targetTrace;
 
         private ExpertDistributionModel currentEDM;
@@ -42,7 +41,7 @@ namespace HandwritingFeedback.Util
 
         public EDMCreationHelpler(ExerciseData theExercise, ExpertInkCanvas bgC, ExpertInkCanvas editC, Canvas overlayC, Page createEDMView)
         {
-            this.theExerciseData = theExercise;
+            this._exerciseData = theExercise;
             //this.theExercise = theExercise;
             this.bgCanvas = bgC;
             this.editCanvas = editC;
@@ -54,7 +53,7 @@ namespace HandwritingFeedback.Util
         private void Setup()
         {
             iteration = 0;
-            this._targetTrace = theExercise.targetTrace;
+            this._targetTrace = _exerciseData.TargetTraceStrokes;
             TraceUtils tu = new TraceUtils(_targetTrace);
             int ttNumberOfStylusPoints = tu.GetNumberOfStylusPoints();            
             currentEDM = new ExpertDistributionModel(ttNumberOfStylusPoints);            
@@ -310,7 +309,7 @@ namespace HandwritingFeedback.Util
             //load outline trace
             LoadTargetTrace();
             //helper lines
-            TraceUtils.DrawHelperLines(bgCanvas, theExercise.lineType, theExercise.lineSpacing);
+            TraceUtils.DrawHelperLines(bgCanvas, _exerciseData.LineType, _exerciseData.LineSpacing);
         }
 
 

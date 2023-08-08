@@ -351,7 +351,7 @@ namespace HandwritingFeedback.Util
             return exerciseItems;
         }
 
-        public static async Task WriteConfigTargetTraceView_Async(int lineType, int lineSpacing, string dir)
+        public static async Task WriteExerciseConfig_Async(string dir)
         {
             //0=title
             //1=description
@@ -374,8 +374,10 @@ namespace HandwritingFeedback.Util
                 "0",
                 "0",
                  "0",
-                lineType.ToString(),
-                lineSpacing.ToString(),
+                 "",
+                 "",
+                //lineType.ToString(),
+                //lineSpacing.ToString(),
                 "0"
             };
 
@@ -409,6 +411,60 @@ namespace HandwritingFeedback.Util
             allLines.Add(starRating.ToString());
             allLines.Add(repAmount.ToString());
             await File.WriteAllLinesAsync(dir + "\\exerciseConfig.txt", allLines);
+        }
+
+        /// <summary>
+        /// Writes the exercise data to the specified path
+        /// handles exceptions
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="exerciseData"></param>
+        /// <returns></returns>        
+        public static async Task WriteExerciseData_Async(ExerciseData exerciseData)
+        {
+            try
+            {
+                string path = exerciseData.Path + "\\exerciseData.json";
+                //serialize exercise data to json
+                var jsonString = JsonSerializer.Serialize(exerciseData);
+                //create a new file with the specified path overwriting any existing file
+                using (FileStream fs = File.Create(path))
+                {
+                    //write the json string to the file
+                    await JsonSerializer.SerializeAsync(fs, exerciseData);
+                }
+
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("The process failed: {0}", e.ToString());                
+            }
+        }
+
+        /// <summary>
+        /// create new exercise folder and return the path to it
+        /// </summary>
+        /// <returns></returns>
+        public static string CreateExerciseFolder()
+        {
+            String folderName = Guid.NewGuid().ToString();
+            string workingDirectory = Environment.CurrentDirectory;
+            string path = Directory.GetParent(workingDirectory).Parent.FullName + "\\SavedData\\Exercises\\" + folderName;
+
+            Debug.WriteLine("working directory: " + workingDirectory);
+            Debug.WriteLine("path to create folder at: " + path);
+
+            if (!Directory.Exists(path))
+            {
+                GlobalState.CreateContentsPreviousFolder = path;
+                Directory.CreateDirectory(path);
+                return path;
+            }
+            else
+            {
+                Debug.WriteLine("Error, folder name already exists");
+                return "";
+            }
         }
     }
 }
