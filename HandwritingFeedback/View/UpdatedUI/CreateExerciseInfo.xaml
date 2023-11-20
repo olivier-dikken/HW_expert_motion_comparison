@@ -121,7 +121,7 @@
                                     VerticalAlignment="Center"></TextBlock>
                         <TextBox Grid.Column="1"
                                  PreviewTextInput="PreviewTextInputNumerical"
-                                 Text="12"
+                                 Text="3"
                                  x:Name="RepititionsAmount" />
                     </Grid>
                     

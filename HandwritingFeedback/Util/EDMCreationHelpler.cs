@@ -3,10 +3,13 @@ using HandwritingFeedback.Config;
 using HandwritingFeedback.InkCanvases;
 using HandwritingFeedback.Models;
 using HandwritingFeedback.View.UpdatedUI;
+using OxyPlot;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
@@ -41,8 +44,7 @@ namespace HandwritingFeedback.Util
 
         public EDMCreationHelpler(ExerciseData theExercise, ExpertInkCanvas bgC, ExpertInkCanvas editC, Canvas overlayC, Page createEDMView)
         {
-            this._exerciseData = theExercise;
-            //this.theExercise = theExercise;
+            this._exerciseData = theExercise;            
             this.bgCanvas = bgC;
             this.editCanvas = editC;
             this.overlayCanvas = overlayC;
@@ -74,9 +76,17 @@ namespace HandwritingFeedback.Util
             string fileName = "EDMData";
             ExpertDistributionModel.SaveToFile(GlobalState.CreateContentsPreviousFolder + "\\" + fileName, edmData);
 
-            //TODO save strokecollection to file
+
+            Directory.CreateDirectory(GlobalState.CreateContentsPreviousFolder + "\\strokecollections\\");
+            int iteration = 0;
+            foreach(StrokeCollection perf in performances)
+            {
+                fileName = "Performance " + iteration.ToString();
+                FileHandler.SaveEDMTrace(perf, GlobalState.CreateContentsPreviousFolder + "\\strokecollections\\", fileName);                
+                iteration++;
+            }            
  
-            //return to menu & show success message
+            //TODO show success message
             
         }
 
@@ -84,7 +94,7 @@ namespace HandwritingFeedback.Util
         /// <summary>
         /// after creating a new sample trace, submit the trace to view distribution contribution
         /// </summary>
-        public void SubmitNewSample()
+        public void SubmitNewSample(bool showDiff = false)
         {
             //collect strokes
             StrokeCollection submittedPerformance = editCanvas.Strokes.Clone();
@@ -92,15 +102,13 @@ namespace HandwritingFeedback.Util
             //add to newSampleEDM
             AddSampleToEDM(newSampleEDM, submittedPerformance);
 
-            if (iteration > 0) //dont compare edm models on first iteration, because there is only 1 model and no other model to compare to
+            if (iteration > 0 && showDiff) //dont compare edm models on first iteration, because there is only 1 model and no other model to compare to
             {
                 //compare to currentEDM
                 EDMModelComparison edmModelComparison = new EDMModelComparison(currentEDM, newSampleEDM);
                 //TODO show vis
                 ShowEDMModelComparisonDiffZonesOnTrace(edmModelComparison);
             }
-
-
         }
 
         /// <summary>
@@ -336,7 +344,7 @@ namespace HandwritingFeedback.Util
         /// <param name="edm"></param>
         /// <param name="newSample"></param>
         private void AddSampleToEDM(ExpertDistributionModel edm, StrokeCollection newSample)
-        {
+        {            
             //store expertPerformance of previous iteration
             Dictionary<string, double[]> add_data = new Dictionary<string, double[]>();
             foreach (string featureName in GlobalState.FeatureNames)
@@ -390,6 +398,7 @@ namespace HandwritingFeedback.Util
         private double[] TransformStrokeDataToTarget(StrokeCollection target, StrokeCollection toTransform, string featureName)
         {
             List<(int, int)> alignmentVector = getBestPath(target, toTransform);
+
             TraceUtils tu = new TraceUtils(_targetTrace);
             int targetLength = tu.GetNumberOfStylusPoints();
             double[] transformed = new double[targetLength];
@@ -403,7 +412,7 @@ namespace HandwritingFeedback.Util
                 for (int j = 0; j < alignmentVector.Count; j++)
                 {
                     if (alignmentVector[j].Item1 == i)
-                    {
+                    {                        
                         StylusPoint currentPoint = GetPointFromTraceAt(toTransform, alignmentVector[j].Item2);
                         StylusPoint previousPoint;
                         double toAdd = 0;
@@ -424,7 +433,7 @@ namespace HandwritingFeedback.Util
                                 }
                                 else
                                 {
-                                    previousPoint = GetPointFromTraceAt(toTransform, (alignmentVector[j].Item2 - 1));
+                                    previousPoint = GetPointFromTraceAt(toTransform, Math.Max(0, (alignmentVector[j].Item2 - 1)));
                                     float x_diff = (float)(currentPoint.X - previousPoint.X);
                                     float y_diff = (float)(currentPoint.Y - previousPoint.Y);                                    
                                     float rad = MathF.Atan2(y_diff, x_diff);
@@ -438,7 +447,7 @@ namespace HandwritingFeedback.Util
                                 break;
 
                             case "Speed":
-                                previousPoint = GetPointFromTraceAt(toTransform, (alignmentVector[j].Item2 - 1));
+                                previousPoint = GetPointFromTraceAt(toTransform, Math.Max(0, (alignmentVector[j].Item2 - 1)));
                                 float diagonalLength = MathF.Sqrt(MathF.Pow((float)(currentPoint.X - previousPoint.X), 2) + MathF.Pow((float)(currentPoint.Y - previousPoint.Y), 2));
                                 toAdd = diagonalLength; //TODO divide by time passed!                                
                                 break;

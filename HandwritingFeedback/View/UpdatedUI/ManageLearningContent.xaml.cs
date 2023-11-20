@@ -16,15 +16,15 @@ namespace HandwritingFeedback.View.UpdatedUI
     /// Interaction logic for ManageLearningContent.xaml
     /// </summary>
     public partial class ManageLearningContent : Page, IMenuHeaderControls
-    {
-        public ObservableCollection<ExerciseItem> ExerciseItems { get; }
+    {        
+        public ObservableCollection<ExerciseData> ExerciseDatas { get; }
         public AnotherCommandImplementation HomeCommand { get; }
         public AnotherCommandImplementation BackCommand { get; }
 
 
         public ManageLearningContent()
-        {            
-            ExerciseItems = FileHandler.GetExerciseItems();                     
+        {                        
+            ExerciseDatas = FileHandler.GetExerciseDatas();
 
             HomeCommand = new AnotherCommandImplementation(
                 _ =>

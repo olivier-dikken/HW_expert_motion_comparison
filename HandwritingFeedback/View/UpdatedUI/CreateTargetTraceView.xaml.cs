@@ -4,21 +4,11 @@ using HandwritingFeedback.Templates;
 using HandwritingFeedback.Util;
 using MaterialDesignThemes.Wpf;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Ink;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace HandwritingFeedback.View.UpdatedUI
 {
@@ -36,8 +26,8 @@ namespace HandwritingFeedback.View.UpdatedUI
         // Variable to store the expert's target trace strokes
         private StrokeCollection targetTraceStrokes;
 
-        int helperLineType = 0;
-        int lineSpacing = 20;
+        int helperLineType;
+        int lineSpacing;
 
         public ICommand SubmitCanvasButtonCommand { get; }
 
@@ -61,13 +51,17 @@ namespace HandwritingFeedback.View.UpdatedUI
             SubmitCanvasButtonCommand = new AnotherCommandImplementation(SubmitCanvasButton);
 
             this.DataContext = this;
-
+            
+            helperLineType = this.exerciseData.LineType;
+            lineSpacing = this.exerciseData.LineSpacing;
+            
             InitializeComponent();
 
             ExpertEditCanvas.DefaultStylusPointDescription =
-                ApplicationConfig.Instance.StylusPointDescription;
+               ApplicationConfig.Instance.StylusPointDescription;
 
-            TraceUtils.DrawHelperLines(CanvasBG, helperLineType, lineSpacing);            
+            // Attach the Loaded event handler, otherwise drawing the helper lines does not work
+            Loaded += (sender, e) => RedrawHelperLines();
         }
 
         /// <summary>
@@ -90,12 +84,14 @@ namespace HandwritingFeedback.View.UpdatedUI
         private void ButtonSwitchLines(object sender, RoutedEventArgs e)
         {
             helperLineType = (helperLineType + 1) % 4;
+            this.exerciseData.LineType = helperLineType;
             RedrawHelperLines();
         }
 
         private void ButtonLineIntervalIncrease(object sender, RoutedEventArgs e)
         {
             lineSpacing += 2;
+            this.exerciseData.LineSpacing = lineSpacing;
             RedrawHelperLines();
         }
 
@@ -104,12 +100,13 @@ namespace HandwritingFeedback.View.UpdatedUI
             if (lineSpacing < 4)
                 return;
             lineSpacing -= 2;
+            this.exerciseData.LineSpacing = lineSpacing;
             RedrawHelperLines();
         }
 
         private void RedrawHelperLines()
         {
-            CanvasBG.Reset();
+            CanvasBG.Reset();            
             TraceUtils.DrawHelperLines(CanvasBG, helperLineType, lineSpacing);
         }
 
@@ -166,17 +163,18 @@ namespace HandwritingFeedback.View.UpdatedUI
             try
             {
                 // Save the target trace strokes to the ExerciseData object
-                exerciseData.TargetTraceStrokes = targetTraceStrokes;
+                this.exerciseData.TargetTraceStrokes = targetTraceStrokes;
 
                 // Save helper line type and spacing to ExerciseData object
-                exerciseData.LineType = helperLineType;
-                exerciseData.LineSpacing = lineSpacing;
+                this.exerciseData.LineType = helperLineType;
+                this.exerciseData.LineSpacing = lineSpacing;
 
                 //save exercise data to file
-                await FileHandler.WriteExerciseData_Async(exerciseData);
+                await FileHandler.WriteExerciseData_Async(this.exerciseData);
+                FileHandler.SaveTargetTrace(targetTraceStrokes, this.exerciseData.Path);
 
                 // Save target trace as .png for card thumbnail display
-                FileHandler.SaveCanvasAsImage(ExpertEditCanvas, exerciseData.Path, "TargetTrace");
+                FileHandler.SaveCanvasAsImage(ExpertEditCanvas, this.exerciseData.Path, "TargetTrace");
 
                 // Navigate to the exercise config screen
                 NavigateToCreateEDMView();
@@ -192,7 +190,7 @@ namespace HandwritingFeedback.View.UpdatedUI
         private void NavigateToCreateEDMView()
         {
             // Navigates to the CreateEDMView page with the updated ExerciseData
-            this.NavigationService.Navigate(new CreateEDMView(exerciseData));
+            this.NavigationService.Navigate(new CreateEDMView(this.exerciseData));
         }
 
 

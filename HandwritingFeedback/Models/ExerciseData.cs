@@ -1,16 +1,22 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Windows.Ink;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 
 namespace HandwritingFeedback.Models
 {
     public class ExerciseData
-    {        
+    {
         // Target trace strokes
+        [JsonIgnore]
         public StrokeCollection TargetTraceStrokes { get; set; }
 
         // List to store trace-over attempts
+        [JsonIgnore]
         public List<StrokeCollection> TraceOverAttempts { get; set; }
 
         // Exercise information
@@ -31,6 +37,13 @@ namespace HandwritingFeedback.Models
             TraceOverAttempts = new List<StrokeCollection>();
             FeatureSelectionGridData = new List<FeedbackSelectionGridItem>();
             CreationDate = DateTime.Now;
+        }     
+        
+        //load targettracestrokes and traceoverattempts from path
+        public void LoadExerciseDataStrokes()
+        {
+            //binary files are in folder 'strokecollections', the traceoverattempts are named 'Performance 0', 'Performance 1' , etc. the targettracestrokes are named 'TargetTrace'
+            
         }
     }
 }

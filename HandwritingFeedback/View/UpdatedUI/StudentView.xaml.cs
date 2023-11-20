@@ -21,7 +21,8 @@ namespace HandwritingFeedback.View.UpdatedUI
         public AnotherCommandImplementation HomeCommand { get; }
         public AnotherCommandImplementation BackCommand { get; }
 
-        ObservableCollection<ExerciseItem> exerciseItems;        
+        ObservableCollection<ExerciseItem> exerciseItems;   
+        ObservableCollection<ExerciseData> exerciseDatas;
 
         public StudentView()
         {
@@ -49,17 +50,17 @@ namespace HandwritingFeedback.View.UpdatedUI
         {
             string workingDirectory = Environment.CurrentDirectory;
             string path = Directory.GetParent(workingDirectory).Parent.FullName + "\\SavedData\\Exercises\\";
-            //FindAvailableExercises(path);
-            exerciseItems = FileHandler.GetExerciseItems();
-            foreach(ExerciseItem exerciseItem in exerciseItems)
-            {
-                Card exerciseCard = ExerciseToCard(exerciseItem);
+            //FindAvailableExercises(path);            
+            exerciseDatas = FileHandler.GetExerciseDatas();
+            foreach(ExerciseData exerciseData in exerciseDatas)
+            {                
+                Card exerciseCard = ExerciseToCard(exerciseData);
                 ExercisePanel.Children.Add(exerciseCard);
             }
         }
 
-        public Card ExerciseToCard(ExerciseItem exerciseItem)
-        {
+        public Card ExerciseToCard(ExerciseData exerciseItem)
+        {            
             PaletteHelper _paletteHelper = new PaletteHelper();
             ITheme theme = _paletteHelper.GetTheme();
             MaterialDesignColors.ColorPair playBtnColor = theme.SecondaryMid;
@@ -80,14 +81,14 @@ namespace HandwritingFeedback.View.UpdatedUI
             cardGrid.RowDefinitions.Add(rd2);
             cardGrid.RowDefinitions.Add(rd3);
 
-            Image exerciseImage = new Image();
-            exerciseImage.Source = exerciseItem.targetTraceImage;
+            Image exerciseImage = new Image();            
+            exerciseImage.Source = new BitmapImage(new Uri(exerciseItem.Path + "/TargetTrace.png", UriKind.Absolute));
             Grid.SetRow(exerciseImage, 0);
             cardGrid.Children.Add(exerciseImage);
 
             StackPanel textPanel = new StackPanel();
             textPanel.Margin = new Thickness(8, 24, 8, 0);
-            TextBlock titleText = new TextBlock() { Text = exerciseItem.Title, FontWeight = FontWeights.Bold };
+            TextBlock titleText = new TextBlock() { Text = exerciseItem.ExerciseName, FontWeight = FontWeights.Bold };
             TextBlock descriptionText = new TextBlock() { Text = exerciseItem.Description, TextWrapping = TextWrapping.Wrap };
             textPanel.Children.Add(titleText);
             textPanel.Children.Add(descriptionText);
@@ -103,7 +104,7 @@ namespace HandwritingFeedback.View.UpdatedUI
             startExerciseButton.Padding = new Thickness(2,0,2,0);
             startExerciseButton.Background = new SolidColorBrush(playBtnColor.Color);
             startExerciseButton.Click += CardOnClick;
-            startExerciseButton.Tag = exerciseItem.path;
+            startExerciseButton.Tag = exerciseItem.Path;
             StackPanel bottomPanel = new StackPanel();
             bottomPanel.HorizontalAlignment = HorizontalAlignment.Right;
             bottomPanel.Orientation = Orientation.Horizontal;

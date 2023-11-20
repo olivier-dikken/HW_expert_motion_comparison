@@ -130,7 +130,7 @@
                         Grid.Row="1"
                         materialDesign:ScrollViewerAssist.IsAutoHideEnabled="True">
                             <ListView Grid.Row="1"
-  ItemsSource="{Binding ExerciseItems}">
+  ItemsSource="{Binding ExerciseDatas}">
                                 <ListView.View>
                                     <GridView>
                                         <GridViewColumn

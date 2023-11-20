@@ -111,6 +111,10 @@ namespace HandwritingFeedback.View.UpdatedUI
             ExerciseData.RepetitionsAmount = int.Parse(RepititionsAmount.Text);
             ExerciseData.FeatureSelectionGridData = FeatureSelectionGridData.ToList();
 
+            //set line type and spacing
+            ExerciseData.LineType = 1;
+            ExerciseData.LineSpacing = 34;
+
             try
             {
                 // Create the exercise folder and return the path

@@ -1,6 +1,7 @@
 ﻿using HandwritingFeedback.Models;
 using HandwritingFeedback.Util;
 using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
@@ -34,6 +35,8 @@ namespace HandwritingFeedback.View.UpdatedUI
                 });
 
             _currentExercise = exerciseData;
+            Debug.WriteLine("exerciseData.Path: " + exerciseData.Path);
+
 
             this.DataContext = this;
 

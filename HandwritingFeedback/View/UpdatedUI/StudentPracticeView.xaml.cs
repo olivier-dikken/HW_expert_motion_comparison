@@ -26,8 +26,9 @@ namespace HandwritingFeedback.View.UpdatedUI
         public static TraceUtils StudentTraceUtils { get; private set; }               
 
         EDMData loadedEDMData;
-        public static StrokeCollection TargetTrace { get; private set; }
-        public ExerciseItem ExerciseItem { get; private set; }
+        public static StrokeCollection TargetTrace { get; private set; }        
+
+        public ExerciseData ExerciseData {get; private set; }
 
         public AnotherCommandImplementation HomeCommand { get; set; }
         public AnotherCommandImplementation BackCommand { get; set; }
@@ -73,10 +74,10 @@ namespace HandwritingFeedback.View.UpdatedUI
 
         private void LoadExercise()
         {
-            ExerciseItem = FileHandler.GetExericseItem(GlobalState.SelectedExercisePath);
-            helperLineType = ExerciseItem.lineType;
-            lineSpacing = ExerciseItem.lineSpacing;
-            exerciseInfoTextBlock.Text = ExerciseItem.description;
+            ExerciseData = FileHandler.GetExerciseData(GlobalState.SelectedExercisePath);            
+            helperLineType = ExerciseData.LineType; //TODO fix this
+            lineSpacing = ExerciseData.LineSpacing;
+            exerciseInfoTextBlock.Text = ExerciseData.Description;
             SetRepetitionText();
             TargetTrace = FileHandler.LoadStrokeCollection(GlobalState.SelectedExercisePath + "\\TargetTrace.isf");
             ExpertTraceUtils = new TraceUtils(TargetTrace);
@@ -97,7 +98,7 @@ namespace HandwritingFeedback.View.UpdatedUI
 
         private void SetRepetitionText()
         {
-            repetitionStatusTextBlock.Text = $"{currentRepetition} / {ExerciseItem.repetitionAmount}";
+            repetitionStatusTextBlock.Text = $"{currentRepetition} / {ExerciseData.RepetitionsAmount}";
         }
 
         /// <summary>
@@ -249,7 +250,7 @@ namespace HandwritingFeedback.View.UpdatedUI
         private void SubmitTrace(object sender, RoutedEventArgs e)
         {                                    
             // Navigate to batched analytics view and transfer traces
-            if(currentRepetition == ExerciseItem.repetitionAmount)
+            if(currentRepetition == ExerciseData.RepetitionsAmount)
             {
                 SubmitLastRepetition();
             } else

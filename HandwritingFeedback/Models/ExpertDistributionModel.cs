@@ -12,6 +12,8 @@ using System.Windows;
 using System.Windows.Controls.Primitives;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
 using System.Windows.Media;
+using System.Windows.Ink;
+using System.Windows.Shapes;
 
 namespace HandwritingFeedback.Models
 {
@@ -131,6 +133,7 @@ namespace HandwritingFeedback.Models
             SaveFileStream.Close();
         }
 
+
         public static EDMData LoadFromFile(string fileName)
         {
             EDMData ret = null;
@@ -246,6 +249,16 @@ namespace HandwritingFeedback.Models
         public double GetFeatureStandardDeviation(int dataIndex, string ftName)
         {
             return edmData[dataIndex][GetFeatureIndex(ftName)].GetStandardDeviation();
+        }
+
+        public EDMDataPointFeatureValue GetFeatureData(int dataIndex, string ftName)
+        {
+            return edmData[dataIndex][GetFeatureIndex(ftName)];
+        }
+
+        public EDMDataPointFeatureValue[] GetFeatureData(int dataIndex)
+        {
+            return edmData[dataIndex];
         }
 
         public int GetLength()

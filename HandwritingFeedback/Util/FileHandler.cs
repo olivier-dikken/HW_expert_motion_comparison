@@ -68,6 +68,21 @@ namespace HandwritingFeedback.Util
             return false;
         }
 
+        public static bool SaveEDMTrace(StrokeCollection strokesToSave, string path, string filename)
+        {
+            //save as TargetTrace.isf in the path folder
+            try
+            {
+                FileStream fs = new FileStream(path + "\\" + filename +".isf", FileMode.Create);
+                strokesToSave.Save(fs);
+                fs.Close();
+                return true;
+            }
+            catch { }
+
+            return false;
+        }
+
         public static bool SaveCandidateTrace(StrokeCollection strokesToSave, string path)
         {
             //save as TargetTrace.isf in the path folder
@@ -318,6 +333,48 @@ namespace HandwritingFeedback.Util
             return null;
         }
 
+        public static ExerciseData GetExerciseData(string path)
+        {
+            ExerciseData exerciseData = FileHandler.ReadExerciseData(path + "/exerciseData.json");
+            return exerciseData;
+        }
+
+        public static ObservableCollection<ExerciseData> GetExerciseDatas()
+        {
+            string workingDirectory = Environment.CurrentDirectory;
+            string exerciseFolderPath = Directory.GetParent(workingDirectory).Parent.FullName + "\\SavedData\\Exercises\\";
+            ObservableCollection<ExerciseData> exerciseDatas = new ObservableCollection<ExerciseData>();
+            try
+            {
+
+                string[] dirs = Directory.GetDirectories(exerciseFolderPath, "*", SearchOption.TopDirectoryOnly);
+                Debug.WriteLine("The number of directories matched is {0}.", dirs.Length);
+                foreach (string dir in dirs)
+                {
+                    string fileName = System.IO.Path.GetFileName(dir);
+                    Debug.WriteLine(fileName);
+                    Debug.WriteLine(dir);
+                    
+                    if (File.Exists(dir + "/exerciseData.json"))
+                    {
+                        ExerciseData exerciseData = FileHandler.ReadExerciseData(dir + "/exerciseData.json");    
+                        Debug.WriteLine("exerciseData.path = " + exerciseData.Path);
+                        exerciseDatas.Add(exerciseData);                        
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Exercise data not found in folder: " + fileName);
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("The process failed: {0}", e.ToString());
+            }
+            return exerciseDatas;
+        }
+
         public static ObservableCollection<ExerciseItem> GetExerciseItems()
         {
             string workingDirectory = Environment.CurrentDirectory;
@@ -333,6 +390,7 @@ namespace HandwritingFeedback.Util
                     string fileName = System.IO.Path.GetFileName(dir);
                     Debug.WriteLine(fileName);
                     Debug.WriteLine(dir);
+                    ExerciseData exerciseData = FileHandler.ReadExerciseData(dir + "/exerciseData.json");
                     if (File.Exists(dir + "/exerciseConfig.txt"))
                     {
                         exerciseItems.Add(ExerciseItem.FromExerciseConfigFile(dir));
@@ -440,6 +498,25 @@ namespace HandwritingFeedback.Util
                 Debug.WriteLine("The process failed: {0}", e.ToString());                
             }
         }
+
+        // read exercise data from json
+        public static ExerciseData ReadExerciseData(string path)
+        {
+            try
+            {
+                Debug.WriteLine("exercise data path: " + path);
+                //get file at path
+                string text = File.ReadAllText(@"" + path);
+                //ExerciseData exerciseData = JsonSerializer.Deserialize<ExerciseData>(text);
+                ExerciseData exerciseData = JsonConvert.DeserializeObject<ExerciseData>(text);
+                return exerciseData;
+            } catch (Exception e)
+            {
+                Debug.WriteLine("The process failed: {0}", e.ToString());
+            }
+            return null;
+        }
+
 
         /// <summary>
         /// create new exercise folder and return the path to it
